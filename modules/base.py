@@ -1,33 +1,61 @@
-from modules.data import Data
-from bs4 import BeautifulSoup
+from . import utils
+from .data import Data
+from bs4 import BeautifulSoup, ResultSet
+from typing import Any
 import asyncio
 import aiohttp
 
 
 class Base:
 
-    def __int__(self, download_dir: str = None, genre: str = "trance", form: str = "tracks",
-                quantity: int = 10, download: bool = True, threads: int = 4):
-        self.download_dir: str = download_dir.lower()
-        self.genre: str = genre.lower() if genre.lower() in Data.GENRES else "trance"
-        self.form: str = form if form in Data.FORMS else "tracks"
-        self.quantity: int = quantity if 1000 < quantity > 0 else 10
-        self.download: bool = download
-        self.threads: int = threads if 8 < threads > 0 else 4
+    def __int__(self) -> None:
+        self.download_dir: str = "music"
+        self.genre: str = "trance"
+        self.form: str = "tracks"
+        self.quantity: int = 10
+        self.download: bool = True
+        self.threads: int = 4
 
-    def get_filtered_links(self, links_massive) -> list:
+    def limiter(self, param: Any) -> Any:
+        param = param.lower() if type(param) is str else param
+        if param == self.form.lower() and param in Data.FORMS \
+                or param == self.genre and param in Data.GENRES:
+            return param
+        if param == self.quantity:
+            param = param if 0 < param <= 1000 else 10
+            return param
+        if param == self.threads:
+            param = param if 0 < param <= 8 else 4
+            return param
+        print(param)
+        print("Something went wrong")
+        exit()
+
+    def get_filtered_links(self, links_massive: ResultSet = None) -> list:
+        if links_massive is None:
+            print("No Links to filtering")
+            exit()
+
         filtered_links = {}
         for link in links_massive:
             for frmt in Data.FORMATS:
                 if link.has_attr("href") and link["href"].find(frmt) > -1:
-                    filtered_links[link["href"]] = 1                            # deduplication
+                    filtered_links[link["href"]] = 1  # deduplication
         return list(filtered_links.keys())
 
     async def get_all_links(self, session: aiohttp.ClientSession = None) -> list:
+        if session is None:
+            print("Unable to download")
+            exit()
+
         page: int = 1
         found_links: list = []
-        while len(found_links) < self.quantity:
-            link = f"https://promodj.com/{self.form}/{self.genre}?bitrate=lossless&page={page}"
+        quantity = self.limiter(self.quantity)
+        genre = self.limiter(self.genre)
+        form = self.limiter(self.form)
+
+        while len(found_links) < quantity:
+            link = f"https://promodj.com/{form}/{genre}?bitrate=lossless&page={page}"
             async with session.get(link) as response:
                 if response.status == 404: break
                 links = BeautifulSoup(await response.read(), features="html.parser").findAll("a")
@@ -35,9 +63,13 @@ class Base:
                 page += 1
         tmp = {}
         for n in found_links: tmp[n] = 1
-        return list(tmp)[:self.quantity]
+        return list(tmp)[:quantity]
 
-    def get_file_name_from_link(self, link: str = None) -> str:
+    async def get_file_name_from_link(self, link: str = None) -> str:
+        if link is None:
+            print("No Link to extract a name")
+            return ""
+
         decode_simbols = {"%20": " ", "%28": "(", "%29": ")", "%26": "&", "%23": "#"}
 
         filename: str = link.split("/")[-1]
@@ -54,7 +86,14 @@ class Base:
         return filename.strip()
 
     async def get_file_by_link(self, session: aiohttp.ClientSession = None, link: str = None):
-        filename = self.get_file_name_from_link(link)
+        if link is None:
+            print("No Link to download")
+            exit()
+        if session is None:
+            print("Unable to connect")
+            exit()
+
+        filename = await self.get_file_name_from_link(link)
         if self.download:
             async with session.get(link) as response:
                 if response.status != 200:
@@ -66,6 +105,7 @@ class Base:
 
         print(f"File save as {self.download_dir + filename}")
 
+    @utils.async_timer()
     async def get_files(self):
         async with aiohttp.ClientSession() as session:
             links_future = asyncio.as_completed([self.get_all_links(session)])
