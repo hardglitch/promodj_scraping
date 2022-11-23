@@ -5,7 +5,6 @@ from typing import Any
 import asyncio
 import aiohttp
 import aiofiles
-from asyncio import Queue
 
 
 class Base:
