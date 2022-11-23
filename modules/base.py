@@ -4,6 +4,8 @@ from bs4 import BeautifulSoup, ResultSet
 from typing import Any
 import asyncio
 import aiohttp
+import aiofiles
+from asyncio import Queue
 
 
 class Base:
@@ -22,13 +24,12 @@ class Base:
                 or param == self.genre and param in Data.GENRES:
             return param
         if param == self.quantity:
-            param = param if 0 < param <= 1000 else 10
+            param = param if param <= abs(Data.MAX_VALUES["quantity"]) else Data.MAX_VALUES["quantity"]
             return param
         if param == self.threads:
-            param = param if 0 < param <= 8 else 4
+            param = param if param <= abs(Data.MAX_VALUES["threads"]) else Data.MAX_VALUES["threads"]
             return param
-        print(param)
-        print("Something went wrong")
+        print("No suitable parameter")
         exit()
 
     def get_filtered_links(self, links_massive: ResultSet = None) -> list:
@@ -97,22 +98,26 @@ class Base:
         if self.download:
             async with session.get(link) as response:
                 if response.status != 200:
-                    print("Something went wrong")
+                    print("Something went wrong 2")
                     return
-                async with open(self.download_dir + filename, "wb") as file:
+                async with aiofiles.open(self.download_dir + filename, "wb") as file:
                     print(f"Downloading {filename}...")
-                    await file.write(response.content)
-
+                    async for data in response.content.iter_chunked(1024):
+                        await file.write(data)
         print(f"File save as {self.download_dir + filename}")
+
+    async def dl_threads_limiter(self, sem: asyncio.Semaphore = None,
+                                 session: aiohttp.ClientSession = None, link: str = None):
+        async with sem:
+            return await self.get_file_by_link(session, link)
 
     @utils.async_timer()
     async def get_files(self):
         async with aiohttp.ClientSession() as session:
             links_future = asyncio.as_completed([self.get_all_links(session)])
+            sem = asyncio.Semaphore(self.limiter(self.threads))
+            tasks = []
             for links in links_future:
                 for link in await links:
-                    task = asyncio.create_task(self.get_file_by_link(session, link))
-                    try:
-                        await asyncio.wait_for(task, timeout=5)
-                    except asyncio.exceptions.TimeoutError:
-                        print("Something went wrong")
+                    tasks.append(asyncio.ensure_future(self.dl_threads_limiter(sem, session, link)))
+            await asyncio.gather(*tasks)
