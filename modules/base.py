@@ -9,13 +9,20 @@ import aiofiles
 
 class Base:
 
-    def __int__(self) -> None:
-        self.download_dir: str = "music"
-        self.genre: str = "trance"
-        self.form: str = "tracks"
-        self.quantity: int = 10
-        self.download: bool = True
-        self.threads: int = 4
+    def __init__(self,
+                 download_dir: str = "music",
+                 genre: str = "trance",
+                 form: str = "tracks",
+                 quantity: int = 10,
+                 download: bool = True,
+                 threads: int = 4) -> None:
+
+        self.download_dir: str = download_dir
+        self.genre: str = self.limiter(genre)
+        self.form: str = self.limiter(form)
+        self.quantity: int = self.limiter(quantity)
+        self.download: bool = download
+        self.threads: int = self.limiter(threads)
 
     def limiter(self, param: Any) -> Any:
         param = param.lower() if type(param) is str else param
