@@ -4,22 +4,22 @@ from dataclasses import dataclass
 @dataclass()
 class Data:
 
-    GENRES = ["trance", "uplifting_trance", "techno", "dnb", "deep_house", "2_step", "liquid_funk", "neurofunk",
-              "jungle"]
+    GENRES = {}
 
     FORMS = ["mixes", "tracks", "lives"]
 
-    FORMATS = [".flac", ".wav", ".aiff"]
+    LOSSLESS_FORMATS = [".flac", ".wav", ".aiff"]
+    LOSSY_FORMATS = [".mp3"]
 
-    VALUES = {"download_dir": f"G:\\_DOWNLOADS\\_MUSIC\\",
-              "genre": "trance",
-              "form": "tracks",
-              "quantity": 10,
-              "download": True,
-              "threads": 4,
-              }
+    class Values:
+        download_dir: str = ""
+        genre: str = "trance"
+        form: str = "tracks"
+        quantity: int = 10
+        threads: int = 4
+        is_lossless: bool = True
+        is_download: bool = True
 
-    MAX_VALUES = {"quantity": 1000,
-                  "threads": 8,
-                  }
-
+    class MaxValues:
+        quantity: int = 1000
+        threads: int = 8

@@ -1,13 +1,13 @@
+import sys
 import asyncio
-from modules import Base, Data
-
+from PyQt6.QtWidgets import QApplication
+from modules import gui
 
 if __name__ == "__main__":
-    music = Base(Data.VALUES["download_dir"],
-                 Data.VALUES["genre"],
-                 Data.VALUES["form"],
-                 Data.VALUES["quantity"],
-                 Data.VALUES["download"],
-                 Data.VALUES["threads"])
-
-    asyncio.run(music.get_files())
+    app = QApplication(sys.argv)
+    window = gui.MainWindow()
+    # asyncio.run(window.start_gui(app))
+    loop = asyncio.new_event_loop()
+    loop.run_until_complete(window.set_genres())
+    window.show()
+    sys.exit(app.exec())
