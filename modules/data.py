@@ -16,10 +16,10 @@ class Data:
         genre: str = "trance"
         form: str = "tracks"
         quantity: int = 10
-        threads: int = 4
+        threads: int = 1
         is_lossless: bool = True
         is_download: bool = True
 
     class MaxValues:
         quantity: int = 1000
-        threads: int = 8
+        threads: int = 4

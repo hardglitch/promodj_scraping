@@ -1,15 +1,17 @@
-from . import utils
-from .data import Data
-from PyQt6.QtCore import pyqtSignal, QThread
+import asyncio
+from asyncio import AbstractEventLoop
+from typing import List, Any, Awaitable
+
+import aiofiles
+import aiohttp
+from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QMainWindow
 from bs4 import BeautifulSoup, ResultSet
-from typing import Any
-import asyncio
-import aiohttp
-import aiofiles
+
+from .data import Data
 
 
-class Base(QThread):
+class Base(QMainWindow):
 
     setTotalProgress = pyqtSignal(int)
     setCurrentProgress = pyqtSignal(int)
@@ -23,7 +25,9 @@ class Base(QThread):
                  quantity: int = 10,
                  period: bool = False,
                  download: bool = True,
-                 threads: int = 4) -> None:
+                 threads: int = 4,
+                 loop: AbstractEventLoop = None
+        ) -> None:
 
         super().__init__()
         self.download_dir: str = download_dir
@@ -38,6 +42,9 @@ class Base(QThread):
         self._file_counter: int = 0
         self._all_files: int = 0
         self._grade: int = 0
+        self._download_future = None
+        self._loop: AbstractEventLoop = loop
+
 
     def limiter(self, param: Any) -> Any:
         param = param.lower() if type(param) is str else param
@@ -53,7 +60,7 @@ class Base(QThread):
         print("No suitable parameter")
         exit()
 
-    def get_filtered_links(self, links_massive: ResultSet = None) -> list:
+    def get_filtered_links(self, links_massive: ResultSet = None) -> List[str]:
         if links_massive is None:
             print("No Links to filtering")
             exit()
@@ -66,7 +73,7 @@ class Base(QThread):
                     filtered_links[link["href"]] = 1  # deduplication
         return list(filtered_links.keys())
 
-    async def get_all_links(self, session: aiohttp.ClientSession = None) -> list:
+    async def get_all_links(self, session: aiohttp.ClientSession = None) -> List[Awaitable]:
         if session is None:
             print("Unable to download")
             exit()
@@ -82,7 +89,7 @@ class Base(QThread):
         while len(found_links) < quantity:
             link = f"https://promodj.com/{form}/{genre}?{period}bitrate={bitrate}&page={page}"
             async with session.get(link) as response:
-                if response.status == 404: break
+                if response.status != 200: break
                 links = BeautifulSoup(await response.read(), features="html.parser").findAll("a")
                 found_links += self.get_filtered_links(links)
                 page += 1
@@ -90,7 +97,7 @@ class Base(QThread):
         for n in found_links: tmp[n] = 1
         return list(tmp)[:quantity]
 
-    async def get_file_name_from_link(self, link: str = None) -> str:
+    def get_file_name_from_link(self, link: str = None) -> str:
         if link is None:
             print("No Link to extract a name")
             return ""
@@ -118,7 +125,7 @@ class Base(QThread):
             print("Unable to connect")
             exit()
 
-        filename = await self.get_file_name_from_link(link)
+        filename = self.get_file_name_from_link(link)
         if self.download:
             async with session.get(link) as response:
                 if response.status != 200:
@@ -127,29 +134,37 @@ class Base(QThread):
                 async with aiofiles.open(self.download_dir + filename, "wb") as file:
                     print(f"Downloading {filename}...")
                     async for data in response.content.iter_chunked(1024):
-                        self.setCurrentProgress.emit(self._grade * self._file_counter - self._grade % 2)
+                        # self.setCurrentProgress.emit(self._grade * self._file_counter - self._grade % 2)
                         await file.write(data)
-                    self._file_counter += 1
-                    if self._file_counter < self._all_files:
-                        self.setCurrentProgress.emit(self._grade * self._file_counter)
+                        # self._file_counter += 1
+                        # if self._file_counter < self._all_files:
+                        #     self.setCurrentProgress.emit(self._grade * self._file_counter)
         print(f"File save as {self.download_dir + filename}")
 
-    async def dl_threads_limiter(self, sem: asyncio.Semaphore = None,
-                                 session: aiohttp.ClientSession = None, link: str = None):
+    async def threads_limiter(self, sem: asyncio.Semaphore = None,
+                              session: aiohttp.ClientSession = None, link: Awaitable = None) -> None:
         async with sem:
+            print("sdfsdf")
             return await self.get_file_by_link(session, link)
 
     # @utils.async_timer()
-    async def get_files(self):
+    async def get_files(self) -> None:
         async with aiohttp.ClientSession() as session:
-            links_future = asyncio.as_completed([self.get_all_links(session)])
             sem = asyncio.Semaphore(self.limiter(self.threads))
             tasks = []
-            for links in links_future:
-                for link in await links:
-                    tasks.append(asyncio.ensure_future(self.dl_threads_limiter(sem, session, link)))
-            self._all_files = len(tasks)
-            self._grade = 100 % self._all_files
-            self.setTotalProgress.emit(self._all_files)
+            for link in await self.get_all_links(session):
+                print("link -", link)
+                tasks.append(asyncio.ensure_future(self.threads_limiter(sem=sem, session=session, link=link)))
+            # self._all_files = len(tasks)
+            # self._grade = 100 % self._all_files
+            # self.setTotalProgress.emit(self._all_files)
             await asyncio.gather(*tasks)
-            self.succeeded.emit()
+            # self.succeeded.emit()
+
+    def start_downloading(self):
+        self._download_future = asyncio.run_coroutine_threadsafe(self.get_files(), self._loop)
+        print("bnmbnb")
+
+    # def cancel_downloading(self):
+    #     if self._download_future:
+    #         self._loop.call_soon_threadsafe(self._download_future.cancel)
