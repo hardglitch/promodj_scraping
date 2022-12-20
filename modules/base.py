@@ -13,8 +13,7 @@ from .data import Data
 
 class Base(QMainWindow):
 
-    setTotalProgress = pyqtSignal(int)
-    setCurrentProgress = pyqtSignal(int)
+    progress = pyqtSignal(int)
     succeeded = pyqtSignal()
 
     def __init__(self,
@@ -134,11 +133,12 @@ class Base(QMainWindow):
                 async with aiofiles.open(self.download_dir + filename, "wb") as file:
                     print(f"Downloading {filename}...")
                     async for data in response.content.iter_chunked(1024):
-                        # self.setCurrentProgress.emit(self._grade * self._file_counter - self._grade % 2)
                         await file.write(data)
-                        # self._file_counter += 1
-                        # if self._file_counter < self._all_files:
-                        #     self.setCurrentProgress.emit(self._grade * self._file_counter)
+                    self._file_counter += 1
+                    if self._file_counter < self._all_files:
+                        self.progress.emit(self._grade * self._file_counter)
+                    else:
+                        self.progress.emit(100)
         print(f"File save as {self.download_dir + filename}")
 
     async def threads_limiter(self, sem: asyncio.Semaphore = None,
@@ -154,9 +154,8 @@ class Base(QMainWindow):
             for link in await self.get_all_links(session):
                 print("link -", link)
                 tasks.append(asyncio.ensure_future(self.threads_limiter(sem=sem, session=session, link=link)))
-            # self._all_files = len(tasks)
-            # self._grade = 100 % self._all_files
-            # self.setTotalProgress.emit(self._all_files)
+            self._all_files = len(tasks)
+            self._grade = 100 // self._all_files
             await asyncio.gather(*tasks)
             self.succeeded.emit()
 

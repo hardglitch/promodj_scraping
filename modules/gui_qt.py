@@ -20,6 +20,8 @@ class MainWindow(QMainWindow):
         self._loop = loop or asyncio.get_event_loop()
         self._is_downloading: bool = False
 
+        # QIcon(os.path.join('icons', 'disk--pencil.png')
+
         self.setFont(QFont("Arial", 12))
         self.setWindowTitle("PromoDJ Music Downloader")
         self.setFixedSize(530, 200)
@@ -91,9 +93,6 @@ class MainWindow(QMainWindow):
 
         self.music = None
 
-    def is_downloading(self):
-        pass
-
     @asyncSlot()
     async def download_files(self):
         try:
@@ -126,8 +125,7 @@ class MainWindow(QMainWindow):
                          loop=self._loop
             )
 
-            # self.music.setTotalProgress.connect(self.progBar.setMaximum)
-            # self.music.setCurrentProgress.connect(self.progBar.setValue)
+            self.music.progress.connect(self.progBar.setValue)
             self.music.succeeded.connect(self.download_successed)
             self.music.start_downloading()
 
