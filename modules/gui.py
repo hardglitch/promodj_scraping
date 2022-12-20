@@ -3,7 +3,7 @@ import sys
 from os import getcwd
 
 import aiohttp
-from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QFont, QIcon
 from PyQt6.QtWidgets import QApplication, QProgressBar, QPushButton, QMainWindow, QComboBox, QCheckBox, QLabel, \
     QFileDialog
 from bs4 import BeautifulSoup
@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
         self._loop = loop or asyncio.get_event_loop()
         self._is_downloading: bool = False
 
-        # QIcon(os.path.join('icons', 'disk--pencil.png')
+        self.setWindowIcon(QIcon("logo.png"))
 
         self.setFont(QFont("Arial", 12))
         self.setWindowTitle("PromoDJ Music Downloader")
@@ -42,7 +42,8 @@ class MainWindow(QMainWindow):
         self.cmbQuantity.move(300, 10)
         self.cmbQuantity.setEditable(True)
         self.cmbQuantity.setDuplicatesEnabled(False)
-        self.cmbQuantity.addItem(str(Data.Values.quantity))
+        self.cmbQuantity.addItems(["1", "5", "10", "50", "100"])
+        self.cmbQuantity.setCurrentText(str(Data.Values.quantity))
 
         self.lblQuantity = QLabel("files", self)
         self.lblQuantity.move(365, 8)
