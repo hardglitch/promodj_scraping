@@ -1,10 +1,8 @@
 import asyncio
 import sys
-import traceback
 from os import getcwd
 
 import aiohttp
-from PyQt6.QtCore import QThreadPool, pyqtSignal, QObject, QRunnable, QMutex, QMutexLocker, pyqtSlot
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import QApplication, QProgressBar, QPushButton, QMainWindow, QComboBox, QCheckBox, QLabel, \
     QFileDialog
@@ -15,48 +13,12 @@ from .base import Base
 from .data import Data
 
 
-class WorkerSignals(QObject):
-    finish = pyqtSignal()
-    error = pyqtSignal(str)
-    result = pyqtSignal(object)
-
-class Worker(QRunnable):
-    def __init__(self, func, *args, **kwargs):
-        super().__init__()
-        self.func = func
-        self.args = args
-        self.kwargs = kwargs
-        self.signals = WorkerSignals()
-        self.mutex = QMutex()
-        self.is_stop = False
-
-    @pyqtSlot()
-    def run(self):
-        try:
-            with QMutexLocker(self.mutex):
-                self.is_stop = False
-            result = self.func(self, *self.args, **self.kwargs)
-        except BaseException:
-            traceback.print_exc()
-            exc_type, value = sys.exc_info()[:2]
-            self.signals.error.emit(exc_type, value, traceback.format_exc())
-        else:
-            self.signals.result.emit(result)
-        finally:
-            self.signals.finish.emit()
-
-    def stop(self):
-        with QMutexLocker(self.mutex):
-            self.is_stop = True
-
 class MainWindow(QMainWindow):
-
-    stop_worker = pyqtSignal()
 
     def __init__(self, loop=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._loop = loop or asyncio.get_event_loop()
-        # self._downloading: Optional[Base] = None
+        self._is_downloading: bool = False
 
         self.setFont(QFont("Arial", 12))
         self.setWindowTitle("PromoDJ Music Downloader")
@@ -120,84 +82,65 @@ class MainWindow(QMainWindow):
         self.btnExit = QPushButton("Exit", self)
         self.btnExit.move(160, 160)
         self.btnExit.setCheckable(True)
-        self.btnExit.clicked.connect(QApplication.instance().quit)
+        self.btnExit.clicked.connect(self.exit)
 
         self.progBar = QProgressBar(self)
         self.progBar.setGeometry(10, 125, 520, 20)
         self.progBar.setVisible(False)
         self.progBar.setMaximum(100)
 
-        self.threadpool = QThreadPool()
-        self.threadpool.setMaxThreadCount(Data.Values.threads)
+        self.music = None
 
-        self.music: Base = None
-        self.worker: Worker = None
+    def is_downloading(self):
+        pass
 
     @asyncSlot()
     async def download_files(self):
         try:
-            if self.threadpool.activeThreadCount() < self.threadpool.maxThreadCount():
-                # if self._downloading is not None:
-                #     self._downloading.cancel_downloading()
-                #     self._downloading = None
-                #     return
+            if self._is_downloading:
+                self.music.cancel_downloading()
+                self.btnDownload.setText("Download")
+                self._is_downloading = False
+                return
+            else:
+                self.btnDownload.setText("Cancel")
+                self._is_downloading = True
 
-                # self.btnDownload.setEnabled(False)
-                self.progBar.setVisible(True)
-                self.progBar.setValue(0)
+            self.progBar.setVisible(True)
+            self.progBar.setValue(0)
 
-                Data.Values.genre = Data.GENRES[self.cmbGenre.currentText()]
-                Data.Values.form = self.cmbForm.currentText()
-                Data.Values.is_lossless = self.chbFormat.isChecked()
-                Data.Values.quantity = int(self.cmbQuantity.currentText())
-                Data.Values.threads = int(self.cmbThreads.currentText())
+            Data.Values.genre = Data.GENRES[self.cmbGenre.currentText()]
+            Data.Values.form = self.cmbForm.currentText()
+            Data.Values.is_lossless = self.chbFormat.isChecked()
+            Data.Values.quantity = int(self.cmbQuantity.currentText())
+            Data.Values.threads = int(self.cmbThreads.currentText())
 
-                self.music = Base(download_dir=Data.Values.download_dir + fr"\\",
-                             genre=Data.Values.genre,
-                             form=Data.Values.form,
-                             lossless=Data.Values.is_lossless,
-                             quantity=Data.Values.quantity,
-                             period=self.chbPeriod.isChecked(),
-                             download=Data.Values.is_download,
-                             threads=Data.Values.threads,
-                             loop=self._loop
-                )
+            self.music = Base(download_dir=Data.Values.download_dir + fr"\\",
+                         genre=Data.Values.genre,
+                         form=Data.Values.form,
+                         lossless=Data.Values.is_lossless,
+                         quantity=Data.Values.quantity,
+                         period=self.chbPeriod.isChecked(),
+                         download=Data.Values.is_download,
+                         threads=Data.Values.threads,
+                         loop=self._loop
+            )
 
-                self.music.setTotalProgress.connect(self.progBar.setMaximum)
-                self.music.setCurrentProgress.connect(self.progBar.setValue)
-                self.music.succeeded.connect(self.download_successed)
+            # self.music.setTotalProgress.connect(self.progBar.setMaximum)
+            # self.music.setCurrentProgress.connect(self.progBar.setValue)
+            self.music.succeeded.connect(self.download_successed)
+            self.music.start_downloading()
 
-                # self.worker = Worker(self.music.get_files)
-                # self.worker = Worker(self.music.start_downloading)
-                self.music.start_downloading()
-                print("dfgdfg")
-
-                # self.worker.signals.finish.connect(self.finish_thread)
-                # self.worker.signals.error.connect(self.error_thread)
-                # self.worker.signals.result.connect(self.result_thread)
-
-                # self.threadpool.start(self.worker)
-
-                self.btnDownload.setEnabled(True)
-                self.btnDownload.setCheckable(True)
         except Exception as error:
             print("Error -", error)
 
 
-    def error_thread(self, message):
-        print("Outputs error logs that occur in asynchronous processing")
-        print(message)
-
-    def result_thread(self, message):
-        print(f"Return value:{message}")
-
-    def finish_thread(self):
-        print("Asynchronous processing is complete")
-        # Restore the standard output destination
-        self.threadpool.waitForDone()
-
     def download_successed(self):
         self.progBar.setValue(self.progBar.maximum())
+        self.music.cancel_downloading()
+        self.btnDownload.setText("Download")
+        self.btnDownload.setChecked(False)
+        self._is_downloading = True
 
     def event_chb_period(self):
         if self.chbPeriod.isChecked():
@@ -210,6 +153,10 @@ class MainWindow(QMainWindow):
         self.lblSaveTo.setText(str(save_to_dir))
         Data.Values.download_dir = save_to_dir
         self.btnSaveTo.setChecked(False)
+
+    def exit(self):
+        QApplication.instance().quit()
+        sys.exit(0)
 
     @asyncSlot()
     async def set_genres(self):

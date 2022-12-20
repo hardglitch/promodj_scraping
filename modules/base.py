@@ -144,7 +144,6 @@ class Base(QMainWindow):
     async def threads_limiter(self, sem: asyncio.Semaphore = None,
                               session: aiohttp.ClientSession = None, link: Awaitable = None) -> None:
         async with sem:
-            print("sdfsdf")
             return await self.get_file_by_link(session, link)
 
     # @utils.async_timer()
@@ -159,12 +158,11 @@ class Base(QMainWindow):
             # self._grade = 100 % self._all_files
             # self.setTotalProgress.emit(self._all_files)
             await asyncio.gather(*tasks)
-            # self.succeeded.emit()
+            self.succeeded.emit()
 
     def start_downloading(self):
         self._download_future = asyncio.run_coroutine_threadsafe(self.get_files(), self._loop)
-        print("bnmbnb")
 
-    # def cancel_downloading(self):
-    #     if self._download_future:
-    #         self._loop.call_soon_threadsafe(self._download_future.cancel)
+    def cancel_downloading(self):
+        if self._download_future:
+            self._loop.call_soon_threadsafe(self._download_future.cancel)
