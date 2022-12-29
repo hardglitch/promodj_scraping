@@ -16,6 +16,8 @@ class Base(QMainWindow):
 
     progress = pyqtSignal(int)
     succeeded = pyqtSignal(int)
+    total_size: int = 0
+    total_chunk_counter: int = 0
 
     def __init__(self,
                  download_dir: str = "music",
@@ -60,6 +62,7 @@ class Base(QMainWindow):
         print(Messages.Errors.NoSuitableParameter)
         exit()
 
+
     def get_filtered_links(self, links_massive: ResultSet = None) -> List[str]:
         if links_massive is None:
             print(Messages.Errors.NoLinksToFiltering)
@@ -72,6 +75,7 @@ class Base(QMainWindow):
                 if link.has_attr("href") and link["href"].find(frmt) > -1:
                     filtered_links[link["href"]] = 1  # deduplication
         return list(filtered_links.keys())
+
 
     async def get_all_links(self, session: aiohttp.ClientSession = None) -> List[Awaitable]:
         if session is None:
@@ -97,6 +101,7 @@ class Base(QMainWindow):
         for n in found_links: tmp[n] = 1
         return list(tmp)[:quantity]
 
+
     def get_file_name_from_link(self, link: str = None) -> str:
         if link is None:
             print(Messages.Errors.NoLinkToExtractAName)
@@ -117,6 +122,28 @@ class Base(QMainWindow):
 
         return filename.strip()
 
+
+    async def get_total_filesize(self, session: aiohttp.ClientSession = None, links: List[Awaitable] = None):
+
+        async def micro_task(micro_link):
+            async with session.get(micro_link) as response:
+                if response.status != 200:
+                    print(Messages.Errors.SomethingWentWrong)
+                    return
+                self.total_size += response.content_length
+
+        if session is None:
+            print(Messages.Errors.UnableToConnect)
+            exit()
+
+        micro_tasks = []
+        for link in links:
+            micro_tasks.append(asyncio.ensure_future(micro_task(link)))
+
+        await asyncio.gather(*micro_tasks)
+
+
+
     async def get_file_by_link(self, session: aiohttp.ClientSession = None, link: str = None):
         if link is None:
             print(Messages.Errors.NoLinkToDownload)
@@ -131,38 +158,49 @@ class Base(QMainWindow):
                 if response.status != 200:
                     print(Messages.Errors.SomethingWentWrong)
                     return
+
                 async with aiofiles.open(self.download_dir + filename, "wb") as file:
                     print(f"Downloading {filename}...")
                     print("Link - ", link)
-                    async for data in response.content.iter_chunked(1024):
+
+                    chunk_size = 1024
+                    async for data in response.content.iter_chunked(chunk_size):
+                        self.total_chunk_counter += 1
+                        self.progress.emit(100 * self.total_chunk_counter * chunk_size // self.total_size)
                         await file.write(data)
-                    self._file_counter += 1
-                    if self._file_counter < self._all_files:
-                        self.progress.emit(self._grade * self._file_counter)
-                    else:
-                        self.progress.emit(100)
         print(f"File save as {self.download_dir + filename}")
+
 
     async def threads_limiter(self, sem: asyncio.Semaphore = None,
                               session: aiohttp.ClientSession = None, link: Awaitable = None) -> None:
         async with sem:
             return await self.get_file_by_link(session, link)
 
-    # @utils.async_timer()
+
     async def get_files(self) -> None:
         async with aiohttp.ClientSession() as session:
             sem = asyncio.Semaphore(self.limiter(self.threads))
             tasks = []
-            for link in await self.get_all_links(session):
+            all_links = await self.get_all_links(session)
+
+            await self.get_total_filesize(session, all_links)
+            print(self.total_size)
+
+            for link in all_links:
                 tasks.append(asyncio.ensure_future(self.threads_limiter(sem=sem, session=session, link=link)))
+
             self._all_files = len(tasks)
             self._grade = 100 // self._all_files
+
             await asyncio.gather(*tasks)
+
             if len(tasks) > 0: self.succeeded.emit(1)
             else: self.succeeded.emit(0)
 
+
     def start_downloading(self):
         self._download_future = asyncio.run_coroutine_threadsafe(self.get_files(), self._loop)
+
 
     def cancel_downloading(self):
         if self._download_future:
