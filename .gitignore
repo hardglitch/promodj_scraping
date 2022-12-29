@@ -5,3 +5,5 @@
 /dist
 /*.spec
 /pyinstaller_command.txt
+/bugs.txt
+/logo.png

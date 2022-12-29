@@ -1,6 +1,7 @@
 import asyncio
 import sys
 
+# from charset_normalizer import md__mypyc
 from PyQt6.QtWidgets import QApplication
 from qasync import QEventLoop
 
