@@ -3,6 +3,7 @@ import sys
 from os import getcwd
 
 import aiohttp
+from PyQt6 import QtCore
 from PyQt6.QtGui import QFont, QIcon
 from PyQt6.QtWidgets import QApplication, QProgressBar, QPushButton, QMainWindow, QComboBox, QCheckBox, QLabel, \
     QFileDialog
@@ -11,6 +12,7 @@ from qasync import asyncSlot
 
 from .base import Base
 from .data import Data
+from .messages import Messages
 
 
 class MainWindow(QMainWindow):
@@ -92,6 +94,11 @@ class MainWindow(QMainWindow):
         self.progBar.setVisible(False)
         self.progBar.setMaximum(100)
 
+        self.lblMessage = QLabel("", self)
+        self.lblMessage.setGeometry(10, 125, 520, 20)
+        self.lblMessage.setVisible(False)
+        self.lblMessage.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+
         self.music = None
 
     @asyncSlot()
@@ -106,6 +113,7 @@ class MainWindow(QMainWindow):
                 self.btnDownload.setText("Cancel")
                 self._is_downloading = True
 
+            self.lblMessage.setVisible(False)
             self.progBar.setVisible(True)
             self.progBar.setValue(0)
 
@@ -134,8 +142,14 @@ class MainWindow(QMainWindow):
             print("Error -", error)
 
 
-    def download_successed(self):
-        self.progBar.setValue(self.progBar.maximum())
+    def download_successed(self, value):
+        if value == 1:
+            self.progBar.setValue(self.progBar.maximum())
+        else:
+            self.progBar.setVisible(False)
+            self.lblMessage.setVisible(True)
+            self.lblMessage.setText(Messages.MatchingFilesNotFound)
+
         self.music.cancel_downloading()
         self.btnDownload.setText("Download")
         self.btnDownload.setChecked(False)

@@ -9,12 +9,13 @@ from PyQt6.QtWidgets import QMainWindow
 from bs4 import BeautifulSoup, ResultSet
 
 from .data import Data
+from .messages import Messages
 
 
 class Base(QMainWindow):
 
     progress = pyqtSignal(int)
-    succeeded = pyqtSignal()
+    succeeded = pyqtSignal(int)
 
     def __init__(self,
                  download_dir: str = "music",
@@ -56,12 +57,12 @@ class Base(QMainWindow):
         if param == self.threads:
             param = param if param <= abs(Data.MaxValues.threads) else Data.MaxValues.threads
             return param
-        print("No suitable parameter")
+        print(Messages.Errors.NoSuitableParameter)
         exit()
 
     def get_filtered_links(self, links_massive: ResultSet = None) -> List[str]:
         if links_massive is None:
-            print("No Links to filtering")
+            print(Messages.Errors.NoLinksToFiltering)
             exit()
 
         filtered_links: dict = {}
@@ -74,7 +75,7 @@ class Base(QMainWindow):
 
     async def get_all_links(self, session: aiohttp.ClientSession = None) -> List[Awaitable]:
         if session is None:
-            print("Unable to download")
+            print(Messages.Errors.UnableToDownload)
             exit()
 
         page: int = 1
@@ -98,7 +99,7 @@ class Base(QMainWindow):
 
     def get_file_name_from_link(self, link: str = None) -> str:
         if link is None:
-            print("No Link to extract a name")
+            print(Messages.Errors.NoLinkToExtractAName)
             return ""
 
         decode_simbols = {"%20": " ", "%28": "(", "%29": ")", "%26": "&", "%23": "#"}
@@ -118,20 +119,21 @@ class Base(QMainWindow):
 
     async def get_file_by_link(self, session: aiohttp.ClientSession = None, link: str = None):
         if link is None:
-            print("No Link to download")
+            print(Messages.Errors.NoLinkToDownload)
             exit()
         if session is None:
-            print("Unable to connect")
+            print(Messages.Errors.UnableToConnect)
             exit()
 
         filename = self.get_file_name_from_link(link)
         if self.download:
             async with session.get(link) as response:
                 if response.status != 200:
-                    print("Something went wrong")
+                    print(Messages.Errors.SomethingWentWrong)
                     return
                 async with aiofiles.open(self.download_dir + filename, "wb") as file:
                     print(f"Downloading {filename}...")
+                    print("Link - ", link)
                     async for data in response.content.iter_chunked(1024):
                         await file.write(data)
                     self._file_counter += 1
@@ -152,12 +154,12 @@ class Base(QMainWindow):
             sem = asyncio.Semaphore(self.limiter(self.threads))
             tasks = []
             for link in await self.get_all_links(session):
-                print("link -", link)
                 tasks.append(asyncio.ensure_future(self.threads_limiter(sem=sem, session=session, link=link)))
             self._all_files = len(tasks)
             self._grade = 100 // self._all_files
             await asyncio.gather(*tasks)
-            self.succeeded.emit()
+            if len(tasks) > 0: self.succeeded.emit(1)
+            else: self.succeeded.emit(0)
 
     def start_downloading(self):
         self._download_future = asyncio.run_coroutine_threadsafe(self.get_files(), self._loop)
