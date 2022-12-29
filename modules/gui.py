@@ -22,7 +22,7 @@ class MainWindow(QMainWindow):
         self._loop = loop or asyncio.get_event_loop()
         self._is_downloading: bool = False
 
-        self.setWindowIcon(QIcon("logo.png"))
+        self.setWindowIcon(QIcon("logo.ico"))
 
         self.setFont(QFont("Arial", 12))
         self.setWindowTitle("PromoDJ Music Downloader")

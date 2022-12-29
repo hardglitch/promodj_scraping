@@ -142,6 +142,8 @@ class Base(QMainWindow):
 
         await asyncio.gather(*micro_tasks)
 
+        if len(micro_tasks) == 0:
+            self.succeeded.emit(0)
 
 
     async def get_file_by_link(self, session: aiohttp.ClientSession = None, link: str = None):
