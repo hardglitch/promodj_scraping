@@ -11,6 +11,8 @@ class Data:
     LOSSLESS_FORMATS = [".flac", ".wav", ".aiff"]
     LOSSY_FORMATS = [".mp3"]
 
+    PRINTING: bool = False
+
     class Values:
         download_dir: str = ""
         genre: str = "trance"

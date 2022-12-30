@@ -7,6 +7,9 @@ from qasync import QEventLoop
 
 from modules import gui
 
+# uncomment this "from.." to fix pyinstaller "missing file" bug
+# I commented this out because PyCharm removes unused import lines by default
+
 if __name__ == "__main__":
 
     app = QApplication(sys.argv)

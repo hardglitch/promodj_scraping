@@ -17,7 +17,7 @@ class Base(QMainWindow):
     progress = pyqtSignal(int)
     succeeded = pyqtSignal(int)
     total_size: int = 0
-    total_chunk_counter: int = 0
+    total_downloaded: int = 0
 
     def __init__(self,
                  download_dir: str = "music",
@@ -156,20 +156,20 @@ class Base(QMainWindow):
 
         filename = self.get_file_name_from_link(link)
         if self.download:
-            async with session.get(link) as response:
+            async with session.get(link, timeout=None) as response:
                 if response.status != 200:
                     print(Messages.Errors.SomethingWentWrong)
                     return
 
                 async with aiofiles.open(self.download_dir + filename, "wb") as file:
-                    print(f"Downloading {filename}...")
-                    print("Link - ", link)
+                    print(f"Downloading {filename}...\nLink - {link}")
 
-                    chunk_size = 1024
-                    async for data in response.content.iter_chunked(chunk_size):
-                        self.total_chunk_counter += 1
-                        self.progress.emit(100 * self.total_chunk_counter * chunk_size // self.total_size)
-                        await file.write(data)
+                    chunk_size = 16144   #  8192 / 16384
+                    async for chunk in response.content.iter_chunked(chunk_size):
+                        if not chunk: break
+                        self.total_downloaded += chunk_size
+                        self.progress.emit(int(100 * self.total_downloaded / (self.total_size * 1.21)))
+                        await file.write(chunk)
         print(f"File save as {self.download_dir + filename}")
 
 
@@ -186,7 +186,6 @@ class Base(QMainWindow):
             all_links = await self.get_all_links(session)
 
             await self.get_total_filesize(session, all_links)
-            print(self.total_size)
 
             for link in all_links:
                 tasks.append(asyncio.ensure_future(self.threads_limiter(sem=sem, session=session, link=link)))
