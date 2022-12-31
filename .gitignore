@@ -5,6 +5,8 @@
 /dist
 /venv
 *.spec
+.dockerignore
+Dockerfile
 pyinstaller_command.txt
 bugs.txt
 logo.png
