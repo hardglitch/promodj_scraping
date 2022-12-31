@@ -5,10 +5,10 @@
 /dist
 /venv
 *.spec
+*.txt
+!requirements.txt
 .dockerignore
 Dockerfile
-pyinstaller_command.txt
-bugs.txt
 logo.png
-bandit.ini
+.bandit.ini
 bandit_run.bat

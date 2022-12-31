@@ -6,5 +6,4 @@ My App will give you the opportunity to download music from this site in a conve
 
 The Code is written in asynchronous and multithreaded Python and built using Pyinstaller.
 GUI created with PyQt6.
-
 PromoDJ Scraper is completely portable
