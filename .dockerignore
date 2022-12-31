@@ -1,6 +1,0 @@
-/venv
-/.git
-/.idea
-.bandit.ini
-bandit_run.bat
-.gitignore
