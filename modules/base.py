@@ -1,6 +1,6 @@
 import asyncio
 from asyncio import AbstractEventLoop
-from typing import List, Any, Awaitable
+from typing import Any, Awaitable, List
 
 import aiofiles
 import aiohttp
@@ -48,6 +48,11 @@ class Base(QMainWindow):
         self._loop: AbstractEventLoop = loop
 
 
+    @staticmethod
+    def print(*args, **kwargs):
+        if Data.PRINTING:
+            print(*args, **kwargs)
+
     def limiter(self, param: Any) -> Any:
         param = param.lower() if type(param) is str else param
         if param == self.form.lower() and param in Data.FORMS \
@@ -59,13 +64,13 @@ class Base(QMainWindow):
         if param == self.threads:
             param = param if param <= abs(Data.MaxValues.threads) else Data.MaxValues.threads
             return param
-        print(Messages.Errors.NoSuitableParameter)
+        self.print(Messages.Errors.NoSuitableParameter)
         exit()
 
 
     def get_filtered_links(self, links_massive: ResultSet = None) -> List[str]:
         if links_massive is None:
-            print(Messages.Errors.NoLinksToFiltering)
+            self.print(Messages.Errors.NoLinksToFiltering)
             exit()
 
         filtered_links: dict = {}
@@ -79,7 +84,7 @@ class Base(QMainWindow):
 
     async def get_all_links(self, session: aiohttp.ClientSession = None) -> List[Awaitable]:
         if session is None:
-            print(Messages.Errors.UnableToDownload)
+            self.print(Messages.Errors.UnableToDownload)
             exit()
 
         page: int = 1
@@ -104,7 +109,7 @@ class Base(QMainWindow):
 
     def get_file_name_from_link(self, link: str = None) -> str:
         if link is None:
-            print(Messages.Errors.NoLinkToExtractAName)
+            self.print(Messages.Errors.NoLinkToExtractAName)
             return ""
 
         decode_simbols = {"%20": " ", "%28": "(", "%29": ")", "%26": "&", "%23": "#"}
@@ -128,12 +133,12 @@ class Base(QMainWindow):
         async def micro_task(micro_link):
             async with session.get(micro_link) as response:
                 if response.status != 200:
-                    print(Messages.Errors.SomethingWentWrong)
+                    self.print(Messages.Errors.SomethingWentWrong)
                     return
                 self.total_size += response.content_length
 
         if session is None:
-            print(Messages.Errors.UnableToConnect)
+            self.print(Messages.Errors.UnableToConnect)
             exit()
 
         micro_tasks = []
@@ -148,21 +153,21 @@ class Base(QMainWindow):
 
     async def get_file_by_link(self, session: aiohttp.ClientSession = None, link: str = None):
         if link is None:
-            print(Messages.Errors.NoLinkToDownload)
+            self.print(Messages.Errors.NoLinkToDownload)
             exit()
         if session is None:
-            print(Messages.Errors.UnableToConnect)
+            self.print(Messages.Errors.UnableToConnect)
             exit()
 
         filename = self.get_file_name_from_link(link)
         if self.download:
             async with session.get(link, timeout=None) as response:
                 if response.status != 200:
-                    print(Messages.Errors.SomethingWentWrong)
+                    self.print(Messages.Errors.SomethingWentWrong)
                     return
 
                 async with aiofiles.open(self.download_dir + filename, "wb") as file:
-                    print(f"Downloading {filename}...\nLink - {link}")
+                    self.print(f"Downloading {filename}...\nLink - {link}")
 
                     chunk_size = 16144   #  8192 / 16384
                     async for chunk in response.content.iter_chunked(chunk_size):
@@ -170,7 +175,7 @@ class Base(QMainWindow):
                         self.total_downloaded += chunk_size
                         self.progress.emit(int(100 * self.total_downloaded / (self.total_size * 1.21)))
                         await file.write(chunk)
-        print(f"File save as {self.download_dir + filename}")
+        self.print(f"File save as {self.download_dir + filename}")
 
 
     async def threads_limiter(self, sem: asyncio.Semaphore = None,
