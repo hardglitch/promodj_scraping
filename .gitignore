@@ -3,9 +3,10 @@
 /__pycache__
 /build
 /dist
-/*.spec
-/pyinstaller_command.txt
-/bugs.txt
-/logo.png
-/bandit.ini
-/bandit_run.bat
+/venv
+*.spec
+pyinstaller_command.txt
+bugs.txt
+logo.png
+bandit.ini
+bandit_run.bat
