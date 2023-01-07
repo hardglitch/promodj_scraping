@@ -1,5 +1,6 @@
 import asyncio
 from asyncio import AbstractEventLoop
+from os import path
 from typing import Any, Awaitable, List
 
 import aiofiles
@@ -55,8 +56,7 @@ class Base(QMainWindow):
 
     def limiter(self, param: Any) -> Any:
         param = param.lower() if type(param) is str else param
-        if param == self.form.lower() and param in Data.FORMS \
-                or param == self.genre and param in Data.GENRES.values():
+        if param == self.form.lower() and param in Data.FORMS:
             return param
         if param == self.quantity:
             param = param if param <= abs(Data.MaxValues.quantity) else Data.MaxValues.quantity
@@ -90,13 +90,12 @@ class Base(QMainWindow):
         page: int = 1
         found_links: list = []
         quantity = self.limiter(self.quantity)
-        genre = self.limiter(self.genre)
         form = self.limiter(self.form)
         bitrate = "lossless" if self.lossless else "high"
         period = f"period=last&period_last={quantity}d&" if self.period else ""
 
         while len(found_links) < quantity:
-            link = f"https://promodj.com/{form}/{genre}?{period}bitrate={bitrate}&page={page}"
+            link = f"https://promodj.com/{form}/{self.genre}?{period}bitrate={bitrate}&page={page}"
             async with session.get(link) as response:
                 if response.status != 200: break
                 links = BeautifulSoup(await response.read(), features="html.parser").findAll("a")
@@ -166,7 +165,7 @@ class Base(QMainWindow):
                     self.print(Messages.Errors.SomethingWentWrong)
                     return
 
-                async with aiofiles.open(self.download_dir + filename, "wb") as file:
+                async with aiofiles.open(path.join(self.download_dir, filename), "wb") as file:
                     self.print(f"Downloading {filename}...\nLink - {link}")
 
                     chunk_size = 16144   #  8192 / 16384

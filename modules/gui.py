@@ -5,14 +5,15 @@ from os import getcwd
 import aiohttp
 from PyQt6 import QtCore
 from PyQt6.QtGui import QFont, QIcon
-from PyQt6.QtWidgets import QApplication, QProgressBar, QPushButton, QMainWindow, QComboBox, QCheckBox, QLabel, \
-    QFileDialog
+from PyQt6.QtWidgets import QApplication, QCheckBox, QComboBox, QFileDialog, QLabel, QMainWindow, QProgressBar, \
+    QPushButton
 from bs4 import BeautifulSoup
 from qasync import asyncSlot
 
 from .base import Base
 from .data import Data
 from .messages import Messages
+from .settings import Parameter, Settings
 
 
 class MainWindow(QMainWindow):
@@ -21,6 +22,8 @@ class MainWindow(QMainWindow):
         super().__init__(*args, **kwargs)
         self._loop = loop or asyncio.get_event_loop()
         self._is_downloading: bool = False
+
+        self.settings_file = Settings()
 
         self.setWindowIcon(QIcon("logo.ico"))
 
@@ -31,7 +34,6 @@ class MainWindow(QMainWindow):
         self.cmbGenre = QComboBox(self)
         self.cmbGenre.resize(220, 24)
         self.cmbGenre.move(10, 10)
-        self.cmbGenre.addItems(Data.GENRES)
 
         self.cmbForm = QComboBox(self)
         self.cmbForm.resize(70, 24)
@@ -51,7 +53,7 @@ class MainWindow(QMainWindow):
         self.lblQuantity.move(365, 8)
 
         self.chbPeriod = QCheckBox("Period", self)
-        self.chbPeriod.setChecked(False)
+        self.chbPeriod.setChecked(Data.Values.is_period)
         self.chbPeriod.move(300, 40)
         self.chbPeriod.toggled.connect(self.event_chb_period)
 
@@ -64,7 +66,7 @@ class MainWindow(QMainWindow):
         self.cmbThreads.move(433, 10)
         for i in range(1, Data.MaxValues.threads + 1):
             self.cmbThreads.addItem(str(i), i)
-        self.cmbThreads.setCurrentIndex(0)
+        self.cmbThreads.setCurrentText(str(Data.Values.threads))
 
         self.lblThreads = QLabel("threads", self)
         self.lblThreads.move(470, 8)
@@ -74,8 +76,7 @@ class MainWindow(QMainWindow):
         self.btnSaveTo.setCheckable(True)
         self.btnSaveTo.clicked.connect(self.save_to)
 
-        Data.Values.download_dir = getcwd()
-        self.lblSaveTo = QLabel(Data.Values.download_dir, self)
+        self.lblSaveTo = QLabel(getcwd(), self)
         self.lblSaveTo.resize(435, 24)
         self.lblSaveTo.move(85, 85)
 
@@ -100,6 +101,7 @@ class MainWindow(QMainWindow):
         self.lblMessage.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
         self.music = None
+        self.genres = {}
 
     @asyncSlot()
     async def download_files(self):
@@ -108,6 +110,7 @@ class MainWindow(QMainWindow):
                 self.music.cancel_downloading()
                 self.btnDownload.setText("Download")
                 self._is_downloading = False
+                self.progBar.setVisible(False)
                 return
             else:
                 self.btnDownload.setText("Cancel")
@@ -117,26 +120,31 @@ class MainWindow(QMainWindow):
             self.progBar.setVisible(True)
             self.progBar.setValue(0)
 
-            Data.Values.genre = Data.GENRES[self.cmbGenre.currentText()]
-            Data.Values.form = self.cmbForm.currentText()
-            Data.Values.is_lossless = self.chbFormat.isChecked()
-            Data.Values.quantity = int(self.cmbQuantity.currentText())
-            Data.Values.threads = int(self.cmbThreads.currentText())
-
-            self.music = Base(download_dir=Data.Values.download_dir + fr"\\",
-                         genre=Data.Values.genre,
-                         form=Data.Values.form,
-                         lossless=Data.Values.is_lossless,
-                         quantity=Data.Values.quantity,
+            self.music = Base(download_dir=self.lblSaveTo.text(),
+                         genre=self.genres[self.cmbGenre.currentText()],
+                         form=self.cmbForm.currentText(),
+                         lossless=self.chbFormat.isChecked(),
+                         quantity=int(self.cmbQuantity.currentText()),
                          period=self.chbPeriod.isChecked(),
                          download=Data.Values.is_download,
-                         threads=Data.Values.threads,
+                         threads=int(self.cmbThreads.currentText()),
                          loop=self._loop
             )
 
             self.music.progress.connect(self.progBar.setValue)
             self.music.succeeded.connect(self.download_successed)
             self.music.start_downloading()
+
+            settings_list = [
+                Parameter(Data.Parameters.DownloadDirectory, self.lblSaveTo.text()),
+                Parameter(Data.Parameters.Genre, self.cmbGenre.currentText()),
+                Parameter(Data.Parameters.Form, self.cmbForm.currentText()),
+                Parameter(Data.Parameters.Lossless, str(int(self.chbFormat.isChecked()))),
+                Parameter(Data.Parameters.Period, str(int(self.chbPeriod.isChecked()))),
+                Parameter(Data.Parameters.Quantity, self.cmbQuantity.currentText()),
+                Parameter(Data.Parameters.Threads, self.cmbThreads.currentText())
+            ]
+            await self.settings_file.write_all(settings_list)
 
         except Exception as error:
             print("Error -", error)
@@ -153,7 +161,7 @@ class MainWindow(QMainWindow):
         self.music.cancel_downloading()
         self.btnDownload.setText("Download")
         self.btnDownload.setChecked(False)
-        self._is_downloading = True
+        self._is_downloading = False
 
     def event_chb_period(self):
         if self.chbPeriod.isChecked():
@@ -164,12 +172,12 @@ class MainWindow(QMainWindow):
     def save_to(self):
         save_to_dir = QFileDialog.getExistingDirectory(self)
         self.lblSaveTo.setText(str(save_to_dir))
-        Data.Values.download_dir = save_to_dir
         self.btnSaveTo.setChecked(False)
 
     def exit(self):
         QApplication.instance().quit()
         sys.exit(0)
+
 
     @asyncSlot()
     async def set_genres(self):
@@ -180,6 +188,34 @@ class MainWindow(QMainWindow):
                 links = BeautifulSoup(await response.read(), features="html.parser").findAll("a")
                 for link in links:
                     if link.has_attr("href") and link["href"].find("/music/") > -1:
-                        Data.GENRES.update({link.text: link["href"].replace("/music/", "")})
-                self.cmbGenre.addItems(Data.GENRES.keys())
+                        self.genres.update({link.text: link["href"].replace("/music/", "")})
+                self.cmbGenre.addItems(self.genres.keys())
                 self.cmbGenre.setCurrentText(Data.Values.genre)
+
+
+    @asyncSlot()
+    async def set_settings(self):
+        await self.set_genres()
+
+        try:
+            settings_list: list[Parameter] = await self.settings_file.read_all()
+
+            if settings_list:
+                for param in settings_list:
+                    if param.name == Data.Parameters.DownloadDirectory:
+                        self.lblSaveTo.setText(param.value)
+                    elif param.name == Data.Parameters.Genre:
+                        self.cmbGenre.setCurrentText(param.value)
+                    elif param.name == Data.Parameters.Form:
+                        self.cmbForm.setCurrentText(param.value)
+                    elif param.name == Data.Parameters.Lossless:
+                        self.chbFormat.setChecked(int(param.value))
+                    elif param.name == Data.Parameters.Period:
+                        self.chbPeriod.setChecked(int(param.value))
+                    elif param.name == Data.Parameters.Quantity:
+                        self.cmbQuantity.setCurrentText(param.value)
+                    elif param.name == Data.Parameters.Threads:
+                        self.cmbThreads.setCurrentText(param.value)
+
+        except FileNotFoundError:
+            pass
