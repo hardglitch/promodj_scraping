@@ -1,7 +1,8 @@
 import asyncio
 from asyncio import AbstractEventLoop
 from os import path
-from typing import Any, Awaitable, List
+from time import time
+from typing import Awaitable, List
 
 import aiofiles
 import aiohttp
@@ -29,6 +30,8 @@ class Base(QMainWindow):
                  period: bool = Data.Values.is_period,
                  download: bool = Data.Values.is_download,
                  threads: int = Data.Values.threads,
+                 rewrite_files: bool = Data.Values.is_rewrite_files,
+                 file_history: bool = Data.Values.is_file_history,
                  loop: AbstractEventLoop = None
         ):
 
@@ -37,10 +40,12 @@ class Base(QMainWindow):
         self.genre: str = genre
         self.form: str = form
         self.lossless: bool = lossless
-        self.quantity: int = quantity
+        self.quantity: int = quantity if quantity < abs(Data.MaxValues.quantity) else abs(Data.MaxValues.quantity)
         self.period: bool = period
         self.download: bool = download
-        self.threads: int = threads
+        self.threads: int = threads if threads < abs(Data.MaxValues.threads) else abs(Data.MaxValues.threads)
+        self.rewrite_files: bool = rewrite_files
+        self.file_history: bool = file_history
 
         self._file_counter: int = 0
         self._all_files: int = 0
@@ -53,33 +58,6 @@ class Base(QMainWindow):
     def print(*args, **kwargs):
         if Data.PRINTING:
             print(*args, **kwargs)
-
-    def limiter(self, param: Any) -> Any:
-        param = param.lower() if isinstance(param, str) else param
-
-        if param == self.form.lower() and param in Data.FORMS:
-            return param
-
-        if param == self.quantity:
-            try:
-                param = abs(int(param))
-            except ValueError:
-                param = Data.Values.quantity
-
-            param = param if param <= abs(Data.MaxValues.quantity) else abs(Data.MaxValues.quantity)
-            return param
-
-        if param == self.threads:
-            try:
-                param = abs(int(param))
-            except ValueError:
-                param = Data.Values.threads
-            param = abs(param) if param <= abs(Data.MaxValues.threads) else abs(Data.MaxValues.threads)
-            return param
-
-        self.print(Messages.Errors.NoSuitableParameter)
-        exit()
-
 
     def get_filtered_links(self, links_massive: ResultSet = None) -> List[str]:
         if links_massive is None:
@@ -102,13 +80,11 @@ class Base(QMainWindow):
 
         page: int = 1
         found_links: list = []
-        quantity = self.limiter(self.quantity)
-        form = self.limiter(self.form)
         bitrate = "lossless" if self.lossless else "high"
-        period = f"period=last&period_last={quantity}d&" if self.period else ""
+        period = f"period=last&period_last={self.quantity}d&" if self.period else ""
 
-        while len(found_links) < quantity:
-            link = f"https://promodj.com/{form}/{self.genre}?{period}bitrate={bitrate}&page={page}"
+        while len(found_links) < self.quantity:
+            link = f"https://promodj.com/{self.form}/{self.genre}?{period}bitrate={bitrate}&page={page}"
             async with session.get(link) as response:
                 if response.status != 200: break
                 links = BeautifulSoup(await response.read(), features="html.parser").findAll("a")
@@ -116,7 +92,7 @@ class Base(QMainWindow):
                 page += 1
         tmp = {}
         for n in found_links: tmp[n] = 1
-        return list(tmp)[:quantity]
+        return list(tmp)[:self.quantity]
 
 
     def get_file_name_from_link(self, link: str = None) -> str:
@@ -172,6 +148,13 @@ class Base(QMainWindow):
             exit()
 
         filename = self.get_file_name_from_link(link)
+        ext_time = str(time()).replace(".", "")
+        ext_pos = filename.rfind(".")
+        filename = filename \
+            if path.exists(path.join(self.download_dir, filename)) and self.rewrite_files \
+               or not path.exists(path.join(self.download_dir, filename))\
+            else filename[:ext_pos] + "_" + ext_time + filename[ext_pos:]
+
         if self.download:
             async with session.get(link, timeout=None) as response:
                 if response.status != 200:
@@ -198,7 +181,7 @@ class Base(QMainWindow):
 
     async def get_files(self) -> None:
         async with aiohttp.ClientSession() as session:
-            sem = asyncio.Semaphore(self.limiter(self.threads))
+            sem = asyncio.Semaphore(self.threads)
             tasks = []
             all_links = await self.get_all_links(session)
 

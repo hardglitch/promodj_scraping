@@ -16,7 +16,6 @@ if __name__ == "__main__":
     asyncio.set_event_loop(loop)
 
     window = gui.MainWindow(loop)
-    # window.set_genres()
     window.set_settings()
     window.show()
     with loop:

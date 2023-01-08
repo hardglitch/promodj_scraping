@@ -19,6 +19,8 @@ class Data:
         threads: int = 1
         is_lossless: bool = True
         is_period: bool = False
+        is_rewrite_files: bool = True
+        is_file_history: bool = False
         is_download: bool = True   # for testing
 
     class MaxValues:
@@ -33,3 +35,5 @@ class Data:
         Period = "Period"
         Quantity = "Quantity"
         Threads = "Threads"
+        RewriteFiles = "RewriteFiles"
+        FileHistory = "FileHistory"
