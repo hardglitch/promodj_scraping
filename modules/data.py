@@ -12,7 +12,7 @@ class Data:
     PRINTING: bool = False    # for testing or console output
 
     class Values:                  # default values
-        download_dir: str = ""
+        download_dir: str = "Downloaded Music"
         genre: str = "Trance"
         form: str = "tracks"
         quantity: int = 10

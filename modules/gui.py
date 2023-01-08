@@ -1,6 +1,8 @@
 import asyncio
+import os.path
 import sys
 from os import getcwd
+from pathlib import PurePath
 
 import aiohttp
 from PyQt6 import QtCore
@@ -76,7 +78,7 @@ class MainWindow(QMainWindow):
         self.btnSaveTo.setCheckable(True)
         self.btnSaveTo.clicked.connect(self.save_to)
 
-        self.lblSaveTo = QLabel(getcwd(), self)
+        self.lblSaveTo = QLabel(os.path.join(getcwd(), Data.Values.download_dir), self)
         self.lblSaveTo.resize(435, 24)
         self.lblSaveTo.move(85, 85)
 
@@ -144,7 +146,7 @@ class MainWindow(QMainWindow):
                 Parameter(Data.Parameters.Quantity, self.cmbQuantity.currentText()),
                 Parameter(Data.Parameters.Threads, self.cmbThreads.currentText())
             ]
-            await self.settings_file.write_all(settings_list)
+            await self.settings_file.write(settings_list)
 
         except Exception as error:
             print("Error -", error)
@@ -171,7 +173,7 @@ class MainWindow(QMainWindow):
 
     def save_to(self):
         save_to_dir = QFileDialog.getExistingDirectory(self)
-        self.lblSaveTo.setText(str(save_to_dir))
+        self.lblSaveTo.setText(str(PurePath(save_to_dir)))
         self.btnSaveTo.setChecked(False)
 
     def exit(self):
@@ -198,24 +200,39 @@ class MainWindow(QMainWindow):
         await self.set_genres()
 
         try:
-            settings_list: list[Parameter] = await self.settings_file.read_all()
+            settings_list: list[Parameter] = await self.settings_file.read()
 
             if settings_list:
-                for param in settings_list:
-                    if param.name == Data.Parameters.DownloadDirectory:
-                        self.lblSaveTo.setText(param.value)
-                    elif param.name == Data.Parameters.Genre:
-                        self.cmbGenre.setCurrentText(param.value)
-                    elif param.name == Data.Parameters.Form:
-                        self.cmbForm.setCurrentText(param.value)
-                    elif param.name == Data.Parameters.Lossless:
-                        self.chbFormat.setChecked(int(param.value))
-                    elif param.name == Data.Parameters.Period:
-                        self.chbPeriod.setChecked(int(param.value))
-                    elif param.name == Data.Parameters.Quantity:
-                        self.cmbQuantity.setCurrentText(param.value)
-                    elif param.name == Data.Parameters.Threads:
-                        self.cmbThreads.setCurrentText(param.value)
+                    for param in settings_list:
+                        try:
+                            if param.name == Data.Parameters.DownloadDirectory and os.path.exists(param.value):
+                                self.lblSaveTo.setText(str(PurePath(param.value)))
+
+                            elif param.name == Data.Parameters.Genre and param.value in self.genres.keys():
+                                self.cmbGenre.setCurrentText(param.value)
+
+                            elif param.name == Data.Parameters.Form and param.value in Data.FORMS:
+                                self.cmbForm.setCurrentText(param.value)
+
+                            elif param.name == Data.Parameters.Lossless and param.value in ["0", "1"]:
+                                self.chbFormat.setChecked(int(param.value))
+
+                            elif param.name == Data.Parameters.Period and param.value in ["0", "1"]:
+                                self.chbPeriod.setChecked(int(param.value))
+
+                            elif param.name == Data.Parameters.Quantity:
+                                try:
+                                    param.value = abs(int(param.value))
+                                    param.value = param.value if param.value <= abs(Data.MaxValues.quantity) else abs(Data.MaxValues.quantity)
+                                except ValueError:
+                                    param.value = abs(Data.Values.quantity)
+                                self.cmbQuantity.setCurrentText(str(param.value))
+
+                            elif param.name == Data.Parameters.Threads:
+                                self.cmbThreads.setCurrentText(param.value)   # controlled by Qt
+
+                        except UnicodeDecodeError:
+                            pass
 
         except FileNotFoundError:
             pass

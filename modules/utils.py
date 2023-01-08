@@ -1,18 +1,24 @@
 import functools
+import re
 import time
-from typing import Callable, Any
+from pathlib import PurePath
+from typing import Any, Callable
 
 
 def async_timer():
     def wrapper(function: Callable) -> Callable:
         @functools.wraps(function)
         async def wrapped(*args, **kwargs) -> Any:
-            start = time.time()
+            start = time.perf_counter()
             try:
                 return await function(*args, **kwargs)
             finally:
-                end = time.time()
+                end = time.perf_counter()
                 delta = end - start
                 print(f"Work time - {delta}")
         return wrapped
     return wrapper
+
+
+def clean_path(path: str) -> str:
+    return str(PurePath(re.sub(r'[+\^<>:?!|%*\"$]', "", path)))

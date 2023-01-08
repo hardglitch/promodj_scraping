@@ -21,16 +21,16 @@ class Base(QMainWindow):
     total_downloaded: int = 0
 
     def __init__(self,
-                 download_dir: str = "music",
-                 genre: str = "trance",
-                 form: str = "tracks",
-                 lossless: bool = True,
-                 quantity: int = 10,
-                 period: bool = False,
-                 download: bool = True,
-                 threads: int = 4,
+                 download_dir: str = Data.Values.download_dir,
+                 genre: str = Data.Values.genre,
+                 form: str = Data.Values.form,
+                 lossless: bool = Data.Values.is_lossless,
+                 quantity: int = Data.Values.quantity,
+                 period: bool = Data.Values.is_period,
+                 download: bool = Data.Values.is_download,
+                 threads: int = Data.Values.threads,
                  loop: AbstractEventLoop = None
-        ) -> None:
+        ):
 
         super().__init__()
         self.download_dir: str = download_dir
@@ -55,15 +55,28 @@ class Base(QMainWindow):
             print(*args, **kwargs)
 
     def limiter(self, param: Any) -> Any:
-        param = param.lower() if type(param) is str else param
+        param = param.lower() if isinstance(param, str) else param
+
         if param == self.form.lower() and param in Data.FORMS:
             return param
+
         if param == self.quantity:
-            param = param if param <= abs(Data.MaxValues.quantity) else Data.MaxValues.quantity
+            try:
+                param = abs(int(param))
+            except ValueError:
+                param = Data.Values.quantity
+
+            param = param if param <= abs(Data.MaxValues.quantity) else abs(Data.MaxValues.quantity)
             return param
+
         if param == self.threads:
-            param = param if param <= abs(Data.MaxValues.threads) else Data.MaxValues.threads
+            try:
+                param = abs(int(param))
+            except ValueError:
+                param = Data.Values.threads
+            param = abs(param) if param <= abs(Data.MaxValues.threads) else abs(Data.MaxValues.threads)
             return param
+
         self.print(Messages.Errors.NoSuitableParameter)
         exit()
 
@@ -111,12 +124,12 @@ class Base(QMainWindow):
             self.print(Messages.Errors.NoLinkToExtractAName)
             return ""
 
-        decode_simbols = {"%20": " ", "%28": "(", "%29": ")", "%26": "&", "%23": "#"}
+        decode_symbols = {"%20": " ", "%28": "(", "%29": ")", "%26": "&", "%23": "#"}
 
         filename: str = link.split("/")[-1]
 
-        for i in decode_simbols:
-            filename = filename.replace(i, decode_simbols[i])
+        for i in decode_symbols:
+            filename = filename.replace(i, decode_symbols[i])
 
         index = 0
         while index != -1:

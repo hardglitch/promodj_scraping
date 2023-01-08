@@ -34,12 +34,12 @@ class Settings:
         self.name = name
 
 
-    async def write_all(self, params: List[Parameter]):
+    async def write(self, params: List[Parameter]):
         async with aiofiles.open(os.path.join(self.path, self.name), "w") as file:
             [await file.writelines(f"{param.name}={param.value}\n") for param in params]
 
 
-    async def read_all(self) -> [Parameter]:
+    async def read(self) -> List[Parameter]:
         try:
             async with aiofiles.open(os.path.join(self.path, self.name), "r") as file:
 
@@ -57,35 +57,4 @@ class Settings:
                 return settings_list
 
         except FileNotFoundError:
-            raise FileNotFoundError
-
-
-    async def get(self, param: Parameter) -> str:
-        try:
-            async with aiofiles.open(os.path.join(self.path, self.name), "r") as file:
-                while Exception != EOFError:
-                    line = await file.readline()
-                    name, value = line.split("=")
-                    if param.name == name.strip():
-                        return value.strip()
-                raise "Parameter not Found"
-
-        except FileNotFoundError:
-            raise FileNotFoundError
-
-
-    async def change(self, param: Parameter):
-        # open + find + read + write
-        pass
-
-
-    async def add(self, param: Parameter):
-        # open + write
-        async with aiofiles.open(os.path.join(self.path, self.name), "a") as file:
-            await file.writelines(f"{param.name}={param.value}")
-
-
-    async def delete(self, param: Parameter):
-        # open + find + delete
-        pass
-
+            print("Settings file not found")
