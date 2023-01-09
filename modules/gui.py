@@ -1,5 +1,5 @@
 import asyncio
-import os.path
+import os
 import sys
 from os import getcwd
 from pathlib import PurePath
@@ -48,7 +48,8 @@ class MainWindow(QMainWindow):
         self.cmbQuantity.move(300, 10)
         self.cmbQuantity.setEditable(True)
         self.cmbQuantity.setDuplicatesEnabled(False)
-        self.cmbQuantity.addItems(["1", "5", "10", "50", "100"])
+        self.cmbQuantity.addItems([str(i) for i in range(1,11)])
+        self.cmbQuantity.addItems(["20", "30", "40", "50", "100"])
         self.cmbQuantity.setCurrentText(str(Data.Values.quantity))
 
         self.lblQuantity = QLabel("files", self)
@@ -140,13 +141,13 @@ class MainWindow(QMainWindow):
             self.music = Base(download_dir=self.lblSaveTo.text(),
                          genre=self.genres[self.cmbGenre.currentText()],
                          form=self.cmbForm.currentText(),
-                         lossless=self.chbFormat.isChecked(),
+                         is_lossless=self.chbFormat.isChecked(),
                          quantity=quantity,
-                         period=self.chbPeriod.isChecked(),
-                         download=Data.Values.is_download,
+                         is_period=self.chbPeriod.isChecked(),
+                         is_download=Data.Values.is_download,
                          threads=int(self.cmbThreads.currentText()),
-                         rewrite_files=self.chbRewriteFiles.isChecked(),
-                         file_history=self.chbFileHistory.isChecked(),
+                         is_rewrite_files=self.chbRewriteFiles.isChecked(),
+                         is_file_history=self.chbFileHistory.isChecked(),
                          loop=self._loop
             )
 

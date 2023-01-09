@@ -1,35 +1,25 @@
 import os
-from typing import List
+from typing import AnyStr, List
 
 import aiofiles
 
 
 class Parameter:
 
-    def __init__(self, name: str, value: str = ""):
+    def __init__(self, name: AnyStr = "", value: AnyStr = ""):
         self.name = name if self.name_check(name) else ""
         self.value = value
 
-
     def name_check(self, name) -> bool:
-
-        charset = "abcdefghijklmnopqrstuvwxyz"  # utf-8 by default
-
-        try:
-            if name != "":
-                for char in name:
-                    if char.lower() not in charset:
-                        return False
-                return True
-            return False
-        except Exception as error:
-            raise error
+        if not name.isalpha():
+            raise "Parameter Name is incorrect"
+        return True
 
 
 class Settings:
     def __init__(self,
-                 path: str = os.getcwd(),
-                 name: str = "settings.ini"):
+                 path: AnyStr = "",
+                 name: AnyStr = "settings.ini"):
         self.path = path
         self.name = name
 

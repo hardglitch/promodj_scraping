@@ -1,7 +1,5 @@
 import functools
-import re
 import time
-from pathlib import PurePath
 from typing import Any, Callable
 
 
@@ -19,6 +17,3 @@ def async_timer():
         return wrapped
     return wrapper
 
-
-def clean_path(path: str) -> str:
-    return str(PurePath(re.sub(r'[+\^<>:?!|%*\"$]', "", path)))

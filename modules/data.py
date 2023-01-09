@@ -1,12 +1,11 @@
 from dataclasses import dataclass
 
-
 @dataclass()
 class Data:
 
-    FORMS = ["mixes", "tracks", "lives"]
+    FORMS = ("mixes", "tracks", "lives")
 
-    LOSSLESS_FORMATS = [".flac", ".wav", ".aiff"]
+    LOSSLESS_FORMATS = (".flac", ".wav", ".aiff")
     LOSSY_FORMATS = [".mp3"]
 
     PRINTING: bool = False    # for testing or console output
