@@ -60,7 +60,7 @@ class Base(QMainWindow):
         if Data.PRINTING:
             print(*args, **kwargs)
 
-    def get_filtered_links(self, links_massive: ResultSet = None) -> List[AnyStr]:
+    def get_filtered_links(self, links_massive: ResultSet = None) -> set[AnyStr]:
         if links_massive is None:
             self.print(Messages.Errors.NoLinksToFiltering)
             exit()
@@ -71,36 +71,31 @@ class Base(QMainWindow):
             for frmt in formats:
                 if link.has_attr("href") and link["href"].find(frmt) > -1 and link["href"].find("/source/") > -1:
                     filtered_links.add(link["href"])    # deduplication
-        return list(filtered_links)
+        return filtered_links
 
 
-    async def get_all_links(self, session: aiohttp.ClientSession = None) -> List[Awaitable]:
+    async def get_all_links(self, session: aiohttp.ClientSession = None) -> List[AnyStr]:
         if session is None:
             self.print(Messages.Errors.UnableToDownload)
             exit()
 
         page: int = 1
-        found_links: list = []
+        found_links = set()
         bitrate = "lossless" if self.is_lossless else "high"
         period = f"period=last&period_last={self.quantity}d&" if self.is_period else ""
-
-        found_links_on_last_page = []
         while (len(found_links) < self.quantity and not self.is_period) or self.is_period:
             link = f"https://promodj.com/{self.form}/{self.genre}?{period}bitrate={bitrate}&page={page}"
             async with session.get(link) as response:
                 if response.status != 200: break
                 text = str(await response.read())
                 links = BeautifulSoup(urllib.parse.unquote(text), features="html.parser").findAll("a")
-                found_links_on_page = self.get_filtered_links(links)
-                if found_links_on_page != found_links_on_last_page:
-                    found_links += found_links_on_page
+                found_links_on_page: set = self.get_filtered_links(links)
+                if not found_links_on_page & found_links:
+                    found_links |= found_links_on_page
                 else:
                     break
-                found_links_on_last_page = found_links_on_page
                 page += 1
-        tmp = {}
-        for n in found_links: tmp[n] = 1
-        return list(tmp)[:self.quantity] if not self.is_period else list(tmp)
+        return list(found_links)[:self.quantity] if not self.is_period else list(found_links)
 
 
     async def get_total_filesize(self, session: aiohttp.ClientSession = None, links: List[Awaitable] = None):
