@@ -1,4 +1,6 @@
 import os
+import re
+from pathlib import PurePath
 from typing import AnyStr, List
 
 import aiofiles
@@ -18,10 +20,10 @@ class Parameter:
 
 class Settings:
     def __init__(self,
-                 path: AnyStr = "",
+                 path: AnyStr = os.getcwd(),
                  name: AnyStr = "settings.ini"):
-        self.path = path
-        self.name = name
+        self.path = PurePath(path) if os.path.exists(path) else os.getcwd()
+        self.name = re.sub(r"[^a-zA-Z0-9_\-.]", "", name)
 
 
     async def write(self, params: List[Parameter]):

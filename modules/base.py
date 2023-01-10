@@ -65,13 +65,13 @@ class Base(QMainWindow):
             self.print(Messages.Errors.NoLinksToFiltering)
             exit()
 
-        filtered_links: dict = {}
+        filtered_links = set()
         formats: list = Data.LOSSLESS_FORMATS if self.is_lossless else Data.LOSSY_FORMATS
         for link in links_massive:
             for frmt in formats:
                 if link.has_attr("href") and link["href"].find(frmt) > -1 and link["href"].find("/source/") > -1:
-                    filtered_links[link["href"]] = 1  # deduplication
-        return list(filtered_links.keys())
+                    filtered_links.add(link["href"])    # deduplication
+        return list(filtered_links)
 
 
     async def get_all_links(self, session: aiohttp.ClientSession = None) -> List[Awaitable]:
