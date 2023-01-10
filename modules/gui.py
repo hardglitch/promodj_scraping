@@ -1,6 +1,7 @@
 import asyncio
 import os
 import sys
+import time
 from os import getcwd
 from pathlib import PurePath
 
@@ -26,6 +27,7 @@ class MainWindow(QMainWindow):
         self._is_downloading: bool = False
 
         self.settings_file = Settings()
+        self.last_launch = int(time.time())
 
         self.setWindowIcon(QIcon("logo.ico"))
 
@@ -156,6 +158,7 @@ class MainWindow(QMainWindow):
             self.music.start_downloading()
 
             settings_list = [
+                Parameter(Data.Parameters.LastDownload, str(self.last_launch)),
                 Parameter(Data.Parameters.DownloadDirectory, self.lblSaveTo.text()),
                 Parameter(Data.Parameters.Genre, self.cmbGenre.currentText()),
                 Parameter(Data.Parameters.Form, self.cmbForm.currentText()),
@@ -164,7 +167,7 @@ class MainWindow(QMainWindow):
                 Parameter(Data.Parameters.RewriteFiles, str(int(self.chbRewriteFiles.isChecked()))),
                 Parameter(Data.Parameters.FileHistory, str(int(self.chbFileHistory.isChecked()))),
                 Parameter(Data.Parameters.Quantity, self.cmbQuantity.currentText()),
-                Parameter(Data.Parameters.Threads, self.cmbThreads.currentText())
+                Parameter(Data.Parameters.Threads, self.cmbThreads.currentText()),
             ]
             await self.settings_file.write(settings_list)
 
@@ -224,7 +227,15 @@ class MainWindow(QMainWindow):
 
             if settings_list:
                 for param in settings_list:
-                    if param.name == Data.Parameters.DownloadDirectory and os.path.exists(param.value):
+
+                    if param.name == Data.Parameters.LastDownload and param.value.isnumeric():
+                        self.last_launch = int(param.value)
+                        self.setWindowTitle(
+                            f"PromoDJ Music Downloader --- Last download was"
+                            f" {int(abs((self.last_launch - int(time.time())) / (3600 * 24)))} days ago")
+
+
+                    elif param.name == Data.Parameters.DownloadDirectory and os.path.exists(param.value):
                         self.lblSaveTo.setText(str(PurePath(param.value)))
 
                     elif param.name == Data.Parameters.Genre and param.value in self.genres.keys():

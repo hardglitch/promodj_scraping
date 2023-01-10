@@ -36,3 +36,4 @@ class Data:
         Threads = "Threads"
         RewriteFiles = "RewriteFiles"
         FileHistory = "FileHistory"
+        LastDownload = "LastDownload"
