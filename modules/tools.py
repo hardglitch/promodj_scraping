@@ -15,3 +15,7 @@ def performance_counter():
                 print(f"Work time - {end-start}")
         return wrapped
     return wrapper
+
+
+def dict_value_sort(dictionary: dict, asc: bool = True) -> dict:
+    return {k: v for k, v in sorted(dictionary.items(), key=lambda item: item[1], reverse=not asc)}

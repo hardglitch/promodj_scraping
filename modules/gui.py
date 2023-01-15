@@ -158,7 +158,7 @@ class MainWindow(QMainWindow):
             self.music.start_downloading()
 
             settings_list = [
-                Parameter(Data.Parameters.LastDownload, str(self.last_launch)),
+                Parameter(Data.Parameters.LastDownload, str(int(time.time()))),
                 Parameter(Data.Parameters.DownloadDirectory, self.lblSaveTo.text()),
                 Parameter(Data.Parameters.Genre, self.cmbGenre.currentText()),
                 Parameter(Data.Parameters.Form, self.cmbForm.currentText()),

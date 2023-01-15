@@ -27,13 +27,16 @@ class Settings:
 
 
     async def write(self, params: List[Parameter]):
-        async with aiofiles.open(os.path.join(self.path, self.name), "w") as file:
-            [await file.writelines(f"{param.name}={param.value}\n") for param in params]
+        try:
+            async with aiofiles.open(os.path.join(self.path, self.name), "w", encoding="utf-8") as file:
+                [await file.writelines(f"{param.name}={param.value}\n") for param in params]
+        except IOError:
+            pass
 
 
     async def read(self) -> List[Parameter]:
         try:
-            async with aiofiles.open(os.path.join(self.path, self.name), "r") as file:
+            async with aiofiles.open(os.path.join(self.path, self.name), "r", encoding="utf-8") as file:
 
                 settings_list = []
                 while True:

@@ -148,7 +148,8 @@ class Base(QMainWindow):
                     async for chunk in response.content.iter_chunked(chunk_size):
                         if not chunk: break
                         self.total_downloaded += chunk_size
-                        self.progress.emit(int(100 * self.total_downloaded / (self.total_size * 1.21)))
+                        if self.total_size > 0:
+                            self.progress.emit(int(100 * self.total_downloaded / (self.total_size * 1.21)))
                         await file.write(chunk)
         self.print(f"File save as {self.download_dir + filename}")
         # if self.file_history:
@@ -179,7 +180,8 @@ class Base(QMainWindow):
                 tasks.append(asyncio.ensure_future(self.threads_limiter(sem=sem, session=session, link=link)))
 
             self._all_files = len(tasks)
-            self._grade = 100 // self._all_files
+            if self._all_files > 0:
+                self._grade = 100 // self._all_files
 
             await asyncio.gather(*tasks)
 
