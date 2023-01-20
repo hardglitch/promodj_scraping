@@ -21,7 +21,7 @@ class Settings:
     def __init__(self,
                  path: AnyStr = Path.cwd(),
                  name: AnyStr = "settings.ini"):
-        self.path = path if Path.exists(path) else Path.cwd()
+        self.path = path if Path(path).exists() else Path.cwd()
         self.name = re.sub(r"[^a-zA-Z0-9_\-.]", "", name)
 
 

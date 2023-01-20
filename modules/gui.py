@@ -1,9 +1,7 @@
 import asyncio
-import os
 import sys
 import time
-from os import getcwd
-from pathlib import PurePath
+from pathlib import Path
 
 import aiohttp
 from PyQt6 import QtCore
@@ -92,7 +90,7 @@ class MainWindow(QMainWindow):
         self.btnSaveTo.setCheckable(True)
         self.btnSaveTo.clicked.connect(self.save_to)
 
-        self.lblSaveTo = QLabel(os.path.join(getcwd(), Data.Values.download_dir), self)
+        self.lblSaveTo = QLabel(str(Path.joinpath(Path.cwd(), Data.Values.download_dir)), self)
         self.lblSaveTo.resize(435, 24)
         self.lblSaveTo.move(85, 85)
 
@@ -195,7 +193,7 @@ class MainWindow(QMainWindow):
 
     def save_to(self):
         save_to_dir = QFileDialog.getExistingDirectory(self)
-        self.lblSaveTo.setText(str(PurePath(save_to_dir)))
+        self.lblSaveTo.setText(str(Path(save_to_dir)))
         self.btnSaveTo.setChecked(False)
 
     def exit(self):
@@ -234,8 +232,8 @@ class MainWindow(QMainWindow):
                             f" {int(abs((self.last_launch - int(time.time())) / (3600 * 24)))} days ago")
 
 
-                    elif param.name == Data.Parameters.DownloadDirectory and os.path.exists(param.value):
-                        self.lblSaveTo.setText(str(PurePath(param.value)))
+                    elif param.name == Data.Parameters.DownloadDirectory and Path(param.value).exists():
+                        self.lblSaveTo.setText(str(Path(param.value)))
 
                     elif param.name == Data.Parameters.Genre and param.value in self.genres.keys():
                         self.cmbGenre.setCurrentText(param.value)

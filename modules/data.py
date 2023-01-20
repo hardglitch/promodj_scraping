@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import AnyStr
 
 @dataclass()
 class Data:
@@ -11,9 +12,9 @@ class Data:
     PRINTING: bool = False    # for testing or console output
 
     class Values:                  # default values
-        download_dir: str = "Downloaded Music"
-        genre: str = "Trance"
-        form: str = "tracks"
+        download_dir: AnyStr = "Downloaded Music"
+        genre: AnyStr = "Trance"
+        form: AnyStr = "tracks"
         quantity: int = 10
         threads: int = 1
         is_lossless: bool = True
@@ -27,13 +28,13 @@ class Data:
         threads: int = 4
 
     class Parameters:
-        DownloadDirectory = "DownloadDirectory"
-        Genre = "Genre"
-        Form = "Form"
-        Lossless = "Lossless"
-        Period = "Period"
-        Quantity = "Quantity"
-        Threads = "Threads"
-        RewriteFiles = "RewriteFiles"
-        FileHistory = "FileHistory"
-        LastDownload = "LastDownload"
+        DownloadDirectory: AnyStr = "DownloadDirectory"
+        Genre: AnyStr = "Genre"
+        Form: AnyStr = "Form"
+        Lossless: AnyStr = "Lossless"
+        Period: AnyStr = "Period"
+        Quantity: AnyStr = "Quantity"
+        Threads: AnyStr = "Threads"
+        RewriteFiles: AnyStr = "RewriteFiles"
+        FileHistory: AnyStr = "FileHistory"
+        LastDownload: AnyStr = "LastDownload"

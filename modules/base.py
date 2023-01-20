@@ -23,9 +23,9 @@ class Base(QMainWindow):
     total_downloaded: int = 0
 
     def __init__(self,
-                 download_dir: str = Data.Values.download_dir,
-                 genre: str = Data.Values.genre,
-                 form: str = Data.Values.form,
+                 download_dir: AnyStr = Data.Values.download_dir,
+                 genre: AnyStr = Data.Values.genre,
+                 form: AnyStr = Data.Values.form,
                  is_lossless: bool = Data.Values.is_lossless,
                  quantity: int = Data.Values.quantity,
                  is_period: bool = Data.Values.is_period,
@@ -38,8 +38,8 @@ class Base(QMainWindow):
 
         super().__init__()
         self.download_dir: Path = Path(download_dir)
-        self.genre: str = genre
-        self.form: str = form
+        self.genre: AnyStr = genre
+        self.form: AnyStr = form
         self.is_lossless: bool = is_lossless
         self.quantity: int = quantity if quantity < abs(Data.MaxValues.quantity) else abs(Data.MaxValues.quantity)
         self.is_period: bool = is_period
@@ -48,9 +48,6 @@ class Base(QMainWindow):
         self.is_rewrite_files: bool = is_rewrite_files
         self.is_file_history: bool = is_file_history
 
-        self._file_counter: int = 0
-        self._all_files: int = 0
-        self._grade: int = 0
         self._download_future = None
         self._loop: AbstractEventLoop = loop
 
@@ -132,8 +129,8 @@ class Base(QMainWindow):
         ext_time = str(time()).replace(".", "")
         ext_pos = filename.rfind(".")
         filename = filename \
-            if Path.exists(Path.joinpath(self.download_dir, filename)) and self.is_rewrite_files \
-               or not Path.exists(Path.joinpath(self.download_dir, filename))\
+            if Path(Path.joinpath(self.download_dir, filename)).exists() and self.is_rewrite_files \
+               or not Path(Path.joinpath(self.download_dir, filename)).exists()\
             else filename[:ext_pos] + "_" + ext_time + filename[ext_pos:]
 
         if self.is_download:
@@ -157,7 +154,7 @@ class Base(QMainWindow):
 
     # async def open_db(self):
     #     async with aiosqlite.connect("history.db") as db:
-    #         if not path.exists("history.db"):
+    #         if not Path("history.db").exists():
     #             print("1")
     #         else:
     #             print("2")
@@ -178,10 +175,6 @@ class Base(QMainWindow):
 
             for link in all_links:
                 tasks.append(asyncio.ensure_future(self.threads_limiter(sem=sem, session=session, link=link)))
-
-            self._all_files = len(tasks)
-            if self._all_files > 0:
-                self._grade = 100 // self._all_files
 
             await asyncio.gather(*tasks)
 
