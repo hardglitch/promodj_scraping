@@ -151,6 +151,8 @@ class MainWindow(QMainWindow):
                          is_file_history=self.chbFileHistory.isChecked(),
                          loop=self._loop
             )
+            if not Path(self.lblSaveTo.text()).exists():
+                Path(Data.Values.download_dir).mkdir()
 
             self.music.progress.connect(self.progBar.setValue)
             self.music.succeeded.connect(self.download_successed)

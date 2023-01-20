@@ -29,8 +29,8 @@ class Settings:
         try:
             async with aiofiles.open(Path.joinpath(self.path, self.name), "w", encoding="utf-8") as file:
                 [await file.writelines(f"{param.name}={param.value}\n") for param in params]
-        except IOError:
-            pass
+        except IOError as error:
+            assert error
 
 
     async def read(self) -> List[Parameter]:
@@ -49,4 +49,4 @@ class Settings:
                 return settings_list
 
         except FileNotFoundError:
-            print("Settings file not found")
+            assert "Settings file not found"
