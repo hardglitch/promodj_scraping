@@ -1,7 +1,7 @@
 import asyncio
 import urllib.parse
 from asyncio import AbstractEventLoop
-from os import path
+from pathlib import Path
 from time import time
 from typing import AnyStr, Awaitable, List
 
@@ -11,8 +11,8 @@ from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QMainWindow
 from bs4 import BeautifulSoup, ResultSet
 
-from .data import Data
-from .messages import Messages
+from modules.data import Data
+from modules.messages import Messages
 
 
 class Base(QMainWindow):
@@ -37,7 +37,7 @@ class Base(QMainWindow):
         ):
 
         super().__init__()
-        self.download_dir: str = download_dir
+        self.download_dir: Path = Path(download_dir)
         self.genre: str = genre
         self.form: str = form
         self.is_lossless: bool = is_lossless
@@ -132,8 +132,8 @@ class Base(QMainWindow):
         ext_time = str(time()).replace(".", "")
         ext_pos = filename.rfind(".")
         filename = filename \
-            if path.exists(path.join(self.download_dir, filename)) and self.is_rewrite_files \
-               or not path.exists(path.join(self.download_dir, filename))\
+            if Path.exists(Path.joinpath(self.download_dir, filename)) and self.is_rewrite_files \
+               or not Path.exists(Path.joinpath(self.download_dir, filename))\
             else filename[:ext_pos] + "_" + ext_time + filename[ext_pos:]
 
         if self.is_download:
@@ -141,7 +141,7 @@ class Base(QMainWindow):
                 if response.status != 200:
                     return self.print(Messages.Errors.SomethingWentWrong)
 
-                async with aiofiles.open(path.join(self.download_dir, filename), "wb") as file:
+                async with aiofiles.open(Path.joinpath(self.download_dir, filename), "wb") as file:
                     self.print(f"Downloading {filename}...\nLink - {link}")
 
                     chunk_size = 16144

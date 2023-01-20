@@ -1,6 +1,5 @@
-import os
 import re
-from pathlib import PurePath
+from pathlib import Path
 from typing import AnyStr, List
 
 import aiofiles
@@ -20,15 +19,15 @@ class Parameter:
 
 class Settings:
     def __init__(self,
-                 path: AnyStr = os.getcwd(),
+                 path: AnyStr = Path.cwd(),
                  name: AnyStr = "settings.ini"):
-        self.path = PurePath(path) if os.path.exists(path) else os.getcwd()
+        self.path = path if Path.exists(path) else Path.cwd()
         self.name = re.sub(r"[^a-zA-Z0-9_\-.]", "", name)
 
 
-    async def write(self, params: List[Parameter]):
+    async def write(self, *params: Parameter):
         try:
-            async with aiofiles.open(os.path.join(self.path, self.name), "w", encoding="utf-8") as file:
+            async with aiofiles.open(Path.joinpath(self.path, self.name), "w", encoding="utf-8") as file:
                 [await file.writelines(f"{param.name}={param.value}\n") for param in params]
         except IOError:
             pass
@@ -36,7 +35,7 @@ class Settings:
 
     async def read(self) -> List[Parameter]:
         try:
-            async with aiofiles.open(os.path.join(self.path, self.name), "r", encoding="utf-8") as file:
+            async with aiofiles.open(Path.joinpath(self.path, self.name), "r", encoding="utf-8") as file:
 
                 settings_list = []
                 while True:

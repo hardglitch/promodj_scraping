@@ -13,10 +13,10 @@ from PyQt6.QtWidgets import QApplication, QCheckBox, QComboBox, QFileDialog, QLa
 from bs4 import BeautifulSoup
 from qasync import asyncSlot
 
-from .base import Base
-from .data import Data
-from .messages import Messages
-from .settings import Parameter, Settings
+from modules.base import Base
+from modules.data import Data
+from modules.messages import Messages
+from modules.settings import Parameter, Settings
 
 
 class MainWindow(QMainWindow):
@@ -157,7 +157,7 @@ class MainWindow(QMainWindow):
             self.music.succeeded.connect(self.download_successed)
             self.music.start_downloading()
 
-            settings_list = [
+            await self.settings_file.write(
                 Parameter(Data.Parameters.LastDownload, str(int(time.time()))),
                 Parameter(Data.Parameters.DownloadDirectory, self.lblSaveTo.text()),
                 Parameter(Data.Parameters.Genre, self.cmbGenre.currentText()),
@@ -167,9 +167,8 @@ class MainWindow(QMainWindow):
                 Parameter(Data.Parameters.RewriteFiles, str(int(self.chbRewriteFiles.isChecked()))),
                 Parameter(Data.Parameters.FileHistory, str(int(self.chbFileHistory.isChecked()))),
                 Parameter(Data.Parameters.Quantity, self.cmbQuantity.currentText()),
-                Parameter(Data.Parameters.Threads, self.cmbThreads.currentText()),
-            ]
-            await self.settings_file.write(settings_list)
+                Parameter(Data.Parameters.Threads, self.cmbThreads.currentText())
+            )
 
         except Exception as error:
             print("Error -", error)
