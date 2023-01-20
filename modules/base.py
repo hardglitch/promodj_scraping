@@ -3,7 +3,7 @@ import urllib.parse
 from asyncio import AbstractEventLoop
 from pathlib import Path
 from time import time
-from typing import AnyStr, Awaitable, List
+from typing import AnyStr, Awaitable, List, Set
 
 import aiofiles
 import aiohttp
@@ -57,7 +57,7 @@ class Base(QMainWindow):
         if Data.PRINTING:
             print(*args, **kwargs)
 
-    def get_filtered_links(self, links_massive: ResultSet = None) -> set[AnyStr]:
+    def get_filtered_links(self, links_massive: ResultSet = None) -> Set[AnyStr]:
         if links_massive is None:
             self.print(Messages.Errors.NoLinksToFiltering)
             exit()
@@ -148,7 +148,7 @@ class Base(QMainWindow):
                         if self.total_size > 0:
                             self.progress.emit(int(100 * self.total_downloaded / (self.total_size * 1.21)))
                         await file.write(chunk)
-        self.print(f"File save as {self.download_dir + filename}")
+        self.print(f"File save as {Path.joinpath(self.download_dir, filename)}")
         # if self.file_history:
         #     await self.open_db()
 

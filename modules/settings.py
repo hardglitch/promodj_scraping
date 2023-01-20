@@ -8,8 +8,8 @@ import aiofiles
 class Parameter:
 
     def __init__(self, name: AnyStr = "", value: AnyStr = ""):
-        self.name = name if self.name_check(name) else ""
-        self.value = value
+        self.name: AnyStr = name if self.name_check(name) else ""
+        self.value: AnyStr = value
 
     def name_check(self, name) -> bool:
         if not name.isalpha():
@@ -21,7 +21,7 @@ class Settings:
     def __init__(self,
                  path: AnyStr = Path.cwd(),
                  name: AnyStr = "settings.ini"):
-        self.path = path if Path(path).exists() else Path.cwd()
+        self.path = path if Path(path).exists() and Path(path).is_file() else Path.cwd()
         self.name = re.sub(r"[^a-zA-Z0-9_\-.]", "", name)
 
 
@@ -38,14 +38,12 @@ class Settings:
             async with aiofiles.open(Path.joinpath(self.path, self.name), "r", encoding="utf-8") as file:
 
                 settings_list = []
-                while True:
-                    line = await file.readline()
-                    if not line: break
-                    if line.strip() != "":
+                while line := await file.readline():
+                    if line.strip():
                         name, value = line.split("=")
                         name = name.strip()
                         value = value.strip()
-                        if name != "" and value != "":
+                        if name and value:
                             settings_list.append(Parameter(name, value))
 
                 return settings_list

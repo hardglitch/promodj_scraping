@@ -2,6 +2,7 @@ import asyncio
 import sys
 import time
 from pathlib import Path
+from typing import AnyStr, Dict, List
 
 import aiohttp
 from PyQt6 import QtCore
@@ -24,7 +25,7 @@ class MainWindow(QMainWindow):
         self._loop = loop or asyncio.get_event_loop()
         self._is_downloading: bool = False
 
-        self.settings_file = Settings()
+        self.settings_file: Settings = Settings()
         self.last_launch = int(time.time())
 
         self.setWindowIcon(QIcon("logo.ico"))
@@ -114,8 +115,8 @@ class MainWindow(QMainWindow):
         self.lblMessage.setVisible(False)
         self.lblMessage.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
-        self.music = None
-        self.genres = {}
+        self.music: Base = Base()
+        self.genres: Dict[AnyStr, AnyStr] = {}
 
     @asyncSlot()
     async def download_files(self):
@@ -134,7 +135,7 @@ class MainWindow(QMainWindow):
             self.progBar.setVisible(True)
             self.progBar.setValue(0)
 
-            quantity = int(self.cmbQuantity.currentText()) \
+            quantity: int = int(self.cmbQuantity.currentText()) \
                 if self.cmbQuantity.currentText().isnumeric() and int(self.cmbQuantity.currentText()) <= abs(Data.MaxValues.quantity) \
                 else abs(Data.Values.quantity)
 
@@ -172,7 +173,7 @@ class MainWindow(QMainWindow):
             print("Error -", error)
 
 
-    def download_successed(self, value):
+    def download_successed(self, value: int):
         if value == 1:
             self.progBar.setValue(self.progBar.maximum())
         else:
@@ -220,7 +221,7 @@ class MainWindow(QMainWindow):
         await self.set_genres()
 
         try:
-            settings_list: list[Parameter] = await self.settings_file.read()
+            settings_list: List[Parameter] = await self.settings_file.read()
 
             if settings_list:
                 for param in settings_list:
