@@ -11,7 +11,7 @@ class Data:
 
     PRINTING: bool = False    # for testing or console output
 
-    class Values:                  # default values
+    class DefaultValues:
         download_dir: AnyStr = "Downloaded Music"
         genre: AnyStr = "Trance"
         form: AnyStr = "tracks"

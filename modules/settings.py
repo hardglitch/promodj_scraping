@@ -49,4 +49,4 @@ class Settings:
                 return settings_list
 
         except FileNotFoundError:
-            assert "Settings file not found"
+            print("Settings file not found")

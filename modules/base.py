@@ -23,16 +23,16 @@ class Base(QMainWindow):
     total_downloaded: int = 0
 
     def __init__(self,
-                 download_dir: AnyStr = Data.Values.download_dir,
-                 genre: AnyStr = Data.Values.genre,
-                 form: AnyStr = Data.Values.form,
-                 is_lossless: bool = Data.Values.is_lossless,
-                 quantity: int = Data.Values.quantity,
-                 is_period: bool = Data.Values.is_period,
-                 is_download: bool = Data.Values.is_download,
-                 threads: int = Data.Values.threads,
-                 is_rewrite_files: bool = Data.Values.is_rewrite_files,
-                 is_file_history: bool = Data.Values.is_file_history,
+                 download_dir: AnyStr = Data.DefaultValues.download_dir,
+                 genre: AnyStr = Data.DefaultValues.genre,
+                 form: AnyStr = Data.DefaultValues.form,
+                 is_lossless: bool = Data.DefaultValues.is_lossless,
+                 quantity: int = Data.DefaultValues.quantity,
+                 is_period: bool = Data.DefaultValues.is_period,
+                 is_download: bool = Data.DefaultValues.is_download,
+                 threads: int = Data.DefaultValues.threads,
+                 is_rewrite_files: bool = Data.DefaultValues.is_rewrite_files,
+                 is_file_history: bool = Data.DefaultValues.is_file_history,
                  loop: AbstractEventLoop = None
         ):
 

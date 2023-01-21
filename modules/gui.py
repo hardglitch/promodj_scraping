@@ -51,13 +51,13 @@ class MainWindow(QMainWindow):
         self.cmbQuantity.setDuplicatesEnabled(False)
         self.cmbQuantity.addItems([str(i) for i in range(1,11)])
         self.cmbQuantity.addItems(["20", "30", "40", "50", "100"])
-        self.cmbQuantity.setCurrentText(str(Data.Values.quantity))
+        self.cmbQuantity.setCurrentText(str(Data.DefaultValues.quantity))
 
         self.lblQuantity = QLabel("files", self)
         self.lblQuantity.move(365, 8)
 
         self.chbPeriod = QCheckBox("Period", self)
-        self.chbPeriod.setChecked(Data.Values.is_period)
+        self.chbPeriod.setChecked(Data.DefaultValues.is_period)
         self.chbPeriod.move(300, 40)
         self.chbPeriod.toggled.connect(self.event_chb_period)
 
@@ -81,7 +81,7 @@ class MainWindow(QMainWindow):
         self.cmbThreads.move(433, 10)
         for i in range(1, Data.MaxValues.threads + 1):
             self.cmbThreads.addItem(str(i), i)
-        self.cmbThreads.setCurrentText(str(Data.Values.threads))
+        self.cmbThreads.setCurrentText(str(Data.DefaultValues.threads))
 
         self.lblThreads = QLabel("threads", self)
         self.lblThreads.move(470, 8)
@@ -91,7 +91,7 @@ class MainWindow(QMainWindow):
         self.btnSaveTo.setCheckable(True)
         self.btnSaveTo.clicked.connect(self.save_to)
 
-        self.lblSaveTo = QLabel(str(Path.joinpath(Path.cwd(), Data.Values.download_dir)), self)
+        self.lblSaveTo = QLabel(str(Path.joinpath(Path.cwd(), Data.DefaultValues.download_dir)), self)
         self.lblSaveTo.resize(435, 24)
         self.lblSaveTo.move(85, 85)
 
@@ -137,7 +137,7 @@ class MainWindow(QMainWindow):
 
             quantity: int = int(self.cmbQuantity.currentText()) \
                 if self.cmbQuantity.currentText().isnumeric() and int(self.cmbQuantity.currentText()) <= abs(Data.MaxValues.quantity) \
-                else abs(Data.Values.quantity)
+                else abs(Data.DefaultValues.quantity)
 
             self.music = Base(download_dir=self.lblSaveTo.text(),
                          genre=self.genres[self.cmbGenre.currentText()],
@@ -145,14 +145,14 @@ class MainWindow(QMainWindow):
                          is_lossless=self.chbFormat.isChecked(),
                          quantity=quantity,
                          is_period=self.chbPeriod.isChecked(),
-                         is_download=Data.Values.is_download,
+                         is_download=Data.DefaultValues.is_download,
                          threads=int(self.cmbThreads.currentText()),
                          is_rewrite_files=self.chbRewriteFiles.isChecked(),
                          is_file_history=self.chbFileHistory.isChecked(),
                          loop=self._loop
             )
             if not Path(self.lblSaveTo.text()).exists():
-                Path(Data.Values.download_dir).mkdir()
+                Path(Data.DefaultValues.download_dir).mkdir()
 
             self.music.progress.connect(self.progBar.setValue)
             self.music.succeeded.connect(self.download_successed)
@@ -215,7 +215,7 @@ class MainWindow(QMainWindow):
                     if link.has_attr("href") and link["href"].find("/music/") > -1:
                         self.genres.update({link.text: link["href"].replace("/music/", "")})
                 self.cmbGenre.addItems(self.genres.keys())
-                self.cmbGenre.setCurrentText(Data.Values.genre)
+                self.cmbGenre.setCurrentText(Data.DefaultValues.genre)
 
 
     @asyncSlot()
@@ -259,7 +259,7 @@ class MainWindow(QMainWindow):
                     elif param.name == Data.Parameters.Quantity:
                         param.value = param.value \
                             if param.value.isnumeric() and int(param.value) <= abs(Data.MaxValues.quantity) \
-                            else abs(Data.Values.quantity)
+                            else abs(Data.DefaultValues.quantity)
                         self.cmbQuantity.setCurrentText(str(param.value))
 
                     elif param.name == Data.Parameters.Threads:
