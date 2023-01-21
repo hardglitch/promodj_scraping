@@ -229,10 +229,10 @@ class MainWindow(QMainWindow):
                 for param in settings_list:
 
                     if param.name == Data.Parameters.LastDownload and param.value.isnumeric():
-                        self.last_launch = int(param.value)
+                        self.last_launch = abs(int(param.value))
                         self.setWindowTitle(
                             f"PromoDJ Music Downloader --- Last download was"
-                            f" {int(abs((self.last_launch - int(time.time())) / (3600 * 24)))} days ago")
+                            f" {int(abs((int(time.time()) - self.last_launch) / (3600 * 24)))} days ago")
 
 
                     elif param.name == Data.Parameters.DownloadDirectory and Path(param.value).exists():
