@@ -170,14 +170,13 @@ class Base(QMainWindow):
 
 
     async def create_history_db(self):
-        async with aiosqlite.connect(database=Data.DB_NAME, loop=self._loop) as db_connection:
+        async with aiosqlite.connect(database=Data.DB_NAME) as db_connection:
             sql_request = """CREATE TABLE IF NOT EXISTS file_history(
             link TEXT NOT NULL,
             date INTEGER NOT NULL
             );"""
             try:
                 await db_connection.execute(sql_request)
-                await db_connection.commit()
             except aiosqlite.DatabaseError as error:
                 self.print("DB Error -", error)
 
@@ -198,6 +197,9 @@ class Base(QMainWindow):
 
     async def get_files(self):
         async with aiohttp.ClientSession() as session:
+            if self.is_file_history:
+                await self.create_history_db()
+
             sem = asyncio.Semaphore(self.threads)
             tasks = []
             all_links = await self.get_all_links(session)
@@ -205,8 +207,6 @@ class Base(QMainWindow):
                 return self.succeeded.emit(0)
 
             await self.get_total_filesize(session, all_links)
-            if self.is_file_history:
-                await self.create_history_db()
 
             for link in all_links:
                 tasks.append(asyncio.ensure_future(self.threads_limiter(sem=sem, session=session, link=link)))
