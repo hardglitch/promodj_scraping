@@ -10,7 +10,7 @@ class Data:
     LOSSY_FORMATS = [".mp3"]
     DB_NAME = "history.db"
 
-    PRINTING: bool = True    # for testing or console output
+    PRINTING: bool = False    # for testing or console output
 
     class DefaultValues:
         download_dir: AnyStr = "Downloaded Music"
