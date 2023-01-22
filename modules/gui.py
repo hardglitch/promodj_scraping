@@ -65,15 +65,16 @@ class MainWindow(QMainWindow):
         self.chbFormat.setChecked(True)
         self.chbFormat.move(30, 40)
 
-        self.chbRewriteFiles = QCheckBox("Rewrite Files", self)
-        self.chbRewriteFiles.setChecked(True)
-        self.chbRewriteFiles.move(130, 40)
-        self.chbRewriteFiles.resize(120, 30)
-
         self.chbFileHistory = QCheckBox("File History", self)
         self.chbFileHistory.setChecked(Data.DefaultValues.is_file_history)
         self.chbFileHistory.move(390, 40)
         self.chbFileHistory.resize(100, 30)
+
+        self.chbRewriteFiles = QCheckBox("Rewrite Files", self)
+        self.chbRewriteFiles.setChecked(Data.DefaultValues.is_rewrite_files)
+        self.chbRewriteFiles.move(130, 40)
+        self.chbRewriteFiles.resize(120, 30)
+        self.chbRewriteFiles.setEnabled(not self.chbFileHistory)
 
         self.cmbThreads = QComboBox(self)
         self.cmbThreads.resize(34, 24)
