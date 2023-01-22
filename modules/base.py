@@ -7,6 +7,7 @@ from typing import AnyStr, Awaitable, List, Set
 
 import aiofiles
 import aiohttp
+import aiosqlite
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QMainWindow
 from bs4 import BeautifulSoup, ResultSet
@@ -92,7 +93,20 @@ class Base(QMainWindow):
                 else:
                     break
                 page += 1
+
+        found_links: Set = await self.filter_by_history(found_links) if self.is_file_history else found_links
         return list(found_links)[:self.quantity] if not self.is_period else list(found_links)
+
+
+    async def filter_by_history(self, found_links: Set) -> Set:
+        async with aiosqlite.connect(Data.DB_NAME) as db_connection:
+            sql_request = """SELECT link FROM file_history LIMIT 100000"""
+            try:
+                sql_cursor: aiosqlite.Cursor = await db_connection.execute(sql_request)
+                records: Set = set(record[0] for record in await sql_cursor.fetchall())
+                return found_links - records
+            except aiosqlite.DatabaseError as error:
+                self.print("DB Error -", error)
 
 
     async def get_total_filesize(self, session: aiohttp.ClientSession = None, links: List[Awaitable] = None):
@@ -113,7 +127,7 @@ class Base(QMainWindow):
 
         await asyncio.gather(*micro_tasks)
 
-        if len(micro_tasks) == 0:
+        if not micro_tasks:
             self.succeeded.emit(0)
 
 
@@ -126,11 +140,12 @@ class Base(QMainWindow):
             exit()
 
         filename: str = link.split("/")[-1]
-        ext_time = str(time()).replace(".", "")
-        ext_pos = filename.rfind(".")
-        filename = filename \
-            if Path(Path.joinpath(self.download_dir, filename)).exists() and self.is_rewrite_files \
-               or not Path(Path.joinpath(self.download_dir, filename)).exists()\
+        ext_time: str = str(time()).replace(".", "")
+        ext_pos: int = filename.rfind(".")
+        filepath: Path = Path.joinpath(self.download_dir, filename)
+        filename: str = filename \
+            if Path(filepath).exists() and self.is_rewrite_files \
+               or not Path(filepath).exists()\
             else filename[:ext_pos] + "_" + ext_time + filename[ext_pos:]
 
         if self.is_download:
@@ -138,7 +153,7 @@ class Base(QMainWindow):
                 if response.status != 200:
                     return self.print(Messages.Errors.SomethingWentWrong)
 
-                async with aiofiles.open(Path.joinpath(self.download_dir, filename), "wb") as file:
+                async with aiofiles.open(filepath, "wb") as file:
                     self.print(f"Downloading {filename}...\nLink - {link}")
 
                     chunk_size = 16144
@@ -148,16 +163,32 @@ class Base(QMainWindow):
                         if self.total_size > 0:
                             self.progress.emit(int(100 * self.total_downloaded / (self.total_size * 1.21)))
                         await file.write(chunk)
-        self.print(f"File save as {Path.joinpath(self.download_dir, filename)}")
-        # if self.file_history:
-        #     await self.open_db()
+        self.print(f"File save as {filepath}")
 
-    # async def open_db(self):
-    #     async with aiosqlite.connect("history.db") as db:
-    #         if not Path("history.db").exists():
-    #             print("1")
-    #         else:
-    #             print("2")
+        if self.is_file_history:
+            await self.write_file_history(link=link, date=int(time()))
+
+
+    async def create_history_db(self):
+        async with aiosqlite.connect(database=Data.DB_NAME, loop=self._loop) as db_connection:
+            sql_request = """CREATE TABLE IF NOT EXISTS file_history(
+            link TEXT NOT NULL,
+            date INTEGER NOT NULL
+            );"""
+            try:
+                await db_connection.execute(sql_request)
+                await db_connection.commit()
+            except aiosqlite.DatabaseError as error:
+                self.print("DB Error -", error)
+
+    async def write_file_history(self, link: AnyStr, date: int):
+        async with aiosqlite.connect(database=Data.DB_NAME, loop=self._loop) as db_connection:
+            sql_request = """INSERT INTO file_history VALUES(?, ?)"""
+            try:
+                await db_connection.execute(sql_request, (link, date))
+                await db_connection.commit()
+            except aiosqlite.DatabaseError as error:
+                self.print("DB Error -", error)
 
     async def threads_limiter(self, sem: asyncio.Semaphore = None,
                               session: aiohttp.ClientSession = None, link: Awaitable = None) -> None:
@@ -170,18 +201,20 @@ class Base(QMainWindow):
             sem = asyncio.Semaphore(self.threads)
             tasks = []
             all_links = await self.get_all_links(session)
+            if not all_links:
+                return self.succeeded.emit(0)
 
             await self.get_total_filesize(session, all_links)
+            if self.is_file_history:
+                await self.create_history_db()
 
             for link in all_links:
                 tasks.append(asyncio.ensure_future(self.threads_limiter(sem=sem, session=session, link=link)))
 
             await asyncio.gather(*tasks)
 
-            if len(tasks) > 0:
-                self.succeeded.emit(1)
-            else:
-                self.succeeded.emit(0)
+            if tasks: self.succeeded.emit(1)
+            else: self.succeeded.emit(0)
 
 
     def start_downloading(self):

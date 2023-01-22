@@ -71,10 +71,9 @@ class MainWindow(QMainWindow):
         self.chbRewriteFiles.resize(120, 30)
 
         self.chbFileHistory = QCheckBox("File History", self)
-        self.chbFileHistory.setChecked(False)
+        self.chbFileHistory.setChecked(Data.DefaultValues.is_file_history)
         self.chbFileHistory.move(390, 40)
         self.chbFileHistory.resize(100, 30)
-        self.chbFileHistory.setEnabled(False)
 
         self.cmbThreads = QComboBox(self)
         self.cmbThreads.resize(34, 24)
