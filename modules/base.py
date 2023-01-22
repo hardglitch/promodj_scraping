@@ -78,7 +78,7 @@ class Base(QMainWindow):
             exit()
 
         page: int = 1
-        found_links = set()
+        found_links: Set[AnyStr] = set()
         bitrate = "lossless" if self.is_lossless else "high"
         period = f"period=last&period_last={self.quantity}d&" if self.is_period else ""
         while (len(found_links) < self.quantity and not self.is_period) or self.is_period:
@@ -94,24 +94,35 @@ class Base(QMainWindow):
                     break
                 page += 1
 
-        found_links: Set = await self.filter_by_history(found_links) if self.is_file_history else found_links
+        found_links: Set[AnyStr] = await self.filter_by_history(found_links) if self.is_file_history else found_links
         return list(found_links)[:self.quantity] if not self.is_period else list(found_links)
 
 
-    async def filter_by_history(self, found_links: Set) -> Set:
-        async with aiosqlite.connect(Data.DB_NAME) as db_connection:
-            sql_request = """SELECT link FROM file_history LIMIT 100000"""
-            try:
+    async def filter_by_history(self, found_links: Set[AnyStr]) -> Set[AnyStr]:
+        try:
+            async with aiosqlite.connect(Data.DB_NAME) as db_connection:
+                sql_request = """SELECT link FROM file_history LIMIT 100000"""
                 sql_cursor: aiosqlite.Cursor = await db_connection.execute(sql_request)
-                records: Set = set(record[0] for record in await sql_cursor.fetchall())
+                records: Set[AnyStr] = set(record[0] for record in await sql_cursor.fetchall())
                 return found_links - records
-            except aiosqlite.DatabaseError as error:
-                self.print("DB Error -", error)
+        except aiosqlite.DatabaseError as error:
+            self.print("DB Error -", error)
+        except TypeError as error:
+            self.print("TypeError -", error)
 
 
-    async def get_total_filesize(self, session: aiohttp.ClientSession = None, links: List[Awaitable] = None):
+    async def get_total_filesize(self, session: aiohttp.ClientSession = None, links: List[AnyStr] = None):
+        if links is None:
+            self.print(Messages.Errors.NoLinksToDownload)
+            exit()
+        if session is None:
+            self.print(Messages.Errors.UnableToConnect)
+            exit()
 
-        async def micro_task(micro_link):
+        async def micro_task(micro_link: AnyStr = None):
+            if micro_link is None:
+                self.print(Messages.Errors.NoLinkToDownload)
+                exit()
             async with session.get(micro_link) as response:
                 if response.status != 200:
                     return self.print(Messages.Errors.SomethingWentWrong)
@@ -121,7 +132,7 @@ class Base(QMainWindow):
             self.print(Messages.Errors.UnableToConnect)
             exit()
 
-        micro_tasks = []
+        micro_tasks: List[Awaitable] = []
         for link in links:
             micro_tasks.append(asyncio.ensure_future(micro_task(link)))
 
@@ -170,27 +181,41 @@ class Base(QMainWindow):
 
 
     async def create_history_db(self):
-        async with aiosqlite.connect(database=Data.DB_NAME) as db_connection:
-            sql_request = """CREATE TABLE IF NOT EXISTS file_history(
-            link TEXT NOT NULL,
-            date INTEGER NOT NULL
-            );"""
-            try:
+        try:
+            async with aiosqlite.connect(database=Data.DB_NAME) as db_connection:
+                sql_request = """CREATE TABLE IF NOT EXISTS file_history(
+                link TEXT NOT NULL,
+                date INTEGER NOT NULL
+                );"""
                 await db_connection.execute(sql_request)
-            except aiosqlite.DatabaseError as error:
-                self.print("DB Error -", error)
+        except aiosqlite.DatabaseError as error:
+            self.print("DB Error -", error)
 
-    async def write_file_history(self, link: AnyStr, date: int):
-        async with aiosqlite.connect(database=Data.DB_NAME, loop=self._loop) as db_connection:
-            sql_request = """INSERT INTO file_history VALUES(?, ?)"""
-            try:
-                await db_connection.execute(sql_request, (link, date))
+    async def write_file_history(self, link: AnyStr = None, date: int = None):
+        if link is None:
+            self.print(Messages.Errors.NoLinkToDownload)
+            exit()
+        if date is None:
+            self.print(Messages.Errors.NoDate)
+            exit()
+
+        try:
+            async with aiosqlite.connect(database=Data.DB_NAME) as db_connection:
+                sql_request = """INSERT INTO file_history VALUES(?, ?)"""
+                await db_connection.execute(sql_request, (link, abs(date)))
                 await db_connection.commit()
-            except aiosqlite.DatabaseError as error:
-                self.print("DB Error -", error)
+        except aiosqlite.DatabaseError as error:
+            self.print("DB Error -", error)
 
-    async def threads_limiter(self, sem: asyncio.Semaphore = None,
-                              session: aiohttp.ClientSession = None, link: Awaitable = None) -> None:
+    async def threads_limiter(self, sem: asyncio.Semaphore,
+                              session: aiohttp.ClientSession = None, link: AnyStr = None) -> None:
+        if link is None:
+            self.print(Messages.Errors.NoLinkToDownload)
+            exit()
+        if session is None:
+            self.print(Messages.Errors.UnableToConnect)
+            exit()
+
         async with sem:
             return await self.get_file_by_link(session, link)
 
@@ -202,7 +227,7 @@ class Base(QMainWindow):
 
             sem = asyncio.Semaphore(self.threads)
             tasks = []
-            all_links = await self.get_all_links(session)
+            all_links: List[AnyStr] = await self.get_all_links(session)
             if not all_links:
                 return self.succeeded.emit(0)
 
