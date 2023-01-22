@@ -78,8 +78,7 @@ class MainWindow(QMainWindow):
         self.cmbThreads = QComboBox(self)
         self.cmbThreads.resize(34, 24)
         self.cmbThreads.move(433, 10)
-        for i in range(1, Data.MaxValues.threads + 1):
-            self.cmbThreads.addItem(str(i), i)
+        [self.cmbThreads.addItem(str(i), i) for i in range(1, Data.MaxValues.threads + 1)]
         self.cmbThreads.setCurrentText(str(Data.DefaultValues.threads))
 
         self.lblThreads = QLabel("threads", self)
