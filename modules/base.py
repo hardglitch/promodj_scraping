@@ -144,7 +144,7 @@ class Base(QMainWindow):
         ext_pos: int = filename.rfind(".")
         filepath: Path = Path.joinpath(self.download_dir, filename)
         filename: str = filename \
-            if Path(filepath).exists() and self.is_rewrite_files \
+            if Path(filepath).exists() and self.is_rewrite_files and not self.is_file_history \
                or not Path(filepath).exists()\
             else filename[:ext_pos] + "_" + ext_time + filename[ext_pos:]
 

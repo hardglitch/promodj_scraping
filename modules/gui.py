@@ -69,12 +69,13 @@ class MainWindow(QMainWindow):
         self.chbFileHistory.setChecked(Data.DefaultValues.is_file_history)
         self.chbFileHistory.move(390, 40)
         self.chbFileHistory.resize(100, 30)
+        self.chbFileHistory.toggled.connect(self.event_chb_file_history)
 
         self.chbRewriteFiles = QCheckBox("Rewrite Files", self)
         self.chbRewriteFiles.setChecked(Data.DefaultValues.is_rewrite_files)
         self.chbRewriteFiles.move(130, 40)
         self.chbRewriteFiles.resize(120, 30)
-        self.chbRewriteFiles.setEnabled(not self.chbFileHistory)
+        self.chbRewriteFiles.setEnabled(not self.chbFileHistory.isChecked())
 
         self.cmbThreads = QComboBox(self)
         self.cmbThreads.resize(34, 24)
@@ -192,6 +193,9 @@ class MainWindow(QMainWindow):
             self.lblQuantity.setText("last days")
         else:
             self.lblQuantity.setText("files")
+
+    def event_chb_file_history(self):
+        self.chbRewriteFiles.setEnabled(not self.chbFileHistory.isChecked())
 
     def save_to(self):
         save_to_dir = QFileDialog.getExistingDirectory(self)
