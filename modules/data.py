@@ -7,9 +7,10 @@ class Data:
     FORMS = ("mixes", "tracks", "lives")
 
     LOSSLESS_FORMATS = (".flac", ".wav", ".aiff")
-    LOSSY_FORMATS = tuple(".mp3")
+    LOSSY_FORMATS = [".mp3"]
+    DB_NAME = "history.db"
 
-    PRINTING: bool = False    # for testing or console output
+    PRINTING: bool = True    # for testing or console output
 
     class DefaultValues:
         download_dir: AnyStr = "Downloaded Music"
@@ -20,7 +21,7 @@ class Data:
         is_lossless: bool = True
         is_period: bool = False
         is_rewrite_files: bool = True
-        is_file_history: bool = False
+        is_file_history: bool = True
         is_download: bool = True   # for testing
 
     class MaxValues:
