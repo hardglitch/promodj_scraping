@@ -39,3 +39,18 @@ class Data:
         RewriteFiles: AnyStr = "RewriteFiles"
         FileHistory: AnyStr = "FileHistory"
         LastDownload: AnyStr = "LastDownload"
+
+    class Inscriptions:
+        PromoDJMusicDownloader: AnyStr = "PromoDJ Music Downloader"
+        PromoDJMusicDownloaderExtended: AnyStr = PromoDJMusicDownloader + " --- Last download was _ days ago"
+        Files: AnyStr = "files"
+        Period: AnyStr = "Period"
+        Lossless: AnyStr = "Lossless"
+        FileHistory: AnyStr = "File History"
+        RewriteFiles: AnyStr = "Rewrite Files"
+        Threads: AnyStr = "threads"
+        SaveTo: AnyStr = "Save to"
+        Download: AnyStr = "Download"
+        Exit: AnyStr = "Exit"
+        Cancel: AnyStr = "Cancel"
+        LastDays: AnyStr = "last days"

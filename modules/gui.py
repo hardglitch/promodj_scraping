@@ -12,6 +12,7 @@ from PyQt6.QtWidgets import QApplication, QCheckBox, QComboBox, QFileDialog, QLa
 from bs4 import BeautifulSoup
 from qasync import asyncSlot
 
+# import tests.tests
 from modules.base import Base
 from modules.data import Data
 from modules.messages import Messages
@@ -31,7 +32,7 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon("logo.ico"))
 
         self.setFont(QFont("Arial", 12))
-        self.setWindowTitle("PromoDJ Music Downloader")
+        self.setWindowTitle(Data.Inscriptions.PromoDJMusicDownloader)
         self.setFixedSize(530, 200)
 
         self.cmbGenre = QComboBox(self)
@@ -53,25 +54,25 @@ class MainWindow(QMainWindow):
         self.cmbQuantity.addItems(["20", "30", "40", "50", "100"])
         self.cmbQuantity.setCurrentText(str(Data.DefaultValues.quantity))
 
-        self.lblQuantity = QLabel("files", self)
+        self.lblQuantity = QLabel(Data.Inscriptions.Files, self)
         self.lblQuantity.move(365, 8)
 
-        self.chbPeriod = QCheckBox("Period", self)
+        self.chbPeriod = QCheckBox(Data.Inscriptions.Period, self)
         self.chbPeriod.setChecked(Data.DefaultValues.is_period)
         self.chbPeriod.move(300, 40)
         self.chbPeriod.toggled.connect(self.event_chb_period)
 
-        self.chbFormat = QCheckBox("Lossless", self)
+        self.chbFormat = QCheckBox(Data.Inscriptions.Lossless, self)
         self.chbFormat.setChecked(True)
         self.chbFormat.move(30, 40)
 
-        self.chbFileHistory = QCheckBox("File History", self)
+        self.chbFileHistory = QCheckBox(Data.Inscriptions.FileHistory, self)
         self.chbFileHistory.setChecked(Data.DefaultValues.is_file_history)
         self.chbFileHistory.move(390, 40)
         self.chbFileHistory.resize(100, 30)
         self.chbFileHistory.toggled.connect(self.event_chb_file_history)
 
-        self.chbRewriteFiles = QCheckBox("Rewrite Files", self)
+        self.chbRewriteFiles = QCheckBox(Data.Inscriptions.RewriteFiles, self)
         self.chbRewriteFiles.setChecked(Data.DefaultValues.is_rewrite_files)
         self.chbRewriteFiles.move(130, 40)
         self.chbRewriteFiles.resize(120, 30)
@@ -83,10 +84,10 @@ class MainWindow(QMainWindow):
         [self.cmbThreads.addItem(str(i), i) for i in range(1, Data.MaxValues.threads + 1)]
         self.cmbThreads.setCurrentText(str(Data.DefaultValues.threads))
 
-        self.lblThreads = QLabel("threads", self)
+        self.lblThreads = QLabel(Data.Inscriptions.Threads, self)
         self.lblThreads.move(470, 8)
 
-        self.btnSaveTo = QPushButton("Save to", self)
+        self.btnSaveTo = QPushButton(Data.Inscriptions.SaveTo, self)
         self.btnSaveTo.setGeometry(10, 85, 70, 24)
         self.btnSaveTo.setCheckable(True)
         self.btnSaveTo.clicked.connect(self.save_to)
@@ -95,12 +96,12 @@ class MainWindow(QMainWindow):
         self.lblSaveTo.resize(435, 24)
         self.lblSaveTo.move(85, 85)
 
-        self.btnDownload = QPushButton("Download", self)
+        self.btnDownload = QPushButton(Data.Inscriptions.Download, self)
         self.btnDownload.move(270, 160)
         self.btnDownload.setCheckable(True)
         self.btnDownload.clicked.connect(self.download_files)
 
-        self.btnExit = QPushButton("Exit", self)
+        self.btnExit = QPushButton(Data.Inscriptions.Exit, self)
         self.btnExit.move(160, 160)
         self.btnExit.setCheckable(True)
         self.btnExit.clicked.connect(self.exit)
@@ -110,7 +111,7 @@ class MainWindow(QMainWindow):
         self.progBar.setVisible(False)
         self.progBar.setMaximum(100)
 
-        self.lblMessage = QLabel("", self)
+        self.lblMessage = QLabel(None, self)
         self.lblMessage.setGeometry(10, 125, 520, 20)
         self.lblMessage.setVisible(False)
         self.lblMessage.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
@@ -123,12 +124,12 @@ class MainWindow(QMainWindow):
         try:
             if self._is_downloading:
                 self.music.cancel_downloading()
-                self.btnDownload.setText("Download")
+                self.btnDownload.setText(Data.Inscriptions.Download)
                 self._is_downloading = False
                 self.progBar.setVisible(False)
                 return
             else:
-                self.btnDownload.setText("Cancel")
+                self.btnDownload.setText(Data.Inscriptions.Cancel)
                 self._is_downloading = True
 
             self.lblMessage.setVisible(False)
@@ -184,15 +185,15 @@ class MainWindow(QMainWindow):
             self.lblMessage.setText(Messages.MatchingFilesNotFound)
 
         self.music.cancel_downloading()
-        self.btnDownload.setText("Download")
+        self.btnDownload.setText(Data.Inscriptions.Download)
         self.btnDownload.setChecked(False)
         self._is_downloading = False
 
     def event_chb_period(self):
         if self.chbPeriod.isChecked():
-            self.lblQuantity.setText("last days")
+            self.lblQuantity.setText(Data.Inscriptions.LastDays)
         else:
-            self.lblQuantity.setText("files")
+            self.lblQuantity.setText(Data.Inscriptions.Files)
 
     def event_chb_file_history(self):
         self.chbRewriteFiles.setEnabled(not self.chbFileHistory.isChecked())
@@ -233,9 +234,8 @@ class MainWindow(QMainWindow):
 
                     if param.name == Data.Parameters.LastDownload and param.value.isnumeric():
                         self.last_launch = abs(int(param.value))
-                        self.setWindowTitle(
-                            f"PromoDJ Music Downloader --- Last download was"
-                            f" {int(abs((int(time.time()) - self.last_launch) / (3600 * 24)))} days ago")
+                        self.setWindowTitle(Data.Inscriptions.PromoDJMusicDownloaderExtended.replace("_",
+                                            str(int(abs((int(time.time()) - self.last_launch) / (3600 * 24))))))
 
 
                     elif param.name == Data.Parameters.DownloadDirectory and Path(param.value).exists():
