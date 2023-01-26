@@ -3,7 +3,7 @@ import urllib.parse
 from asyncio import AbstractEventLoop
 from pathlib import Path
 from time import time
-from typing import AnyStr, Awaitable, List, Set
+from typing import Awaitable, List, Set
 
 import aiofiles
 import aiohttp
@@ -24,9 +24,9 @@ class Base(QMainWindow):
     total_downloaded: int = 0
 
     def __init__(self,
-                 download_dir: AnyStr = Data.DefaultValues.download_dir,
-                 genre: AnyStr = Data.DefaultValues.genre,
-                 form: AnyStr = Data.DefaultValues.form,
+                 download_dir: str = Data.DefaultValues.download_dir,
+                 genre: str = Data.DefaultValues.genre,
+                 form: str = Data.DefaultValues.form,
                  is_lossless: bool = Data.DefaultValues.is_lossless,
                  quantity: int = Data.DefaultValues.quantity,
                  is_period: bool = Data.DefaultValues.is_period,
@@ -39,8 +39,8 @@ class Base(QMainWindow):
 
         super().__init__()
         self.download_dir: Path = Path(download_dir)
-        self.genre: AnyStr = genre
-        self.form: AnyStr = form
+        self.genre: str = genre
+        self.form: str = form
         self.is_lossless: bool = is_lossless
         self.quantity: int = quantity if quantity < abs(Data.MaxValues.quantity) else abs(Data.MaxValues.quantity)
         self.is_period: bool = is_period
@@ -58,7 +58,7 @@ class Base(QMainWindow):
         if Data.PRINTING:
             print(*args, **kwargs)
 
-    def get_filtered_links(self, links_massive: ResultSet = None) -> Set[AnyStr]:
+    def get_filtered_links(self, links_massive: ResultSet = None) -> Set[str]:
         if links_massive is None:
             self.print(Messages.Errors.NoLinksToFiltering)
             exit()
@@ -72,13 +72,13 @@ class Base(QMainWindow):
         return filtered_links
 
 
-    async def get_all_links(self, session: aiohttp.ClientSession = None) -> List[AnyStr]:
+    async def get_all_links(self, session: aiohttp.ClientSession = None) -> List[str]:
         if session is None:
             self.print(Messages.Errors.UnableToDownload)
             exit()
 
         page: int = 1
-        found_links: Set[AnyStr] = set()
+        found_links: Set[str] = set()
         bitrate = "lossless" if self.is_lossless else "high"
         period = f"period=last&period_last={self.quantity}d&" if self.is_period else ""
         while (len(found_links) < self.quantity and not self.is_period) or self.is_period:
@@ -94,16 +94,16 @@ class Base(QMainWindow):
                     break
                 page += 1
 
-        found_links: Set[AnyStr] = await self.filter_by_history(found_links) if self.is_file_history else found_links
+        found_links: Set[str] = await self.filter_by_history(found_links) if self.is_file_history else found_links
         return list(found_links)[:self.quantity] if not self.is_period else list(found_links)
 
 
-    async def filter_by_history(self, found_links: Set[AnyStr]) -> Set[AnyStr]:
+    async def filter_by_history(self, found_links: Set[str]) -> Set[str]:
         try:
             async with aiosqlite.connect(Data.DB_NAME) as db_connection:
                 sql_request = """SELECT link FROM file_history LIMIT 100000"""
                 sql_cursor: aiosqlite.Cursor = await db_connection.execute(sql_request)
-                records: Set[AnyStr] = set(record[0] for record in await sql_cursor.fetchall())
+                records: Set[str] = set(record[0] for record in await sql_cursor.fetchall())
                 return found_links - records
         except aiosqlite.DatabaseError as error:
             self.print("DB Error -", error)
@@ -111,7 +111,7 @@ class Base(QMainWindow):
             self.print("TypeError -", error)
 
 
-    async def get_total_filesize(self, session: aiohttp.ClientSession = None, links: List[AnyStr] = None):
+    async def get_total_filesize(self, session: aiohttp.ClientSession = None, links: List[str] = None):
         if links is None:
             self.print(Messages.Errors.NoLinksToDownload)
             exit()
@@ -119,7 +119,7 @@ class Base(QMainWindow):
             self.print(Messages.Errors.UnableToConnect)
             exit()
 
-        async def micro_task(micro_link: AnyStr = None):
+        async def micro_task(micro_link: str = None):
             if micro_link is None:
                 self.print(Messages.Errors.NoLinkToDownload)
                 exit()
@@ -142,7 +142,7 @@ class Base(QMainWindow):
             self.succeeded.emit(0)
 
 
-    async def get_file_by_link(self, session: aiohttp.ClientSession = None, link: AnyStr = None):
+    async def get_file_by_link(self, session: aiohttp.ClientSession = None, link: str = None):
         if link is None:
             self.print(Messages.Errors.NoLinkToDownload)
             exit()
@@ -191,7 +191,7 @@ class Base(QMainWindow):
         except aiosqlite.DatabaseError as error:
             self.print("DB Error -", error)
 
-    async def write_file_history(self, link: AnyStr = None, date: int = None):
+    async def write_file_history(self, link: str = None, date: int = None):
         if link is None:
             self.print(Messages.Errors.NoLinkToDownload)
             exit()
@@ -208,7 +208,7 @@ class Base(QMainWindow):
             self.print("DB Error -", error)
 
     async def threads_limiter(self, sem: asyncio.Semaphore,
-                              session: aiohttp.ClientSession = None, link: AnyStr = None) -> None:
+                              session: aiohttp.ClientSession = None, link: str = None) -> None:
         if link is None:
             self.print(Messages.Errors.NoLinkToDownload)
             exit()
@@ -227,7 +227,7 @@ class Base(QMainWindow):
 
             sem = asyncio.Semaphore(self.threads)
             tasks = []
-            all_links: List[AnyStr] = await self.get_all_links(session)
+            all_links: List[str] = await self.get_all_links(session)
             if not all_links:
                 return self.succeeded.emit(0)
 

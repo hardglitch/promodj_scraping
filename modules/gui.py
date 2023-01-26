@@ -2,7 +2,7 @@ import asyncio
 import sys
 import time
 from pathlib import Path
-from typing import AnyStr, Dict, List
+from typing import Dict, List
 
 import aiohttp
 from PyQt6 import QtCore
@@ -12,7 +12,6 @@ from PyQt6.QtWidgets import QApplication, QCheckBox, QComboBox, QFileDialog, QLa
 from bs4 import BeautifulSoup
 from qasync import asyncSlot
 
-# import tests.tests
 from modules.base import Base
 from modules.data import Data
 from modules.messages import Messages
@@ -117,7 +116,7 @@ class MainWindow(QMainWindow):
         self.lblMessage.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
         self.music: Base = Base()
-        self.genres: Dict[AnyStr, AnyStr] = {}
+        self.genres: Dict[str, str] = {}
 
     @asyncSlot()
     async def download_files(self):
