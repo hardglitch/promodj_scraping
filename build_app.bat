@@ -2,5 +2,6 @@
 @echo off
 
 pipenv run pyinstaller -n="PDJ_Scraper" --icon=logo.ico --onefile -w main.py
+copy logo.ico \dist
 
 pause
