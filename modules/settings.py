@@ -19,7 +19,7 @@ class Parameter:
     def name_check(self, name: str) -> str:
         assert isinstance(name, str)
         if not name.isalpha():
-            raise "Parameter Name is incorrect"
+            raise ValueError("Parameter Name is incorrect")
         return name[:1000]
 
     def value_check(self, value: str) -> str:
