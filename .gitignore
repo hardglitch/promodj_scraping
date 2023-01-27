@@ -1,9 +1,10 @@
 *
 !/modules
 !/modules/*
-!__main__.py
+!main.py
 !logo.png
 !requirements.txt
+!build_app.bat
 !LICENSE.md
 !README.md
 !Dockerfile
