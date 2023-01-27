@@ -13,9 +13,12 @@ if __name__ == "__main__":
     loop = QEventLoop(app)
     asyncio.set_event_loop(loop)
 
-    window = gui.MainWindow(loop) if not Config.DEBUG else tests.MockMainWindow(loop)
-    window.set_settings()
-    window.show()
+    try:
+        window = gui.MainWindow(loop) if not Config.DEBUG else tests.mock_main_window(loop=loop)
+        window.set_settings()
+        window.show()
+    except AttributeError:
+        sys.exit()
 
     with loop:
         loop.run_forever()

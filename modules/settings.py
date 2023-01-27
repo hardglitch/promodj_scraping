@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import List, Union
+from typing import List
 
 import aiofiles
 from aiofiles.threadpool.text import AsyncTextIOWrapper
@@ -13,14 +13,14 @@ class Parameter:
 
     def __init__(self, name: str = None, value: str = None):
         assert isinstance(name, str) and isinstance(value, str)
-        self.name: str = name if self.name_check(name) else None
+        self.name: str = self.name_check(name)
         self.value: str = self.value_check(value)
 
-    def name_check(self, name: str) -> bool:
+    def name_check(self, name: str) -> str:
         assert isinstance(name, str)
         if not name.isalpha():
             raise "Parameter Name is incorrect"
-        return True
+        return name[:1000]
 
     def value_check(self, value: str) -> str:
         assert isinstance(value, str)
@@ -31,11 +31,11 @@ class Parameter:
 
 class Settings:
     def __init__(self,
-                 path: Union[str, Path] = Path.cwd(),
+                 path: str = str(Path.cwd()),
                  name: str = "settings.ini"):
-        assert isinstance(path, Union[str, Path]) and isinstance(name, str)
-        self.path = path if Path(path).exists() and Path(path).is_file() else Path.cwd()
-        self.name = re.sub(r"[^a-zA-Z0-9_\-.]", "", name)
+        assert isinstance(path, str) and isinstance(name, str)
+        self.path: Path = Path(path[:1000]) if Path(path[:1000]).exists() and Path(path[:1000]).is_file() else Path.cwd()
+        self.name = re.sub(r"[^a-zA-Z0-9_\-.]", "", name)[:255]
 
 
     async def write(self, *params: Parameter):

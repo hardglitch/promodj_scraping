@@ -10,7 +10,7 @@ from PyQt6.QtGui import QFont, QIcon
 from PyQt6.QtWidgets import QApplication, QCheckBox, QComboBox, QFileDialog, QLabel, QMainWindow, QProgressBar, \
     QPushButton
 from bs4 import BeautifulSoup
-from qasync import asyncSlot
+from qasync import QEventLoop, asyncSlot
 
 from modules.base import Base
 from modules.data import Data
@@ -20,9 +20,9 @@ from modules.settings import Parameter, Settings
 
 class MainWindow(QMainWindow):
 
-    def __init__(self, loop=None, *args, **kwargs):
+    def __init__(self, loop: QEventLoop, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._loop = loop or asyncio.get_event_loop()
+        self._loop: QEventLoop = loop or asyncio.get_event_loop()
         self._is_downloading: bool = False
 
         self.settings_file: Settings = Settings()
