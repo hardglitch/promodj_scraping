@@ -4,9 +4,10 @@
 !main.py
 !logo.png
 !requirements.txt
-!build_app.bat
 !LICENSE.md
 !README.md
 !Dockerfile
 !Docker-compose.yml
+!_bandit_run.bat
+!_pyinstaller_run.bat
 !.gitignore
