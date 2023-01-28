@@ -1,6 +1,8 @@
 *
 !/modules
-!/modules/*
+!/modules/*.py
+!/tests/
+!/tests/*.py
 !main.py
 !logo.png
 !requirements.txt
