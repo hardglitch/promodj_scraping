@@ -8,8 +8,6 @@
 !requirements.txt
 !LICENSE.md
 !README.md
-!Dockerfile
-!Docker-compose.yml
 !_bandit_run.bat
 !_pyinstaller_run.bat
 !.gitignore
