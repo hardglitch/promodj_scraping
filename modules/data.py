@@ -6,7 +6,7 @@ class Data:
     FORMS = ("mixes", "tracks", "lives")
 
     LOSSLESS_FORMATS = (".flac", ".wav", ".aiff")
-    LOSSY_FORMATS = [".mp3"]
+    LOSSY_FORMATS = (".mp3",)
     DB_NAME = "history.db"
 
     PRINTING: bool = False   # for console output
