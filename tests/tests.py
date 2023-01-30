@@ -3,10 +3,10 @@ from typing import Any, Callable, Iterable
 
 from qasync import QEventLoop
 
-from modules import tools
 from modules.gui import MainWindow
-from modules.settings import Parameter, Settings
 from tests.config import Config
+from utils import tools
+from utils.settings import Parameter, Settings
 
 FULL_CHAOS: int = 0
 RANDOM_BUT_SETTINGS_TYPE: int = 1

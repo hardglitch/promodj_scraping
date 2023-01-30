@@ -15,7 +15,7 @@ from qasync import QEventLoop, asyncSlot
 from modules.base import Base
 from modules.data import Data
 from modules.messages import Messages
-from modules.settings import Parameter, Settings
+from utils.settings import Parameter, Settings
 
 
 class MainWindow(QMainWindow):
