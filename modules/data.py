@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import AnyStr
 
 @dataclass()
 class Data:
@@ -10,12 +9,12 @@ class Data:
     LOSSY_FORMATS = [".mp3"]
     DB_NAME = "history.db"
 
-    PRINTING: bool = False   # for testing or console output
+    PRINTING: bool = False   # for console output
 
     class DefaultValues:
-        download_dir: AnyStr = "Downloaded Music"
-        genre: AnyStr = "Trance"
-        form: AnyStr = "tracks"
+        download_dir: str = "Downloaded Music"
+        genre: str = "Trance"
+        form: str = "tracks"
         quantity: int = 10
         threads: int = 1
         is_lossless: bool = True
@@ -29,28 +28,28 @@ class Data:
         threads: int = 4
 
     class Parameters:
-        DownloadDirectory: AnyStr = "DownloadDirectory"
-        Genre: AnyStr = "Genre"
-        Form: AnyStr = "Form"
-        Lossless: AnyStr = "Lossless"
-        Period: AnyStr = "Period"
-        Quantity: AnyStr = "Quantity"
-        Threads: AnyStr = "Threads"
-        RewriteFiles: AnyStr = "RewriteFiles"
-        FileHistory: AnyStr = "FileHistory"
-        LastDownload: AnyStr = "LastDownload"
+        DownloadDirectory: str = "DownloadDirectory"
+        Genre: str = "Genre"
+        Form: str = "Form"
+        Lossless: str = "Lossless"
+        Period: str = "Period"
+        Quantity: str = "Quantity"
+        Threads: str = "Threads"
+        RewriteFiles: str = "RewriteFiles"
+        FileHistory: str = "FileHistory"
+        LastDownload: str = "LastDownload"
 
     class Inscriptions:
-        PromoDJMusicDownloader: AnyStr = "PromoDJ Music Downloader"
-        PromoDJMusicDownloaderExtended: AnyStr = PromoDJMusicDownloader + " --- Last download was _ days ago"
-        Files: AnyStr = "files"
-        Period: AnyStr = "Period"
-        Lossless: AnyStr = "Lossless"
-        FileHistory: AnyStr = "File History"
-        RewriteFiles: AnyStr = "Rewrite Files"
-        Threads: AnyStr = "threads"
-        SaveTo: AnyStr = "Save to"
-        Download: AnyStr = "Download"
-        Exit: AnyStr = "Exit"
-        Cancel: AnyStr = "Cancel"
-        LastDays: AnyStr = "last days"
+        PromoDJMusicDownloader: str = "PromoDJ Music Downloader"
+        PromoDJMusicDownloaderExtended: str = PromoDJMusicDownloader + " --- Last download was _ days ago"
+        Files: str = "files"
+        Period: str = "Period"
+        Lossless: str = "Lossless"
+        FileHistory: str = "File History"
+        RewriteFiles: str = "Rewrite Files"
+        Threads: str = "threads"
+        SaveTo: str = "Save to"
+        Download: str = "Download"
+        Exit: str = "Exit"
+        Cancel: str = "Cancel"
+        LastDays: str = "last days"
