@@ -3,6 +3,8 @@
 !/modules/*.py
 !/tests/
 !/tests/*.py
+!/utils
+!/utils/*.py
 !main.py
 !logo.png
 !requirements.txt
