@@ -5,7 +5,7 @@ class Data:
 
     FORMS = ("mixes", "tracks", "lives")
 
-    LOSSLESS_FORMATS = (".flac", ".wav", ".aiff")
+    LOSSLESS_FORMATS = (".flac", ".wav", ".aiff", ".alac", ".tta", ".ape", ".wv")
     LOSSY_FORMATS = (".mp3",)
     DB_NAME = "history.db"
 

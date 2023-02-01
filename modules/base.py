@@ -204,12 +204,11 @@ class Base(QMainWindow):
         except aiosqlite.DatabaseError as error:
             self.print("DB Error -", error)
 
-    async def threads_limiter(self, sem: asyncio.Semaphore,
-                              session: aiohttp.ClientSession = None, link: str = None) -> None:
+    async def threads_limiter(self, sem: asyncio.Semaphore, link: str = None) -> None:
         if link is None:
             self.print(Messages.Errors.NoLinkToDownload)
             exit()
-        if session is None:
+        if self._session is None:
             self.print(Messages.Errors.UnableToConnect)
             exit()
 
@@ -231,7 +230,7 @@ class Base(QMainWindow):
             await self.get_total_filesize(all_links)
 
             for link in all_links:
-                tasks.append(asyncio.ensure_future(self.threads_limiter(sem=sem, session=session, link=link)))
+                tasks.append(asyncio.ensure_future(self.threads_limiter(sem=sem, link=link)))
 
             await asyncio.gather(*tasks)
 
