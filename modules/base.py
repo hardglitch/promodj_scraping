@@ -3,7 +3,7 @@ import urllib.parse
 from asyncio import AbstractEventLoop
 from pathlib import Path
 from time import time
-from typing import Awaitable, List, Set
+from typing import Awaitable, List, Set, Union
 
 import aiofiles
 import aiohttp
@@ -51,6 +51,7 @@ class Base(QMainWindow):
 
         self._download_future = None
         self._loop: AbstractEventLoop = loop
+        self._session: Union[aiohttp.ClientSession, None] = None
 
 
     @staticmethod
@@ -72,8 +73,8 @@ class Base(QMainWindow):
         return filtered_links
 
 
-    async def get_all_links(self, session: aiohttp.ClientSession = None) -> List[str]:
-        if session is None:
+    async def get_all_links(self) -> List[str]:
+        if self._session is None:
             self.print(Messages.Errors.UnableToDownload)
             exit()
 
@@ -83,7 +84,7 @@ class Base(QMainWindow):
         period = f"period=last&period_last={self.quantity}d&" if self.is_period else ""
         while (len(found_links) < self.quantity and not self.is_period) or self.is_period:
             link = f"https://promodj.com/{self.form}/{self.genre}?{period}bitrate={bitrate}&page={page}"
-            async with session.get(link) as response:
+            async with self._session.get(link) as response:
                 if response.status != 200: break
                 text = str(await response.read())
                 links = BeautifulSoup(urllib.parse.unquote(text), features="html.parser").findAll("a")
@@ -111,11 +112,11 @@ class Base(QMainWindow):
             self.print("TypeError -", error)
 
 
-    async def get_total_filesize(self, session: aiohttp.ClientSession = None, links: List[str] = None):
+    async def get_total_filesize(self, links: List[str] = None):
         if links is None:
             self.print(Messages.Errors.NoLinksToDownload)
             exit()
-        if session is None:
+        if self._session is None:
             self.print(Messages.Errors.UnableToConnect)
             exit()
 
@@ -123,14 +124,10 @@ class Base(QMainWindow):
             if micro_link is None:
                 self.print(Messages.Errors.NoLinkToDownload)
                 exit()
-            async with session.get(micro_link) as response:
+            async with self._session.get(micro_link) as response:
                 if response.status != 200:
                     return self.print(Messages.Errors.SomethingWentWrong)
                 self.total_size += response.content_length
-
-        if session is None:
-            self.print(Messages.Errors.UnableToConnect)
-            exit()
 
         micro_tasks: List[Awaitable] = []
         for link in links:
@@ -142,11 +139,11 @@ class Base(QMainWindow):
             self.succeeded.emit(0)
 
 
-    async def get_file_by_link(self, session: aiohttp.ClientSession = None, link: str = None):
+    async def get_file_by_link(self, link: str = None):
         if link is None:
             self.print(Messages.Errors.NoLinkToDownload)
             exit()
-        if session is None:
+        if self._session is None:
             self.print(Messages.Errors.UnableToConnect)
             exit()
 
@@ -160,7 +157,7 @@ class Base(QMainWindow):
             else filename[:ext_pos] + "_" + ext_time + filename[ext_pos:]
 
         if self.is_download:
-            async with session.get(link, timeout=None) as response:
+            async with self._session.get(link, timeout=None) as response:
                 if response.status != 200:
                     return self.print(Messages.Errors.SomethingWentWrong)
 
@@ -217,21 +214,21 @@ class Base(QMainWindow):
             exit()
 
         async with sem:
-            return await self.get_file_by_link(session, link)
+            return await self.get_file_by_link(link)
 
 
     async def get_files(self):
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession() as self._session:
             if self.is_file_history:
                 await self.create_history_db()
 
             sem = asyncio.Semaphore(self.threads)
             tasks = []
-            all_links: List[str] = await self.get_all_links(session)
+            all_links: List[str] = await self.get_all_links()
             if not all_links:
                 return self.succeeded.emit(0)
 
-            await self.get_total_filesize(session, all_links)
+            await self.get_total_filesize(all_links)
 
             for link in all_links:
                 tasks.append(asyncio.ensure_future(self.threads_limiter(sem=sem, session=session, link=link)))

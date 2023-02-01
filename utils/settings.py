@@ -6,9 +6,6 @@ import aiofiles
 from aiofiles.threadpool.text import AsyncTextIOWrapper
 
 
-# from tests import tests
-
-
 class Parameter:
 
     def __init__(self, name: str = None, value: str = None):
@@ -34,7 +31,8 @@ class Settings:
                  path: str = str(Path.cwd()),
                  name: str = "settings.ini"):
         assert isinstance(path, str) and isinstance(name, str)
-        self.path: Path = Path(path[:1000]) if Path(path[:1000]).exists() and Path(path[:1000]).is_file() else Path.cwd()
+        path = Path(path[:1000])
+        self.path: Path = path if path.exists() and path.is_file() else Path.cwd()
         self.name = re.sub(r"[^a-zA-Z0-9_\-.]", "", name)[:255]
 
 

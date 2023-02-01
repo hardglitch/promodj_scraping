@@ -9,9 +9,9 @@ from utils import tools
 from utils.settings import Parameter, Settings
 
 FULL_CHAOS: int = 0
-RANDOM_BUT_SETTINGS_TYPE: int = 1
-LEGAL_SETTINGS_TYPE: int = 2
-LEGAL_PARAMETERS = LEGAL_SETTINGS = 3
+HALF_LEGAL_ARGUMENTS: int = 1
+LEGAL_ARGUMENTS: int = 2
+
 
 class MockParameter(Parameter):
     if Config.DEBUG and Config.MOCK_Parameter:
@@ -56,16 +56,14 @@ def test(obj: Callable, loop: QEventLoop = None, params_range: int = 5,
             except ValueError as error:
                 if str(error).find("not enough values to unpack") < 0: raise error
 
-    if mode in [LEGAL_SETTINGS_TYPE, LEGAL_PARAMETERS, LEGAL_SETTINGS]:
+    if mode == LEGAL_ARGUMENTS:
         for _ in range(cycles):
             print(f"{_*100/cycles: <4.1f}", end="")
             try:
-                param1 = tools.random_string(10000, path_friendly=True)
-                param2 = tools.random_string(10000, path_friendly=True)
-                if mode == LEGAL_SETTINGS_TYPE: obj(loop=loop, settings=Settings(param1, param2))
-                elif mode == LEGAL_PARAMETERS:
-                    __ = obj(param1, param2)
-                    if print_process: print(__)
+                param1 = tools.random_string(1010, path_friendly=True)
+                param2 = tools.random_string(1010, path_friendly=True)
+                if obj.__name__ == "MockMainWindow": obj(loop=loop, settings=Settings(param1, param2))
+                else: obj(param1, param2)
             except AssertionError:
                 if print_process: print(f"ERROR CAUGHT - '{obj.__name__}'")
             except ValueError:
@@ -87,11 +85,11 @@ def test(obj: Callable, loop: QEventLoop = None, params_range: int = 5,
 def mock_main_window(loop: QEventLoop):
     if Config.DEBUG:
         if Config.MOCK_Parameter: test(obj=MockParameter, mode=FULL_CHAOS)
-        if Config.MOCK_Parameter: test(obj=MockParameter, mode=LEGAL_PARAMETERS)
+        if Config.MOCK_Parameter: test(obj=MockParameter, mode=LEGAL_ARGUMENTS)
         if Config.MOCK_Settings: test(obj=MockSettings, mode=FULL_CHAOS)
-        if Config.MOCK_Settings: test(obj=MockSettings, mode=LEGAL_SETTINGS)
+        if Config.MOCK_Settings: test(obj=MockSettings, mode=LEGAL_ARGUMENTS)
         if Config.MOCK_MainWindow: test(obj=MockMainWindow, loop=loop, mode=FULL_CHAOS)
-        if Config.MOCK_MainWindow: test(obj=MockMainWindow, loop=loop, mode=RANDOM_BUT_SETTINGS_TYPE)
-        if Config.MOCK_MainWindow: test(obj=MockMainWindow, loop=loop, mode=LEGAL_SETTINGS_TYPE)
+        if Config.MOCK_MainWindow: test(obj=MockMainWindow, loop=loop, mode=HALF_LEGAL_ARGUMENTS)
+        if Config.MOCK_MainWindow: test(obj=MockMainWindow, loop=loop, mode=LEGAL_ARGUMENTS)
 
 

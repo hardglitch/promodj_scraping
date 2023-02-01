@@ -3,7 +3,7 @@ from dataclasses import dataclass
 @dataclass()
 class Config:
 
-    DEBUG = False
+    DEBUG = True
 
     MOCK_Parameter = True
     MOCK_Settings = True
