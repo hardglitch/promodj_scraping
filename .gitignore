@@ -11,5 +11,5 @@
 !LICENSE.md
 !README.md
 !_bandit_run.bat
-!_pyinstaller_run.bat
+!_build_app_win.bat
 !.gitignore

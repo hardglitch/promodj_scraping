@@ -13,7 +13,7 @@ if __name__ == "__main__":
     loop = QEventLoop(app)
     asyncio.set_event_loop(loop)
 
-    try:
+    try:                                     # this construction is temporary
         window = gui.MainWindow(loop) if not Config.DEBUG else tests.mock_main_window(loop=loop)
         window.set_settings()
         window.show()

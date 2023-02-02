@@ -62,8 +62,11 @@ def test(obj: Callable, loop: QEventLoop = None, params_range: int = 5,
             try:
                 param1 = tools.random_string(1010, path_friendly=True)
                 param2 = tools.random_string(1010, path_friendly=True)
+                # param1 = tools.perf_counter_function(tools.random_string, 1010, path_friendly=True)
+                # param2 = tools.perf_counter_function(tools.random_string, 1010, path_friendly=True)
                 if obj.__name__ == "MockMainWindow": obj(loop=loop, settings=Settings(param1, param2))
                 else: obj(param1, param2)
+                # print(param1, "\n", param2)
             except AssertionError:
                 if print_process: print(f"ERROR CAUGHT - '{obj.__name__}'")
             except ValueError:
@@ -82,6 +85,7 @@ def test(obj: Callable, loop: QEventLoop = None, params_range: int = 5,
     print(f"OK - '{obj.__name__}' in {mode=} tested.")
 
 
+@tools.perf_counter_decorator()
 def mock_main_window(loop: QEventLoop):
     if Config.DEBUG:
         if Config.MOCK_Parameter: test(obj=MockParameter, mode=FULL_CHAOS)

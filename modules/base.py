@@ -64,6 +64,8 @@ class Base(QMainWindow):
             self.print(Messages.Errors.NoLinksToFiltering)
             exit()
 
+        assert isinstance(links_massive, ResultSet)
+
         filtered_links = set()
         formats: list = Data.LOSSLESS_FORMATS if self.is_lossless else Data.LOSSY_FORMATS
         for link in links_massive:
@@ -100,6 +102,7 @@ class Base(QMainWindow):
 
 
     async def filter_by_history(self, found_links: Set[str]) -> Set[str]:
+        assert isinstance(found_links, Set)
         try:
             async with aiosqlite.connect(Data.DB_NAME) as db_connection:
                 sql_request = """SELECT link FROM file_history LIMIT 100000"""
@@ -120,6 +123,8 @@ class Base(QMainWindow):
             self.print(Messages.Errors.UnableToConnect)
             exit()
 
+        for link in links:
+            assert isinstance(link, str)
         async def micro_task(micro_link: str = None):
             if micro_link is None:
                 self.print(Messages.Errors.NoLinkToDownload)
@@ -146,6 +151,8 @@ class Base(QMainWindow):
         if self._session is None:
             self.print(Messages.Errors.UnableToConnect)
             exit()
+
+        assert isinstance(link, str)
 
         filename: str = link.split("/")[-1]
         ext_time: str = str(time()).replace(".", "")
@@ -196,6 +203,8 @@ class Base(QMainWindow):
             self.print(Messages.Errors.NoDate)
             exit()
 
+        assert isinstance(link, str) and isinstance(date, int)
+
         try:
             async with aiosqlite.connect(database=Data.DB_NAME) as db_connection:
                 sql_request = """INSERT INTO file_history VALUES(?, ?)"""
@@ -211,6 +220,8 @@ class Base(QMainWindow):
         if self._session is None:
             self.print(Messages.Errors.UnableToConnect)
             exit()
+
+        assert isinstance(sem, asyncio.Semaphore) and isinstance(link, str)
 
         async with sem:
             return await self.get_file_by_link(link)
