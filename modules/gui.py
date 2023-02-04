@@ -15,6 +15,7 @@ from qasync import QEventLoop, asyncSlot
 from modules.base import Base
 from modules.data import Data
 from modules.messages import Messages
+from tests import debug
 from utils.settings import Parameter, Settings
 
 
@@ -25,8 +26,8 @@ class MainWindow(QMainWindow):
         self._loop: QEventLoop = loop or asyncio.get_event_loop()
         self._is_downloading: bool = False
 
-        self.settings_file: Settings = Settings()
-        self.last_launch = int(time.time())
+        self._settings_file: Settings = Settings()
+        self._last_launch = int(time.time())
 
         self.setWindowIcon(QIcon("logo.ico"))
 
@@ -115,14 +116,14 @@ class MainWindow(QMainWindow):
         self.lblMessage.setVisible(False)
         self.lblMessage.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
-        self.music: Base = Base()
-        self.genres: Dict[str, str] = {}
+        self._music: Base = Base()
+        self._genres: Dict[str, str] = {}
 
     @asyncSlot()
     async def download_files(self):
         try:
             if self._is_downloading:
-                self.music.cancel_downloading()
+                self._music.cancel_downloading()
                 self.btnDownload.setText(Data.Inscriptions.Download)
                 self._is_downloading = False
                 self.progBar.setVisible(False)
@@ -136,16 +137,16 @@ class MainWindow(QMainWindow):
             self.progBar.setValue(0)
 
             quantity: int = int(self.cmbQuantity.currentText()) \
-                if self.cmbQuantity.currentText().isnumeric() and int(self.cmbQuantity.currentText()) <= abs(Data.MaxValues.quantity) \
+                if self.cmbQuantity.currentText().isnumeric() \
+                   and int(self.cmbQuantity.currentText()) <= abs(Data.MaxValues.quantity) \
                 else abs(Data.DefaultValues.quantity)
 
-            self.music = Base(download_dir=self.lblSaveTo.text(),
-                         genre=self.genres[self.cmbGenre.currentText()],
+            self._music = Base(download_dir=self.lblSaveTo.text(),
+                         genre=self._genres[self.cmbGenre.currentText()],
                          form=self.cmbForm.currentText(),
                          is_lossless=self.chbFormat.isChecked(),
                          quantity=quantity,
                          is_period=self.chbPeriod.isChecked(),
-                         is_download=Data.DefaultValues.is_download,
                          threads=int(self.cmbThreads.currentText()),
                          is_rewrite_files=self.chbRewriteFiles.isChecked(),
                          is_file_history=self.chbFileHistory.isChecked(),
@@ -154,11 +155,11 @@ class MainWindow(QMainWindow):
             if not Path(self.lblSaveTo.text()).exists():
                 Path(Data.DefaultValues.download_dir).mkdir()
 
-            self.music.progress.connect(self.progBar.setValue)
-            self.music.succeeded.connect(self.download_successed)
-            self.music.start_downloading()
+            self._music.progress.connect(self.progBar.setValue)
+            self._music.succeeded.connect(self.download_successed)
+            self._music.start_downloading()
 
-            await self.settings_file.write(
+            await self._settings_file.write(
                 Parameter(Data.Parameters.LastDownload, str(int(time.time()))),
                 Parameter(Data.Parameters.DownloadDirectory, self.lblSaveTo.text()),
                 Parameter(Data.Parameters.Genre, self.cmbGenre.currentText()),
@@ -172,7 +173,7 @@ class MainWindow(QMainWindow):
             )
 
         except Exception as error:
-            print("Error -", error)
+            debug.log("Error", error=error)
 
 
     def download_successed(self, value: int):
@@ -183,7 +184,7 @@ class MainWindow(QMainWindow):
             self.lblMessage.setVisible(True)
             self.lblMessage.setText(Messages.MatchingFilesNotFound)
 
-        self.music.cancel_downloading()
+        self._music.cancel_downloading()
         self.btnDownload.setText(Data.Inscriptions.Download)
         self.btnDownload.setChecked(False)
         self._is_downloading = False
@@ -216,8 +217,8 @@ class MainWindow(QMainWindow):
                 links = BeautifulSoup(await response.read(), features="html.parser").findAll("a")
                 for link in links:
                     if link.has_attr("href") and link["href"].find("/music/") > -1:
-                        self.genres.update({link.text: link["href"].replace("/music/", "")})
-                self.cmbGenre.addItems(self.genres.keys())
+                        self._genres.update({link.text: link["href"].replace("/music/", "")})
+                self.cmbGenre.addItems(self._genres.keys())
                 self.cmbGenre.setCurrentText(Data.DefaultValues.genre)
 
 
@@ -226,21 +227,21 @@ class MainWindow(QMainWindow):
         await self.set_genres()
 
         try:
-            settings_list: List[Parameter] = await self.settings_file.read()
+            settings_list: List[Parameter] = await self._settings_file.read()
 
             if settings_list:
                 for param in settings_list:
 
                     if param.name == Data.Parameters.LastDownload and param.value.isnumeric():
-                        self.last_launch = abs(int(param.value))
+                        self._last_launch = abs(int(param.value))
                         self.setWindowTitle(Data.Inscriptions.PromoDJMusicDownloaderExtended.replace("_",
-                                            str(int(abs((int(time.time()) - self.last_launch) / (3600 * 24))))))
+                                            str(int(abs((int(time.time()) - self._last_launch) / (3600 * 24))))))
 
 
                     elif param.name == Data.Parameters.DownloadDirectory and Path(param.value).exists():
                         self.lblSaveTo.setText(str(Path(param.value)))
 
-                    elif param.name == Data.Parameters.Genre and param.value in self.genres.keys():
+                    elif param.name == Data.Parameters.Genre and param.value in self._genres.keys():
                         self.cmbGenre.setCurrentText(param.value)
 
                     elif param.name == Data.Parameters.Form and param.value in Data.FORMS:
