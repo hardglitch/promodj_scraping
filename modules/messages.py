@@ -14,5 +14,6 @@ class Messages:
         UnableToConnect = "Unable to connect"
         SomethingWentWrong = "Something went wrong"
         NoDate = "No Date"
+        NoLinkToWrite = "No Link to write"
 
     MatchingFilesNotFound = "Matching files not found or already downloaded"

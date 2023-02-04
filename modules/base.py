@@ -7,13 +7,14 @@ from typing import Awaitable, List, Set, Union
 
 import aiofiles
 import aiohttp
-import aiosqlite
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QMainWindow
 from bs4 import BeautifulSoup, ResultSet
 
+from modules import db
 from modules.data import Data
 from modules.messages import Messages
+from tests import debug
 
 
 class Base(QMainWindow):
@@ -30,7 +31,6 @@ class Base(QMainWindow):
                  is_lossless: bool = Data.DefaultValues.is_lossless,
                  quantity: int = Data.DefaultValues.quantity,
                  is_period: bool = Data.DefaultValues.is_period,
-                 is_download: bool = Data.DefaultValues.is_download,
                  threads: int = Data.DefaultValues.threads,
                  is_rewrite_files: bool = Data.DefaultValues.is_rewrite_files,
                  is_file_history: bool = Data.DefaultValues.is_file_history,
@@ -44,7 +44,6 @@ class Base(QMainWindow):
         self.is_lossless: bool = is_lossless
         self.quantity: int = quantity if quantity < abs(Data.MaxValues.quantity) else abs(Data.MaxValues.quantity)
         self.is_period: bool = is_period
-        self.is_download: bool = is_download
         self.threads: int = threads if threads < abs(Data.MaxValues.threads) else abs(Data.MaxValues.threads)
         self.is_rewrite_files: bool = is_rewrite_files
         self.is_file_history: bool = is_file_history
@@ -54,16 +53,8 @@ class Base(QMainWindow):
         self._session: Union[aiohttp.ClientSession, None] = None
 
 
-    @staticmethod
-    def print(*args, **kwargs):
-        if Data.PRINTING:
-            print(*args, **kwargs)
-
-    def get_filtered_links(self, links_massive: ResultSet = None) -> Set[str]:
-        if links_massive is None:
-            self.print(Messages.Errors.NoLinksToFiltering)
-            exit()
-
+    def get_filtered_links(self, links_massive: ResultSet) -> Set[str]:
+        if not links_massive: debug.log(Messages.Errors.NoLinksToFiltering)
         assert isinstance(links_massive, ResultSet)
 
         filtered_links = set()
@@ -76,9 +67,7 @@ class Base(QMainWindow):
 
 
     async def get_all_links(self) -> List[str]:
-        if self._session is None:
-            self.print(Messages.Errors.UnableToDownload)
-            exit()
+        if not self._session: debug.log(Messages.Errors.UnableToDownload)
 
         page: int = 1
         found_links: Set[str] = set()
@@ -93,65 +82,30 @@ class Base(QMainWindow):
                 found_links_on_page: set = self.get_filtered_links(links)
                 if not found_links_on_page & found_links:
                     found_links |= found_links_on_page
-                else:
-                    break
+                else: break
                 page += 1
 
-        found_links: Set[str] = await self.filter_by_history(found_links) if self.is_file_history else found_links
+        found_links: Set[str] = await db.filter_by_history(found_links) if self.is_file_history else found_links
         return list(found_links)[:self.quantity] if not self.is_period else list(found_links)
 
 
-    async def filter_by_history(self, found_links: Set[str]) -> Set[str]:
-        assert isinstance(found_links, Set)
-        try:
-            async with aiosqlite.connect(Data.DB_NAME) as db_connection:
-                sql_request = """SELECT link FROM file_history LIMIT 100000"""
-                sql_cursor: aiosqlite.Cursor = await db_connection.execute(sql_request)
-                records: Set[str] = set(record[0] for record in await sql_cursor.fetchall())
-                return found_links - records
-        except aiosqlite.DatabaseError as error:
-            self.print("DB Error -", error)
-        except TypeError as error:
-            self.print("TypeError -", error)
-
-
-    async def get_total_filesize(self, links: List[str] = None):
-        if links is None:
-            self.print(Messages.Errors.NoLinksToDownload)
-            exit()
-        if self._session is None:
-            self.print(Messages.Errors.UnableToConnect)
-            exit()
-
-        for link in links:
-            assert isinstance(link, str)
-        async def micro_task(micro_link: str = None):
-            if micro_link is None:
-                self.print(Messages.Errors.NoLinkToDownload)
-                exit()
+    async def get_total_filesize(self, links: List[str]):
+        if not links: debug.log(Messages.Errors.NoLinksToDownload)
+        assert isinstance(links, List)
+        for link in links: assert isinstance(link, str)
+        async def micro_task(micro_link: str):
             async with self._session.get(micro_link) as response:
-                if response.status != 200:
-                    return self.print(Messages.Errors.SomethingWentWrong)
+                if response.status != 200: return debug.log(Messages.Errors.SomethingWentWrong)
                 self.total_size += response.content_length
 
         micro_tasks: List[Awaitable] = []
-        for link in links:
-            micro_tasks.append(asyncio.ensure_future(micro_task(link)))
-
+        for link in links: micro_tasks.append(asyncio.ensure_future(micro_task(link)))
         await asyncio.gather(*micro_tasks)
-
-        if not micro_tasks:
-            self.succeeded.emit(0)
+        if not micro_tasks: self.succeeded.emit(0)
 
 
-    async def get_file_by_link(self, link: str = None):
-        if link is None:
-            self.print(Messages.Errors.NoLinkToDownload)
-            exit()
-        if self._session is None:
-            self.print(Messages.Errors.UnableToConnect)
-            exit()
-
+    async def get_file_by_link(self, link: str):
+        if not link: debug.log(Messages.Errors.NoLinkToDownload)
         assert isinstance(link, str)
 
         filename: str = link.split("/")[-1]
@@ -163,13 +117,13 @@ class Base(QMainWindow):
                or not Path(filepath).exists()\
             else filename[:ext_pos] + "_" + ext_time + filename[ext_pos:]
 
-        if self.is_download:
+        @debug.is_download()
+        async def download() -> None:
             async with self._session.get(link, timeout=None) as response:
-                if response.status != 200:
-                    return self.print(Messages.Errors.SomethingWentWrong)
+                if response.status != 200: return debug.log(Messages.Errors.SomethingWentWrong)
 
                 async with aiofiles.open(filepath, "wb") as file:
-                    self.print(f"Downloading {filename}...\nLink - {link}")
+                    debug.print_message(f"Downloading {filename}...\nLink - {link}")
 
                     chunk_size = 16144
                     async for chunk in response.content.iter_chunked(chunk_size):
@@ -178,80 +132,45 @@ class Base(QMainWindow):
                         if self.total_size > 0:
                             self.progress.emit(int(100 * self.total_downloaded / (self.total_size * 1.21)))
                         await file.write(chunk)
-        self.print(f"File save as {filepath}")
+
+        await download()
+        debug.print_message(f"File save as {filepath}")
 
         if self.is_file_history:
-            await self.write_file_history(link=link, date=int(time()))
+            await db.write_file_history(link=link, date=int(time()))
 
 
-    async def create_history_db(self):
-        try:
-            async with aiosqlite.connect(database=Data.DB_NAME) as db_connection:
-                sql_request = """CREATE TABLE IF NOT EXISTS file_history(
-                link TEXT NOT NULL,
-                date INTEGER NOT NULL
-                );"""
-                await db_connection.execute(sql_request)
-        except aiosqlite.DatabaseError as error:
-            self.print("DB Error -", error)
-
-    async def write_file_history(self, link: str = None, date: int = None):
-        if link is None:
-            self.print(Messages.Errors.NoLinkToDownload)
-            exit()
-        if date is None:
-            self.print(Messages.Errors.NoDate)
-            exit()
-
-        assert isinstance(link, str) and isinstance(date, int)
-
-        try:
-            async with aiosqlite.connect(database=Data.DB_NAME) as db_connection:
-                sql_request = """INSERT INTO file_history VALUES(?, ?)"""
-                await db_connection.execute(sql_request, (link, abs(date)))
-                await db_connection.commit()
-        except aiosqlite.DatabaseError as error:
-            self.print("DB Error -", error)
-
-    async def threads_limiter(self, sem: asyncio.Semaphore, link: str = None) -> None:
-        if link is None:
-            self.print(Messages.Errors.NoLinkToDownload)
-            exit()
-        if self._session is None:
-            self.print(Messages.Errors.UnableToConnect)
-            exit()
-
+    async def threads_limiter(self, sem: asyncio.Semaphore, link: str) -> None:
         assert isinstance(sem, asyncio.Semaphore) and isinstance(link, str)
-
         async with sem:
             return await self.get_file_by_link(link)
 
 
     async def get_files(self):
-        async with aiohttp.ClientSession() as self._session:
-            if self.is_file_history:
-                await self.create_history_db()
+        try:
+            async with aiohttp.ClientSession() as self._session:
+                if self.is_file_history: await db.create_history_db()
 
-            sem = asyncio.Semaphore(self.threads)
-            tasks = []
-            all_links: List[str] = await self.get_all_links()
-            if not all_links:
-                return self.succeeded.emit(0)
+                sem = asyncio.Semaphore(self.threads)
 
-            await self.get_total_filesize(all_links)
+                tasks = []
+                all_links: List[str] = await self.get_all_links()
+                if not all_links: return self.succeeded.emit(0)
 
-            for link in all_links:
-                tasks.append(asyncio.ensure_future(self.threads_limiter(sem=sem, link=link)))
+                await self.get_total_filesize(all_links)
 
-            await asyncio.gather(*tasks)
+                for link in all_links:
+                    tasks.append(asyncio.ensure_future(self.threads_limiter(sem=sem, link=link)))
+                await asyncio.gather(*tasks)
 
-            if tasks: self.succeeded.emit(1)
-            else: self.succeeded.emit(0)
+                if tasks: self.succeeded.emit(1)
+                else: self.succeeded.emit(0)
+        except aiohttp.ClientError as error:
+            debug.log(Messages.Errors.UnableToConnect, error)
 
 
     def start_downloading(self):
         self._download_future = asyncio.run_coroutine_threadsafe(self.get_files(), self._loop)
-
 
     def cancel_downloading(self):
         if self._download_future:
