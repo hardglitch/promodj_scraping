@@ -7,12 +7,16 @@ from typing import Any, Callable
 
 @dataclass()
 class Constants:
-    IS_DOWNLOAD = True  # for testing
-    PRINTING: bool = False  # for console output
+    IS_DOWNLOAD = True     # download simulation
+    PRINTING: bool = True  # console output
     LOGGING: bool = True
     LOG_FILE = "logging.log"
 
+
 def log(message: str, error: Exception = None):
+    assert isinstance(message, str)
+    assert isinstance(error, Exception | None)
+    message = message[:1000]
     if Constants.LOGGING:
         tm = strftime("%Y-%m-%d %H:%M:%S", gmtime())
         logging.basicConfig(filename=Constants.LOG_FILE, encoding="utf-8", level=logging.ERROR)

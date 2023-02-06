@@ -3,7 +3,7 @@ import urllib.parse
 from asyncio import AbstractEventLoop
 from pathlib import Path
 from time import time
-from typing import Awaitable, List, Set, Union
+from typing import Awaitable, List, Set, Tuple, Union
 
 import aiofiles
 import aiohttp
@@ -11,10 +11,9 @@ from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QMainWindow
 from bs4 import BeautifulSoup, ResultSet
 
-from modules import db
+from modules import db, debug
 from modules.data import Data
 from modules.messages import Messages
-from tests import debug
 
 
 class Base(QMainWindow):
@@ -25,6 +24,7 @@ class Base(QMainWindow):
     total_downloaded: int = 0
 
     def __init__(self,
+                 loop: AbstractEventLoop = None,
                  download_dir: str = Data.DefaultValues.download_dir,
                  genre: str = Data.DefaultValues.genre,
                  form: str = Data.DefaultValues.form,
@@ -34,7 +34,6 @@ class Base(QMainWindow):
                  threads: int = Data.DefaultValues.threads,
                  is_rewrite_files: bool = Data.DefaultValues.is_rewrite_files,
                  is_file_history: bool = Data.DefaultValues.is_file_history,
-                 loop: AbstractEventLoop = None
         ):
 
         super().__init__()
@@ -48,7 +47,7 @@ class Base(QMainWindow):
         self.is_rewrite_files: bool = is_rewrite_files
         self.is_file_history: bool = is_file_history
 
-        self._download_future = None
+        self._download_future: Union[asyncio.Future, None] = None
         self._loop: AbstractEventLoop = loop
         self._session: Union[aiohttp.ClientSession, None] = None
 
@@ -58,7 +57,7 @@ class Base(QMainWindow):
         assert isinstance(links_massive, ResultSet)
 
         filtered_links = set()
-        formats: list = Data.LOSSLESS_FORMATS if self.is_lossless else Data.LOSSY_FORMATS
+        formats: Tuple[str] = Data.LOSSLESS_FORMATS if self.is_lossless else Data.LOSSY_FORMATS
         for link in links_massive:
             for frmt in formats:
                 if link.has_attr("href") and link["href"].find(frmt) > -1 and link["href"].find("/source/") > -1:
@@ -170,7 +169,7 @@ class Base(QMainWindow):
 
 
     def start_downloading(self):
-        self._download_future = asyncio.run_coroutine_threadsafe(self.get_files(), self._loop)
+        self._download_future: asyncio.Future = asyncio.run_coroutine_threadsafe(self.get_files(), self._loop)
 
     def cancel_downloading(self):
         if self._download_future:

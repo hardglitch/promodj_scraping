@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 import aiofiles
 from aiofiles.threadpool.text import AsyncTextIOWrapper
@@ -8,8 +8,9 @@ from aiofiles.threadpool.text import AsyncTextIOWrapper
 
 class Parameter:
 
-    def __init__(self, name: str = None, value: str = None):
-        assert isinstance(name, str) and isinstance(value, str)
+    def __init__(self, name: str, value: str):
+        assert isinstance(name, str)
+        assert isinstance(value, str)
         self.name: str = self.name_check(name)
         self.value: str = self.value_check(value)
 
@@ -28,19 +29,19 @@ class Parameter:
 
 class Settings:
     def __init__(self,
-                 path: str = str(Path.cwd()),
-                 name: str = "settings.ini"):
-        assert isinstance(path, str) and isinstance(name, str)
-        path = Path(path[:1000])
+                 path: Union[str, Path] = Path.cwd(),
+                 filename: str = "settings.ini"):
+        assert isinstance(path, str|Path)
+        assert isinstance(filename, str)
+        path = Path(str(path)[:1000])
         self.path: Path = path if path.exists() and path.is_file() else Path.cwd()
-        self.name = re.sub(r"[^a-zA-Z0-9_\-.]", "", name)[:255]
+        self.filename = re.sub(r"[^a-zA-Z0-9_\-.]", "", filename)[:255]
 
 
     async def write(self, *params: Parameter):
-        for param in params:
-            assert isinstance(param, Parameter)
+        for param in params: assert isinstance(param, Parameter)
         try:
-            async with aiofiles.open(Path.joinpath(self.path, self.name), "w", encoding="utf-8") as file:
+            async with aiofiles.open(Path.joinpath(self.path, self.filename), "w", encoding="utf-8") as file:
                 [await file.writelines(f"{param.name}={param.value}\n") for param in params]
         except IOError as error:
             print("IOError -", error)
@@ -48,7 +49,7 @@ class Settings:
 
     async def read(self) -> List[Parameter]:
         try:
-            async with aiofiles.open(Path.joinpath(self.path, self.name), "r", encoding="utf-8") as file:
+            async with aiofiles.open(Path.joinpath(self.path, self.filename), "r", encoding="utf-8") as file:
                 assert isinstance(file, AsyncTextIOWrapper)
 
                 settings_list = []
@@ -66,3 +67,6 @@ class Settings:
             print("Settings file not found")
         except UnicodeDecodeError:
             print("Settings file found but corrupted")
+        except IOError as error:
+            print("IOError -", error)
+

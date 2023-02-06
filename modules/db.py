@@ -2,9 +2,9 @@ from typing import Set
 
 import aiosqlite
 
+from modules import debug
 from modules.data import Data
 from modules.messages import Messages
-from tests import debug
 
 
 async def create_history_db():
