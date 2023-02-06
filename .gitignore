@@ -3,6 +3,7 @@
 !/modules/*.py
 !/tests/
 !/tests/*.py
+!/tests/pytest.ini
 !/utils
 !/utils/*.py
 !/utils/settings

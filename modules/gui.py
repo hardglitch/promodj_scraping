@@ -2,7 +2,7 @@ import asyncio
 import sys
 import time
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Union
 
 import aiohttp
 from PyQt6 import QtCore
@@ -23,7 +23,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self, loop: asyncio.AbstractEventLoop, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._loop: asyncio.AbstractEventLoop = loop or asyncio.get_event_loop()
+        self._loop: asyncio.AbstractEventLoop = loop
         self._is_downloading: bool = False
 
         self._settings_file: Settings = Settings()
@@ -116,7 +116,7 @@ class MainWindow(QMainWindow):
         self.lblMessage.setVisible(False)
         self.lblMessage.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
-        self._music: Base = Base()
+        self._music: Union[Base, None] = None
         self._genres: Dict[str, str] = {}
 
     @asyncSlot()

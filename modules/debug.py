@@ -7,7 +7,7 @@ from typing import Any, Callable
 
 @dataclass()
 class Constants:
-    IS_DOWNLOAD = True     # download simulation
+    IS_DOWNLOAD = True     # download simulation (True = Real, False = Simulate)
     PRINTING: bool = True  # console output
     LOGGING: bool = True
     LOG_FILE = "logging.log"

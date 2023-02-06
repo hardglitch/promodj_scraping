@@ -24,7 +24,7 @@ class Base(QMainWindow):
     total_downloaded: int = 0
 
     def __init__(self,
-                 loop: AbstractEventLoop = None,
+                 loop: AbstractEventLoop,
                  download_dir: str = Data.DefaultValues.download_dir,
                  genre: str = Data.DefaultValues.genre,
                  form: str = Data.DefaultValues.form,
@@ -37,6 +37,7 @@ class Base(QMainWindow):
         ):
 
         super().__init__()
+        if not loop: raise "No Loop"
         self.download_dir: Path = Path(download_dir)
         self.genre: str = genre
         self.form: str = form
@@ -47,8 +48,8 @@ class Base(QMainWindow):
         self.is_rewrite_files: bool = is_rewrite_files
         self.is_file_history: bool = is_file_history
 
-        self._download_future: Union[asyncio.Future, None] = None
         self._loop: AbstractEventLoop = loop
+        self._download_future: Union[asyncio.Future, None] = None
         self._session: Union[aiohttp.ClientSession, None] = None
 
 
