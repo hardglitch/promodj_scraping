@@ -7,8 +7,6 @@ from modules.base import Base
 from modules.data import Data
 from tests import prerequisites
 
-# from PyQt6.QtCore import pyqtSignal
-
 TEST_LOOP = prerequisites.start()
 
 def test_default_values():
@@ -48,11 +46,5 @@ def test_default_types():
     assert isinstance(b._download_future, asyncio.Future | None)
     assert isinstance(b._session, aiohttp.ClientSession | None)
 
-    # assert isinstance(b.progress, pyqtSignal)
-    # assert isinstance(b.succeeded, pyqtSignal)
     assert isinstance(b.total_size, int)
     assert isinstance(b.total_downloaded, int)
-
-
-def test_get_filtered_links():
-    pass

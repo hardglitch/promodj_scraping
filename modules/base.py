@@ -71,15 +71,18 @@ class Base(QMainWindow):
 
         page: int = 1
         found_links: Set[str] = set()
-        bitrate = "lossless" if self.is_lossless else "high"
-        period = f"period=last&period_last={self.quantity}d&" if self.is_period else ""
+        bitrate: str = "lossless" if self.is_lossless else "high"
+        period: str = f"period=last&period_last={self.quantity}d&" if self.is_period else ""
         while (len(found_links) < self.quantity and not self.is_period) or self.is_period:
             link = f"https://promodj.com/{self.form}/{self.genre}?{period}bitrate={bitrate}&page={page}"
             async with self._session.get(link) as response:
                 if response.status != 200: break
                 text = str(await response.read())
                 links = BeautifulSoup(urllib.parse.unquote(text), features="html.parser").findAll("a")
+
                 found_links_on_page: set = self.get_filtered_links(links)
+                assert isinstance(found_links_on_page, Set)
+
                 if not found_links_on_page & found_links:
                     found_links |= found_links_on_page
                 else: break
@@ -155,6 +158,7 @@ class Base(QMainWindow):
 
                 tasks = []
                 all_links: List[str] = await self.get_all_links()
+                assert isinstance(all_links, List)
                 if not all_links: return self.succeeded.emit(0)
 
                 await self.get_total_filesize(all_links)
