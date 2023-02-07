@@ -3,8 +3,13 @@
 !/modules/*.py
 !/tests/
 !/tests/*.py
+!/tests/pytest.ini
 !/utils
 !/utils/*.py
+!/utils/settings
+!/utils/settings/*.py
+!/utils/settings/tests
+!/utils/settings/tests/*.py
 !main.py
 !logo.png
 !requirements.txt

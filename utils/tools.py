@@ -35,6 +35,9 @@ def dict_value_sort(dictionary: dict, asc: bool = True) -> dict:
 def clear_path(path: str):
     return re.sub(r"[^\w\(\)\\\/\[\]\.\,\+\-\&\ \=\']", "", path)
 
+def clear_filename(filename: str):
+    return re.sub(r"[^a-zA-Z0-9_\-.]", "", filename)[:255]
+
 
 def random_string(max_length: int = 1, path_friendly: bool = False) -> str:
     rnd_str = "".join((secrets.choice(string.printable) for _ in range(secrets.choice(range(max_length)))))

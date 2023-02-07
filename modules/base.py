@@ -3,7 +3,7 @@ import urllib.parse
 from asyncio import AbstractEventLoop
 from pathlib import Path
 from time import time
-from typing import Awaitable, List, Set, Union
+from typing import Awaitable, List, Set, Tuple, Union
 
 import aiofiles
 import aiohttp
@@ -11,10 +11,9 @@ from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QMainWindow
 from bs4 import BeautifulSoup, ResultSet
 
-from modules import db
+from modules import db, debug
 from modules.data import Data
 from modules.messages import Messages
-from tests import debug
 
 
 class Base(QMainWindow):
@@ -25,6 +24,7 @@ class Base(QMainWindow):
     total_downloaded: int = 0
 
     def __init__(self,
+                 loop: AbstractEventLoop,
                  download_dir: str = Data.DefaultValues.download_dir,
                  genre: str = Data.DefaultValues.genre,
                  form: str = Data.DefaultValues.form,
@@ -34,10 +34,10 @@ class Base(QMainWindow):
                  threads: int = Data.DefaultValues.threads,
                  is_rewrite_files: bool = Data.DefaultValues.is_rewrite_files,
                  is_file_history: bool = Data.DefaultValues.is_file_history,
-                 loop: AbstractEventLoop = None
         ):
 
         super().__init__()
+        if not loop: raise "No Loop"
         self.download_dir: Path = Path(download_dir)
         self.genre: str = genre
         self.form: str = form
@@ -48,8 +48,8 @@ class Base(QMainWindow):
         self.is_rewrite_files: bool = is_rewrite_files
         self.is_file_history: bool = is_file_history
 
-        self._download_future = None
         self._loop: AbstractEventLoop = loop
+        self._download_future: Union[asyncio.Future, None] = None
         self._session: Union[aiohttp.ClientSession, None] = None
 
 
@@ -58,7 +58,7 @@ class Base(QMainWindow):
         assert isinstance(links_massive, ResultSet)
 
         filtered_links = set()
-        formats: list = Data.LOSSLESS_FORMATS if self.is_lossless else Data.LOSSY_FORMATS
+        formats: Tuple[str] = Data.LOSSLESS_FORMATS if self.is_lossless else Data.LOSSY_FORMATS
         for link in links_massive:
             for frmt in formats:
                 if link.has_attr("href") and link["href"].find(frmt) > -1 and link["href"].find("/source/") > -1:
@@ -71,15 +71,18 @@ class Base(QMainWindow):
 
         page: int = 1
         found_links: Set[str] = set()
-        bitrate = "lossless" if self.is_lossless else "high"
-        period = f"period=last&period_last={self.quantity}d&" if self.is_period else ""
+        bitrate: str = "lossless" if self.is_lossless else "high"
+        period: str = f"period=last&period_last={self.quantity}d&" if self.is_period else ""
         while (len(found_links) < self.quantity and not self.is_period) or self.is_period:
             link = f"https://promodj.com/{self.form}/{self.genre}?{period}bitrate={bitrate}&page={page}"
             async with self._session.get(link) as response:
                 if response.status != 200: break
                 text = str(await response.read())
                 links = BeautifulSoup(urllib.parse.unquote(text), features="html.parser").findAll("a")
+
                 found_links_on_page: set = self.get_filtered_links(links)
+                assert isinstance(found_links_on_page, Set)
+
                 if not found_links_on_page & found_links:
                     found_links |= found_links_on_page
                 else: break
@@ -155,6 +158,7 @@ class Base(QMainWindow):
 
                 tasks = []
                 all_links: List[str] = await self.get_all_links()
+                assert isinstance(all_links, List)
                 if not all_links: return self.succeeded.emit(0)
 
                 await self.get_total_filesize(all_links)
@@ -170,7 +174,7 @@ class Base(QMainWindow):
 
 
     def start_downloading(self):
-        self._download_future = asyncio.run_coroutine_threadsafe(self.get_files(), self._loop)
+        self._download_future: asyncio.Future = asyncio.run_coroutine_threadsafe(self.get_files(), self._loop)
 
     def cancel_downloading(self):
         if self._download_future:

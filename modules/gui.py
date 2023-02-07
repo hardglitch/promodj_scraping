@@ -2,7 +2,7 @@ import asyncio
 import sys
 import time
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Union
 
 import aiohttp
 from PyQt6 import QtCore
@@ -10,20 +10,20 @@ from PyQt6.QtGui import QFont, QIcon
 from PyQt6.QtWidgets import QApplication, QCheckBox, QComboBox, QFileDialog, QLabel, QMainWindow, QProgressBar, \
     QPushButton
 from bs4 import BeautifulSoup
-from qasync import QEventLoop, asyncSlot
+from qasync import asyncSlot
 
+from modules import debug
 from modules.base import Base
 from modules.data import Data
 from modules.messages import Messages
-from tests import debug
-from utils.settings import Parameter, Settings
+from utils.settings.settings import Parameter, Settings
 
 
 class MainWindow(QMainWindow):
 
-    def __init__(self, loop: QEventLoop, *args, **kwargs):
+    def __init__(self, loop: asyncio.AbstractEventLoop, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._loop: QEventLoop = loop or asyncio.get_event_loop()
+        self._loop: asyncio.AbstractEventLoop = loop
         self._is_downloading: bool = False
 
         self._settings_file: Settings = Settings()
@@ -116,7 +116,7 @@ class MainWindow(QMainWindow):
         self.lblMessage.setVisible(False)
         self.lblMessage.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
-        self._music: Base = Base()
+        self._music: Union[Base, None] = None
         self._genres: Dict[str, str] = {}
 
     @asyncSlot()
