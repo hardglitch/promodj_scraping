@@ -5,12 +5,12 @@ import aiohttp
 
 from modules.base import Base
 from modules.data import Data
-from tests import prerequisites
+from tests.prerequisites import Start
 
-TEST_LOOP = prerequisites.start()
+prerequisites = Start()
 
 def test_default_values():
-    b = Base(loop=TEST_LOOP)
+    b = Base()
     assert b.download_dir == Path(Data.DefaultValues.download_dir)
     assert b.genre == Data.DefaultValues.genre
     assert b.form == Data.DefaultValues.form
@@ -21,7 +21,6 @@ def test_default_values():
     assert b.is_rewrite_files == Data.DefaultValues.is_rewrite_files
     assert b.is_file_history == Data.DefaultValues.is_file_history
 
-    assert b._loop is not None
     assert b._download_future is None
     assert b._session is None
 
@@ -31,7 +30,7 @@ def test_default_values():
     assert b.total_downloaded == 0
 
 def test_default_types():
-    b = Base(loop=TEST_LOOP)
+    b = Base()
     assert isinstance(b.download_dir, str|Path)
     assert isinstance(b.genre, str)
     assert isinstance(b.form, str)
@@ -42,7 +41,6 @@ def test_default_types():
     assert isinstance(b.is_rewrite_files, bool)
     assert isinstance(b.is_file_history, bool)
 
-    assert isinstance(b._loop, asyncio.AbstractEventLoop)
     assert isinstance(b._download_future, asyncio.Future | None)
     assert isinstance(b._session, aiohttp.ClientSession | None)
 

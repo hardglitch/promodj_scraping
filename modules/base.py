@@ -1,6 +1,5 @@
 import asyncio
 import urllib.parse
-from asyncio import AbstractEventLoop
 from pathlib import Path
 from time import time
 from typing import Awaitable, List, Set, Tuple, Union
@@ -24,7 +23,6 @@ class Base(QMainWindow):
     total_downloaded: int = 0
 
     def __init__(self,
-                 loop: AbstractEventLoop,
                  download_dir: str = Data.DefaultValues.download_dir,
                  genre: str = Data.DefaultValues.genre,
                  form: str = Data.DefaultValues.form,
@@ -33,11 +31,10 @@ class Base(QMainWindow):
                  is_period: bool = Data.DefaultValues.is_period,
                  threads: int = Data.DefaultValues.threads,
                  is_rewrite_files: bool = Data.DefaultValues.is_rewrite_files,
-                 is_file_history: bool = Data.DefaultValues.is_file_history,
+                 is_file_history: bool = Data.DefaultValues.is_file_history
         ):
 
         super().__init__()
-        if not loop: raise "No Loop"
         self.download_dir: Path = Path(download_dir)
         self.genre: str = genre
         self.form: str = form
@@ -48,7 +45,6 @@ class Base(QMainWindow):
         self.is_rewrite_files: bool = is_rewrite_files
         self.is_file_history: bool = is_file_history
 
-        self._loop: AbstractEventLoop = loop
         self._download_future: Union[asyncio.Future, None] = None
         self._session: Union[aiohttp.ClientSession, None] = None
 
@@ -174,8 +170,9 @@ class Base(QMainWindow):
 
 
     def start_downloading(self):
-        self._download_future: asyncio.Future = asyncio.run_coroutine_threadsafe(self.get_files(), self._loop)
+        self._download_future: asyncio.Future = \
+            asyncio.run_coroutine_threadsafe(self.get_files(), asyncio.get_event_loop())
 
     def cancel_downloading(self):
         if self._download_future:
-            self._loop.call_soon_threadsafe(self._download_future.cancel)
+            asyncio.get_event_loop().call_soon_threadsafe(self._download_future.cancel)

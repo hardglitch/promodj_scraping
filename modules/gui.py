@@ -1,4 +1,4 @@
-import asyncio
+import sys
 import sys
 import time
 from pathlib import Path
@@ -21,9 +21,8 @@ from utils.settings.settings import Parameter, Settings
 
 class MainWindow(QMainWindow):
 
-    def __init__(self, loop: asyncio.AbstractEventLoop, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._loop: asyncio.AbstractEventLoop = loop
         self._is_downloading: bool = False
 
         self._settings_file: Settings = Settings()
@@ -149,8 +148,7 @@ class MainWindow(QMainWindow):
                          is_period=self.chbPeriod.isChecked(),
                          threads=int(self.cmbThreads.currentText()),
                          is_rewrite_files=self.chbRewriteFiles.isChecked(),
-                         is_file_history=self.chbFileHistory.isChecked(),
-                         loop=self._loop
+                         is_file_history=self.chbFileHistory.isChecked()
             )
             if not Path(self.lblSaveTo.text()).exists():
                 Path(Data.DefaultValues.download_dir).mkdir()
