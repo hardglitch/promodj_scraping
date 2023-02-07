@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Set, Tuple
 
 import pytest
 
@@ -25,13 +25,15 @@ def test_settings():
     assert s.filename is not None
 
 @pytest.mark.asyncio
-async def test_settings_write(tmp_path):
+async def test_settings_write_read(tmp_path):
     s = Settings(path=tmp_path, filename=test_setting_filename)
+    assert isinstance(s, Settings)
+
     p = (Parameter("ParamOne", "value"),
          Parameter("ParamTwo", "value"),
          Parameter("ParamThree", "value")
     )
-    assert isinstance(p, Parameter | Tuple | List)
+    assert isinstance(p, Parameter | Tuple | List | Set)
     for _ in p: assert isinstance(_, Parameter)
 
     await s.write(*p)
@@ -40,16 +42,12 @@ async def test_settings_write(tmp_path):
     assert fullpath.is_file()
     assert fullpath.stat().st_size > 0
 
-@pytest.mark.asyncio
-async def test_settings_read(tmp_path):
-    s = Settings(path=tmp_path, filename=test_setting_filename)
-    assert isinstance(s, Settings)
-    fullpath = s.path.joinpath(s.filename)
-    assert fullpath.exists()
-    assert fullpath.is_file()
-    assert fullpath.stat().st_size > 0
+    p_get = await s.read()
+    p_exp = list(p)
+    assert isinstance(p_get, List)
+    for i, param in enumerate(p_get):
+        assert isinstance(param, Parameter)
+        assert param.name == p_exp[i].name
+        assert param.value == p_exp[i].value
 
-    p = await s.read()
-    assert isinstance(p, Parameter | Tuple | List)
-    for _ in p: assert isinstance(_, Parameter)
     Path(s.filename).unlink()
