@@ -1,8 +1,7 @@
 import sys
-import sys
 import time
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List, Optional
 
 import aiohttp
 from PyQt6 import QtCore
@@ -23,10 +22,11 @@ class MainWindow(QMainWindow):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._is_downloading: bool = False
 
         self._settings_file: Settings = Settings()
         self._last_launch = int(time.time())
+        self._music: Optional[Base] = None
+        self._genres: Dict[str, str] = {}
 
         self.setWindowIcon(QIcon("logo.ico"))
 
@@ -110,26 +110,22 @@ class MainWindow(QMainWindow):
         self.progBar.setVisible(False)
         self.progBar.setMaximum(100)
 
-        self.lblMessage = QLabel(None, self)
+        self.lblMessage = QLabel("", self)
         self.lblMessage.setGeometry(10, 125, 520, 20)
         self.lblMessage.setVisible(False)
         self.lblMessage.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
-        self._music: Union[Base, None] = None
-        self._genres: Dict[str, str] = {}
-
     @asyncSlot()
     async def download_files(self):
         try:
-            if self._is_downloading:
+            if self._music:
                 self._music.cancel_downloading()
                 self.btnDownload.setText(Data.Inscriptions.Download)
-                self._is_downloading = False
                 self.progBar.setVisible(False)
+                self._music = None
                 return
             else:
                 self.btnDownload.setText(Data.Inscriptions.Cancel)
-                self._is_downloading = True
 
             self.lblMessage.setVisible(False)
             self.progBar.setVisible(True)
@@ -185,7 +181,6 @@ class MainWindow(QMainWindow):
         self._music.cancel_downloading()
         self.btnDownload.setText(Data.Inscriptions.Download)
         self.btnDownload.setChecked(False)
-        self._is_downloading = False
 
     def event_chb_period(self):
         if self.chbPeriod.isChecked():
@@ -260,8 +255,8 @@ class MainWindow(QMainWindow):
                     elif param.name == Data.Parameters.Quantity:
                         param.value = param.value \
                             if param.value.isnumeric() and int(param.value) <= abs(Data.MaxValues.quantity) \
-                            else abs(Data.DefaultValues.quantity)
-                        self.cmbQuantity.setCurrentText(str(param.value))
+                            else str(abs(Data.DefaultValues.quantity))
+                        self.cmbQuantity.setCurrentText(param.value)
 
                     elif param.name == Data.Parameters.Threads:
                         self.cmbThreads.setCurrentText(param.value)   # controlled by Qt

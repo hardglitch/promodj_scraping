@@ -21,5 +21,6 @@ class Start:
         server_address = ("127.0.0.1", 8181)
         server_socket.bind(server_address)
         server_socket.listen()
+
         connection, client_address = server_socket.accept()
 

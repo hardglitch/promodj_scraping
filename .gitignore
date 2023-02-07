@@ -17,4 +17,5 @@
 !README.md
 !_bandit_run.bat
 !_build_app_win.bat
+!_pyright_run.bat
 !.gitignore

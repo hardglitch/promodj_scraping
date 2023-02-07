@@ -23,7 +23,7 @@ class Parameter:
     def value_check(self, value: str) -> str:
         assert isinstance(value, str)
         if not value:
-            raise "Parameter Value is incorrect"
+            raise ValueError("Parameter Value is incorrect")
         return value[:1000]
 
 
@@ -65,8 +65,7 @@ class Settings:
 
         except FileNotFoundError:
             print("Settings file not found")
-        except UnicodeDecodeError:
+        except UnicodeDecodeError or TypeError:
             print("Settings file found but corrupted")
         except IOError as error:
             print("IOError -", error)
-

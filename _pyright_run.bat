@@ -3,7 +3,7 @@
 @CHCP 65001
 
 CALL venv\scripts\activate.bat
-bandit -r main.py tests modules utils -n 3 -lll -f html -o check_result.html
+pyright -p . 
 CALL venv\scripts\deactivate.bat
 
 pause

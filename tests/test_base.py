@@ -1,4 +1,4 @@
-import asyncio
+from concurrent.futures import Future
 from pathlib import Path
 
 import aiohttp
@@ -7,7 +7,7 @@ from modules.base import Base
 from modules.data import Data
 from tests.prerequisites import Start
 
-prerequisites = Start()
+Start()
 
 def test_default_values():
     b = Base()
@@ -21,7 +21,7 @@ def test_default_values():
     assert b.is_rewrite_files == Data.DefaultValues.is_rewrite_files
     assert b.is_file_history == Data.DefaultValues.is_file_history
 
-    assert b._download_future is None
+    assert b._downloading is None
     assert b._session is None
 
     assert b.progress
@@ -41,7 +41,7 @@ def test_default_types():
     assert isinstance(b.is_rewrite_files, bool)
     assert isinstance(b.is_file_history, bool)
 
-    assert isinstance(b._download_future, asyncio.Future | None)
+    assert isinstance(b._downloading, Future | None)
     assert isinstance(b._session, aiohttp.ClientSession | None)
 
     assert isinstance(b.total_size, int)

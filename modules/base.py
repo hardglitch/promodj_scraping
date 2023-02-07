@@ -1,8 +1,9 @@
 import asyncio
 import urllib.parse
+from concurrent.futures import Future
 from pathlib import Path
 from time import time
-from typing import Awaitable, List, Set, Tuple, Union
+from typing import Awaitable, List, Optional, Set, Tuple
 
 import aiofiles
 import aiohttp
@@ -45,8 +46,8 @@ class Base(QMainWindow):
         self.is_rewrite_files: bool = is_rewrite_files
         self.is_file_history: bool = is_file_history
 
-        self._download_future: Union[asyncio.Future, None] = None
-        self._session: Union[aiohttp.ClientSession, None] = None
+        self._downloading: Optional[Future] = None
+        self._session: Optional[aiohttp.ClientSession] = None
 
 
     def get_filtered_links(self, links_massive: ResultSet) -> Set[str]:
@@ -54,7 +55,7 @@ class Base(QMainWindow):
         assert isinstance(links_massive, ResultSet)
 
         filtered_links = set()
-        formats: Tuple[str] = Data.LOSSLESS_FORMATS if self.is_lossless else Data.LOSSY_FORMATS
+        formats: Tuple = Data.LOSSLESS_FORMATS if self.is_lossless else Data.LOSSY_FORMATS
         for link in links_massive:
             for frmt in formats:
                 if link.has_attr("href") and link["href"].find(frmt) > -1 and link["href"].find("/source/") > -1:
@@ -170,9 +171,8 @@ class Base(QMainWindow):
 
 
     def start_downloading(self):
-        self._download_future: asyncio.Future = \
-            asyncio.run_coroutine_threadsafe(self.get_files(), asyncio.get_event_loop())
+        self._downloading = asyncio.run_coroutine_threadsafe(self.get_files(), asyncio.get_event_loop())
 
     def cancel_downloading(self):
-        if self._download_future:
-            asyncio.get_event_loop().call_soon_threadsafe(self._download_future.cancel)
+        if self._downloading:
+            asyncio.get_event_loop().call_soon_threadsafe(self._downloading.cancel)
