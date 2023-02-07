@@ -11,12 +11,9 @@ if __name__ == "__main__":
     loop = QEventLoop(app)
     asyncio.set_event_loop(loop)
 
-    try:
-        window = gui.MainWindow(loop)
-        window.set_settings()
-        window.show()
-    except AttributeError:
-        sys.exit()
+    window = gui.MainWindow()
+    window.set_settings()
+    window.show()
 
     with loop:
         loop.run_forever()

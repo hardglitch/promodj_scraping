@@ -1,9 +1,10 @@
 import asyncio
 import string
 import sys
-from typing import Callable, Iterable
+from typing import Callable, Iterable, Optional
 
 from PyQt6.QtWidgets import QApplication
+from qasync import QEventLoop
 
 from modules.gui import MainWindow
 from utils import tools
@@ -19,17 +20,14 @@ DICTS = (({x: y} for x in (*BASE_TYPES, LIST) if not isinstance(x, Iterable)) fo
 SPECIAL_CHARS = string.punctuation
 TEST_PARAMETERS = (*BASE_TYPES, LIST, *[([x for x in y]) for y in DICTS], *SPECIAL_CHARS)
 
-TEST_LOOP = asyncio.new_event_loop()
-
 class MockSettings(Settings):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.path, self.name = args
 
 class MockMainWindow(MainWindow):
-    def __init__(self, *args, settings: Settings = None, **kwargs):
+    def __init__(self, *args, settings: Optional[Settings], **kwargs):
         super().__init__(*args, **kwargs)
-        self._loop = TEST_LOOP
         self._settings_file = settings
 
 def test(obj: Callable, params_range: int = 5,
@@ -58,7 +56,7 @@ def test(obj: Callable, params_range: int = 5,
                 param1 = tools.random_string(1010, path_friendly=True)
                 param2 = tools.random_string(1010, path_friendly=True)
                 if obj.__name__ == "MockMainWindow":
-                    obj(loop=TEST_LOOP, settings=Settings(param1, param2))
+                    obj(settings=Settings(param1, param2))
                 else: obj(param1, param2)
             except AssertionError:
                 if print_process: print(f"ERROR CAUGHT - '{obj.__name__}'")
@@ -80,5 +78,6 @@ def all_tests():
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    asyncio.set_event_loop(TEST_LOOP)
+    loop = QEventLoop()
+    asyncio.set_event_loop(loop)
     all_tests()

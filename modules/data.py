@@ -4,10 +4,9 @@ from typing import Tuple
 @dataclass()
 class Data:
 
-    FORMS: Tuple[str] = ("mixes", "tracks", "lives")
-
-    LOSSLESS_FORMATS: Tuple[str] = (".flac", ".wav", ".aiff", ".alac", ".tta", ".ape", ".wv")
-    LOSSY_FORMATS: Tuple[str] = (".mp3",)
+    FORMS: Tuple = ("mixes", "tracks", "lives")
+    LOSSLESS_FORMATS: Tuple = (".flac", ".wav", ".aiff", ".alac", ".tta", ".ape", ".wv")
+    LOSSY_FORMATS: Tuple = (".mp3",)
     DB_NAME: str = "history.db"
 
     class DefaultValues:

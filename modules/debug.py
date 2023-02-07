@@ -2,7 +2,7 @@ import functools
 import logging
 from dataclasses import dataclass
 from time import gmtime, strftime
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 
 @dataclass()
@@ -13,7 +13,7 @@ class Constants:
     LOG_FILE = "logging.log"
 
 
-def log(message: str, error: Exception = None):
+def log(message: str, error: Optional[Exception] = None):
     assert isinstance(message, str)
     assert isinstance(error, Exception | None)
     message = message[:1000]
