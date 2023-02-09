@@ -97,12 +97,10 @@ class MainWindow(QMainWindow):
 
         self.btnDownload = QPushButton(Data.Inscriptions.Download, self)
         self.btnDownload.move(270, 160)
-        self.btnDownload.setCheckable(True)
         self.btnDownload.clicked.connect(self.download_files)
 
         self.btnExit = QPushButton(Data.Inscriptions.Exit, self)
         self.btnExit.move(160, 160)
-        self.btnExit.setCheckable(True)
         self.btnExit.clicked.connect(self.exit)
 
         self.progBar = QProgressBar(self)
@@ -184,9 +182,10 @@ class MainWindow(QMainWindow):
         else:
             self.lblMessage.setText(Messages.MatchingFilesNotFound)
 
-        self._music.cancel_downloading()
         self.btnDownload.setText(Data.Inscriptions.Download)
         self.btnDownload.setChecked(False)
+        self._music.cancel_downloading()
+        self._music = None
 
     def search(self, value: int, mode: int):
         if self.progBar.isVisible(): self.progBar.setVisible(False)

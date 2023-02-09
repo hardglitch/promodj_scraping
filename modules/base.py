@@ -117,8 +117,8 @@ class Base(QMainWindow):
 
         found_links: Set[str] = await db.filter_by_history(found_links) if self.is_file_history else found_links
         f_links: List[str] = list(found_links)[:self.quantity] if not self.is_period else list(found_links)
-        if len(f_links) <= 20: await self.get_total_filesize(f_links)
-        return f_links
+        if 0 < len(f_links) <= 20: await self.get_total_filesize(f_links)
+        return f_links if f_links else self.succeeded.emit(0)
 
 
     async def get_file_by_link(self, link: str):
@@ -180,7 +180,6 @@ class Base(QMainWindow):
 
                 all_links: List[str] = await self.get_all_links()
                 assert isinstance(all_links, List)
-                if not all_links: return self.succeeded.emit(0)
 
                 tasks = []
                 for link in all_links:
