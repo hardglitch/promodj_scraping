@@ -112,24 +112,27 @@ class MainWindow(QMainWindow):
 
         self.lblMessage = QLabel("", self)
         self.lblMessage.setGeometry(10, 125, 520, 20)
-        self.lblMessage.setVisible(False)
         self.lblMessage.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+
+        self.lblFiles = QLabel("", self)
+        self.lblFiles.move(30, 160)
+        self.lblFiles.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
     @asyncSlot()
     async def download_files(self):
         try:
+            self.progBar.setVisible(False)
+            self.lblFiles.setText("")
+            self.lblMessage.setText("")
+
             if self._music:
                 self._music.cancel_downloading()
                 self.btnDownload.setText(Data.Inscriptions.Download)
-                self.progBar.setVisible(False)
                 self._music = None
                 return
-            else:
-                self.btnDownload.setText(Data.Inscriptions.Cancel)
 
-            self.lblMessage.setVisible(False)
-            self.progBar.setVisible(True)
             self.progBar.setValue(0)
+            self.btnDownload.setText(Data.Inscriptions.Cancel)
 
             quantity: int = int(self.cmbQuantity.currentText()) \
                 if self.cmbQuantity.currentText().isnumeric() \
@@ -151,6 +154,8 @@ class MainWindow(QMainWindow):
 
             self._music.progress.connect(self.progBar.setValue)
             self._music.succeeded.connect(self.download_successed)
+            self._music.search.connect(self.search)
+            self._music.file_info.connect(self.file_info)
             self._music.start_downloading()
 
             await self._settings_file.write(
@@ -171,16 +176,28 @@ class MainWindow(QMainWindow):
 
 
     def download_successed(self, value: int):
+        self.progBar.setVisible(False)
+        self.lblFiles.setText("")
+
         if value == 1:
-            self.progBar.setValue(self.progBar.maximum())
+            self.lblMessage.setText(Messages.AllFilesDownloaded)
         else:
-            self.progBar.setVisible(False)
-            self.lblMessage.setVisible(True)
             self.lblMessage.setText(Messages.MatchingFilesNotFound)
 
         self._music.cancel_downloading()
         self.btnDownload.setText(Data.Inscriptions.Download)
         self.btnDownload.setChecked(False)
+
+    def search(self, value: int, mode: int):
+        if self.progBar.isVisible(): self.progBar.setVisible(False)
+        if mode == 0: self.lblMessage.setText(Messages.Searching + "." * value)
+        elif mode == 1: self.lblMessage.setText(Messages.LinkAnalysis + "." * value)
+        else:
+            self.lblMessage.setText("")
+            self.progBar.setVisible(True)
+
+    def file_info(self, total_downloaded: int, total_files: int):
+        self.lblFiles.setText(f"{total_downloaded}/{total_files}")
 
     def event_chb_period(self):
         if self.chbPeriod.isChecked():

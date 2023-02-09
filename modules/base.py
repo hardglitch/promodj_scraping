@@ -3,7 +3,7 @@ import urllib.parse
 from concurrent.futures import Future
 from pathlib import Path
 from time import time
-from typing import Awaitable, List, Optional, Set, Tuple
+from typing import List, Optional, Set, Tuple
 
 import aiofiles
 import aiohttp
@@ -20,8 +20,11 @@ class Base(QMainWindow):
 
     progress = pyqtSignal(int)
     succeeded = pyqtSignal(int)
-    total_size: int = 0
-    total_downloaded: int = 0
+    search = pyqtSignal(int, int)
+    file_info = pyqtSignal(int, int)
+    _total_files: int = 0
+    _total_downloaded_files: int = 0
+    _total_downloaded: int = 0
 
     def __init__(self,
                  download_dir: str = Data.DefaultValues.download_dir,
@@ -47,8 +50,8 @@ class Base(QMainWindow):
         self.is_file_history: bool = is_file_history
 
         self._downloading: Optional[Future] = None
+        self._search: Optional[Future] = None
         self._session: Optional[aiohttp.ClientSession] = None
-
 
     def get_filtered_links(self, links_massive: ResultSet) -> Set[str]:
         if not links_massive: debug.log(Messages.Errors.NoLinksToFiltering)
@@ -72,7 +75,7 @@ class Base(QMainWindow):
         period: str = f"period=last&period_last={self.quantity}d&" if self.is_period else ""
         while (len(found_links) < self.quantity and not self.is_period) or self.is_period:
             link = f"https://promodj.com/{self.form}/{self.genre}?{period}bitrate={bitrate}&page={page}"
-            async with self._session.get(link) as response:
+            async with self._session.get(link, timeout=None) as response:
                 if response.status != 200: break
                 text = str(await response.read())
                 links = BeautifulSoup(urllib.parse.unquote(text), features="html.parser").findAll("a")
@@ -83,25 +86,11 @@ class Base(QMainWindow):
                 if not found_links_on_page & found_links:
                     found_links |= found_links_on_page
                 else: break
+                self.search.emit(page, 0)
                 page += 1
 
         found_links: Set[str] = await db.filter_by_history(found_links) if self.is_file_history else found_links
         return list(found_links)[:self.quantity] if not self.is_period else list(found_links)
-
-
-    async def get_total_filesize(self, links: List[str]):
-        if not links: debug.log(Messages.Errors.NoLinksToDownload)
-        assert isinstance(links, List)
-        for link in links: assert isinstance(link, str)
-        async def micro_task(micro_link: str):
-            async with self._session.get(micro_link) as response:
-                if response.status != 200: return debug.log(Messages.Errors.SomethingWentWrong)
-                self.total_size += response.content_length
-
-        micro_tasks: List[Awaitable] = []
-        for link in links: micro_tasks.append(asyncio.ensure_future(micro_task(link)))
-        await asyncio.gather(*micro_tasks)
-        if not micro_tasks: self.succeeded.emit(0)
 
 
     async def get_file_by_link(self, link: str):
@@ -116,32 +105,39 @@ class Base(QMainWindow):
             if Path(filepath).exists() and self.is_rewrite_files and not self.is_file_history \
                or not Path(filepath).exists()\
             else filename[:ext_pos] + "_" + ext_time + filename[ext_pos:]
+        self.file_info.emit(self._total_downloaded_files, self._total_files)
 
         @debug.is_download()
         async def download() -> None:
             async with self._session.get(link, timeout=None) as response:
-                if response.status != 200: return debug.log(Messages.Errors.SomethingWentWrong)
+                if response.status != 200: return debug.log(Messages.Errors.SomethingWentWrong + f" (get_file_by_link)")
 
                 async with aiofiles.open(filepath, "wb") as file:
                     debug.print_message(f"Downloading {filename}...\nLink - {link}")
 
-                    chunk_size = 16144
+                    chunk_size: int = 16144
+                    current_file_downloaded_size: int = 0
+                    filesize = response.content_length
                     async for chunk in response.content.iter_chunked(chunk_size):
                         if not chunk: break
-                        self.total_downloaded += chunk_size
-                        if self.total_size > 0:
-                            self.progress.emit(int(100 * self.total_downloaded / (self.total_size * 1.21)))
+                        if self._total_files > 0:
+                            self.progress.emit(round((100 * self._total_downloaded_files / self._total_files) +
+                                    (100 * current_file_downloaded_size / (filesize * 1.2 * self._total_files))))
+                        current_file_downloaded_size += chunk_size
                         await file.write(chunk)
+                    self._total_downloaded += filesize
 
         await download()
         debug.print_message(f"File save as {filepath}")
+        self._total_downloaded_files += 1
 
         if self.is_file_history:
             await db.write_file_history(link=link, date=int(time()))
 
 
     async def threads_limiter(self, sem: asyncio.Semaphore, link: str) -> None:
-        assert isinstance(sem, asyncio.Semaphore) and isinstance(link, str)
+        assert isinstance(sem, asyncio.Semaphore)
+        assert isinstance(link, str)
         async with sem:
             return await self.get_file_by_link(link)
 
@@ -153,15 +149,15 @@ class Base(QMainWindow):
 
                 sem = asyncio.Semaphore(self.threads)
 
-                tasks = []
                 all_links: List[str] = await self.get_all_links()
                 assert isinstance(all_links, List)
                 if not all_links: return self.succeeded.emit(0)
 
-                await self.get_total_filesize(all_links)
-
+                tasks = []
                 for link in all_links:
                     tasks.append(asyncio.ensure_future(self.threads_limiter(sem=sem, link=link)))
+                self.search.emit(0, 2)
+                self._total_files = len(tasks)
                 await asyncio.gather(*tasks)
 
                 if tasks: self.succeeded.emit(1)
