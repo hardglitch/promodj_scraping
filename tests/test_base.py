@@ -26,11 +26,12 @@ def test_default_values():
 
     assert b.progress
     assert b.succeeded
-    b._total_files: int = 0
-    b._total_downloaded_files: int = 0
-    b._total_downloaded: int = 0
-    _all_thread_current_file_downloaded_size: int = 0
-    _all_thread_filesize: int = 0
+    assert b.search
+    assert b.file_info
+    assert b._total_files == 0
+    assert b._total_downloaded_files == 0
+    assert b._total_downloaded == 0
+    assert b._total_size == 0
 
 def test_default_types():
     b = Base()
@@ -47,5 +48,7 @@ def test_default_types():
     assert isinstance(b._downloading, Future | None)
     assert isinstance(b._session, aiohttp.ClientSession | None)
 
-    assert isinstance(b.total_size, int)
-    assert isinstance(b.total_downloaded, int)
+    assert isinstance(b._total_files, int)
+    assert isinstance(b._total_downloaded_files, int)
+    assert isinstance(b._total_downloaded, int)
+    assert isinstance(b._total_size, int)
