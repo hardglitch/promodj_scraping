@@ -17,7 +17,7 @@ class Data:
         threads: int = 1
         is_lossless: bool = True
         is_period: bool = False
-        is_rewrite_files: bool = True
+        is_rewrite_files: bool = False
         is_file_history: bool = True
 
     class MaxValues:

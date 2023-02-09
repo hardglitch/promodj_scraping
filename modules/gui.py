@@ -258,16 +258,16 @@ class MainWindow(QMainWindow):
                         self.cmbForm.setCurrentText(param.value)
 
                     elif param.name == Data.Parameters.Lossless and param.value in ["0", "1"]:
-                        self.chbFormat.setChecked(int(param.value))
+                        self.chbFormat.setChecked(bool(int(param.value)))
 
                     elif param.name == Data.Parameters.Period and param.value in ["0", "1"]:
-                        self.chbPeriod.setChecked(int(param.value))
+                        self.chbPeriod.setChecked(bool(int(param.value)))
 
                     elif param.name == Data.Parameters.RewriteFiles and param.value in ["0", "1"]:
-                        self.chbRewriteFiles.setChecked(int(param.value))
+                        self.chbRewriteFiles.setChecked(bool(int(param.value)))
 
                     elif param.name == Data.Parameters.FileHistory and param.value in ["0", "1"]:
-                        self.chbFileHistory.setChecked(int(param.value))
+                        self.chbFileHistory.setChecked(bool(int(param.value)))
 
                     elif param.name == Data.Parameters.Quantity:
                         param.value = param.value \

@@ -26,7 +26,7 @@ class MockSettings(Settings):
         self.path, self.name = args
 
 class MockMainWindow(MainWindow):
-    def __init__(self, *args, settings: Optional[Settings], **kwargs):
+    def __init__(self, settings: Optional[Settings], *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._settings_file = settings
 
