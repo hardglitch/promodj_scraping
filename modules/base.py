@@ -1,9 +1,10 @@
 import asyncio
+import inspect
 import urllib.parse
 from concurrent.futures import Future
 from pathlib import Path
-from time import time
-from typing import List, Optional, Set, Tuple
+from time import sleep, time
+from typing import Awaitable, List, Optional, Set, Tuple
 
 import aiofiles
 import aiohttp
@@ -25,8 +26,7 @@ class Base(QMainWindow):
     _total_files: int = 0
     _total_downloaded_files: int = 0
     _total_downloaded: int = 0
-    _current_file_downloaded_size: int = 0
-    _filesize: int = 0
+    _total_size: int = 0
 
     def __init__(self,
                  download_dir: str = Data.DefaultValues.download_dir,
@@ -64,21 +64,45 @@ class Base(QMainWindow):
         for link in links_massive:
             for frmt in formats:
                 if link.has_attr("href") and link["href"].find(frmt) > -1 and link["href"].find("/source/") > -1:
-                    filtered_links.add(link["href"])    # deduplication
+                    filtered_links.add(link["href"])
         return filtered_links
+
+    async def get_total_filesize(self, links: List[str]):
+        if not links: debug.log(Messages.Errors.NoLinksToDownload + f" in {inspect.stack()[0][3]}")
+        assert isinstance(links, List)
+        for link in links: assert isinstance(link, str)
+
+        async def micro_task(micro_link: str, counter: int):
+            async with self._session.get(micro_link, timeout=None) as response:
+                if response.status != 200:
+                    return debug.log(Messages.Errors.SomethingWentWrong
+                                     + f" in {inspect.stack()[0][3]}. {response.status=}")
+                self._total_size += response.content_length
+                self.search.emit(counter, 1)
+                sleep(0.1)
+
+        count: int = 0
+        micro_tasks: List[Awaitable] = []
+        for link in links:
+            count += 1
+            micro_tasks.append(asyncio.ensure_future(micro_task(link, count)))
+        await asyncio.gather(*micro_tasks)
+        if not micro_tasks: self.succeeded.emit(0)
 
 
     async def get_all_links(self) -> List[str]:
         if not self._session: debug.log(Messages.Errors.UnableToDownload)
 
         page: int = 1
-        found_links: Set[str] = set()
+        found_links = set()
         bitrate: str = "lossless" if self.is_lossless else "high"
         period: str = f"period=last&period_last={self.quantity}d&" if self.is_period else ""
         while (len(found_links) < self.quantity and not self.is_period) or self.is_period:
             link = f"https://promodj.com/{self.form}/{self.genre}?{period}bitrate={bitrate}&page={page}"
             async with self._session.get(link, timeout=None) as response:
-                if response.status != 200: break
+                if response.status != 200:
+                    return debug.log(Messages.Errors.SomethingWentWrong
+                                     + f" in {inspect.stack()[0][3]}. {response.status=}")
                 text = str(await response.read())
                 links = BeautifulSoup(urllib.parse.unquote(text), features="html.parser").findAll("a")
 
@@ -92,7 +116,9 @@ class Base(QMainWindow):
                 page += 1
 
         found_links: Set[str] = await db.filter_by_history(found_links) if self.is_file_history else found_links
-        return list(found_links)[:self.quantity] if not self.is_period else list(found_links)
+        f_links: List[str] = list(found_links)[:self.quantity] if not self.is_period else list(found_links)
+        if len(f_links) <= 20: await self.get_total_filesize(f_links)
+        return f_links
 
 
     async def get_file_by_link(self, link: str):
@@ -107,30 +133,32 @@ class Base(QMainWindow):
             if Path(filepath).exists() and self.is_rewrite_files and not self.is_file_history \
                or not Path(filepath).exists()\
             else filename[:ext_pos] + "_" + ext_time + filename[ext_pos:]
-        self.file_info.emit(self._total_downloaded_files, self._total_files)
 
         @debug.is_download()
         async def download() -> None:
             async with self._session.get(link, timeout=None) as response:
-                if response.status != 200: return debug.log(Messages.Errors.SomethingWentWrong + f" (get_file_by_link)")
+                if response.status != 200:
+                    return debug.log(Messages.Errors.SomethingWentWrong
+                                     + f" in {inspect.stack()[0][3]}. {response.status=}")
 
                 async with aiofiles.open(filepath, "wb") as file:
                     debug.print_message(f"Downloading {filename}...\nLink - {link}")
 
                     chunk_size: int = 16144
-                    self._filesize = response.content_length
                     async for chunk in response.content.iter_chunked(chunk_size):
                         if not chunk: break
-                        if self._total_files > 0:
-                            self.progress.emit(round((100 * self._total_downloaded_files / self._total_files) +
-                                    (100 * self._current_file_downloaded_size / (self._filesize * 1.2 * self._total_files))))
-                        self._current_file_downloaded_size += chunk_size
+                        if 0 < self._total_files <= 20:
+                            self.progress.emit(round(100 * self._total_downloaded / (self._total_size * 1.2)))
+                        elif self._total_files > 20:
+                            self.progress.emit(round((100 * self._total_downloaded_files / self._total_files)))
+                        self._total_downloaded += chunk_size
                         await file.write(chunk)
-                    self._total_downloaded += self._filesize
 
+        self.file_info.emit(self._total_downloaded_files, self._total_files)
         await download()
         debug.print_message(f"File save as {filepath}")
         self._total_downloaded_files += 1
+        self.file_info.emit(self._total_downloaded_files, self._total_files)
 
         if self.is_file_history:
             await db.write_file_history(link=link, date=int(time()))

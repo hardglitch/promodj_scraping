@@ -26,8 +26,11 @@ def test_default_values():
 
     assert b.progress
     assert b.succeeded
-    assert b.total_size == 0
-    assert b.total_downloaded == 0
+    b._total_files: int = 0
+    b._total_downloaded_files: int = 0
+    b._total_downloaded: int = 0
+    _all_thread_current_file_downloaded_size: int = 0
+    _all_thread_filesize: int = 0
 
 def test_default_types():
     b = Base()

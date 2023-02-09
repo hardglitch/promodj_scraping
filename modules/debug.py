@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from time import gmtime, strftime
 from typing import Any, Callable, Optional
 
-
 @dataclass()
 class Constants:
     IS_DOWNLOAD = True     # download simulation (True = Real, False = Simulate)
@@ -35,3 +34,4 @@ def is_download() -> Any:
             return await func(*args, **kwargs) if Constants.IS_DOWNLOAD else None
         return wrapped
     return wrapper
+
