@@ -25,6 +25,8 @@ class Base(QMainWindow):
     _total_files: int = 0
     _total_downloaded_files: int = 0
     _total_downloaded: int = 0
+    _current_file_downloaded_size: int = 0
+    _filesize: int = 0
 
     def __init__(self,
                  download_dir: str = Data.DefaultValues.download_dir,
@@ -116,16 +118,15 @@ class Base(QMainWindow):
                     debug.print_message(f"Downloading {filename}...\nLink - {link}")
 
                     chunk_size: int = 16144
-                    current_file_downloaded_size: int = 0
-                    filesize = response.content_length
+                    self._filesize = response.content_length
                     async for chunk in response.content.iter_chunked(chunk_size):
                         if not chunk: break
                         if self._total_files > 0:
                             self.progress.emit(round((100 * self._total_downloaded_files / self._total_files) +
-                                    (100 * current_file_downloaded_size / (filesize * 1.2 * self._total_files))))
-                        current_file_downloaded_size += chunk_size
+                                    (100 * self._current_file_downloaded_size / (self._filesize * 1.2 * self._total_files))))
+                        self._current_file_downloaded_size += chunk_size
                         await file.write(chunk)
-                    self._total_downloaded += filesize
+                    self._total_downloaded += self._filesize
 
         await download()
         debug.print_message(f"File save as {filepath}")
