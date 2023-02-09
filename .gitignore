@@ -18,4 +18,5 @@
 !_bandit_run.bat
 !_build_app_win.bat
 !_pyright_run.bat
+!pyrightconfig.json
 !.gitignore
