@@ -148,7 +148,7 @@ class Base(QMainWindow):
                     async for chunk in response.content.iter_chunked(chunk_size):
                         if not chunk: break
                         if 0 < self._total_files <= 20:
-                            self.progress.emit(round(100 * self._total_downloaded / (self._total_size * 1.2)))
+                            self.progress.emit(round(100 * self._total_downloaded / (self._total_size * 1.21)))
                         elif self._total_files > 20:
                             self.progress.emit(round((100 * self._total_downloaded_files / self._total_files)))
                         self._total_downloaded += chunk_size
