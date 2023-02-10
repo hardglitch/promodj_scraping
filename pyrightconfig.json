@@ -1,0 +1,11 @@
+{
+  "include": [
+    "modules",
+    "tests",
+    "utils"
+  ],
+  
+  "exclude": [
+    "**/__pycache__"
+  ]
+}

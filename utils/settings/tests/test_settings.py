@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import List, Set, Tuple
 
+import aiofiles
 import pytest
 
 from utils.settings.settings import Parameter, Settings
@@ -49,5 +50,31 @@ async def test_settings_write_read(tmp_path):
         assert isinstance(param, Parameter)
         assert param.name == p_exp[i].name
         assert param.value == p_exp[i].value
+
+    Path(s.filename).unlink()
+
+@pytest.mark.asyncio
+async def test_settings_base_illegal_read(tmp_path):
+    s = Settings(path=tmp_path, filename=test_setting_filename)
+    assert isinstance(s, Settings)
+
+    base_test_parameters = [
+        "",
+        "      ",
+        " = \n = ",
+        "2 = ",
+        "2=",
+        "= 2  ",
+        "=",
+        "a=",
+    ]
+
+    fullpath = s.path.joinpath(s.filename)
+    for p in base_test_parameters:
+        async with aiofiles.open(fullpath, "w") as file:
+            await file.writelines(p)
+        assert fullpath.exists()
+        assert fullpath.is_file()
+        assert not await s.read()
 
     Path(s.filename).unlink()

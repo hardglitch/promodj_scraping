@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import List, Union
+from typing import List, Optional, Union
 
 import aiofiles
 from aiofiles.threadpool.text import AsyncTextIOWrapper
@@ -47,7 +47,7 @@ class Settings:
             print("IOError -", error)
 
 
-    async def read(self) -> List[Parameter]:
+    async def read(self) -> Optional[List[Parameter]]:
         try:
             async with aiofiles.open(Path.joinpath(self.path, self.filename), "r", encoding="utf-8") as file:
                 assert isinstance(file, AsyncTextIOWrapper)
@@ -61,11 +61,14 @@ class Settings:
                         if name and value:
                             settings_list.append(Parameter(name, value))
 
-                return settings_list
+                return settings_list if settings_list else None
 
         except FileNotFoundError:
             print("Settings file not found")
+            return None
         except UnicodeDecodeError or TypeError:
             print("Settings file found but corrupted")
+            return None
         except IOError as error:
             print("IOError -", error)
+            return None

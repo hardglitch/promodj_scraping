@@ -1,6 +1,6 @@
 PyQt6==6.4.2
 aiohttp==3.8.3
 qasync==0.23.0
-aiofiles==22.1.0
+aiofiles==23.1.0
 aiosqlite==0.18.0
 beautifulsoup4==4.11.2

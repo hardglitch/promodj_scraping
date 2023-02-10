@@ -1,12 +1,8 @@
-import asyncio
 import string
-import sys
 from typing import Callable, Iterable, Optional
 
-from PyQt6.QtWidgets import QApplication
-from qasync import QEventLoop
-
 from modules.gui import MainWindow
+from tests.prerequisites import Start
 from utils import tools
 from utils.settings.settings import Settings
 
@@ -20,18 +16,20 @@ DICTS = (({x: y} for x in (*BASE_TYPES, LIST) if not isinstance(x, Iterable)) fo
 SPECIAL_CHARS = string.punctuation
 TEST_PARAMETERS = (*BASE_TYPES, LIST, *[([x for x in y]) for y in DICTS], *SPECIAL_CHARS)
 
+Start()
+
 class MockSettings(Settings):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.path, self.name = args
 
 class MockMainWindow(MainWindow):
-    def __init__(self, *args, settings: Optional[Settings], **kwargs):
+    def __init__(self, settings: Optional[Settings], *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._settings_file = settings
 
-def test(obj: Callable, params_range: int = 5,
-         cycles: int = 1000, print_process: bool = False, mode: int = FULL_CHAOS):
+def hard_test(obj: Callable, params_range: int = 5,
+         cycles: int = 1000, print_process: bool = False, mode: int = FULL_CHAOS) -> bool:
 
     def recursive_func(*args, n: int = 0):
         for tp in TEST_PARAMETERS:
@@ -51,7 +49,7 @@ def test(obj: Callable, params_range: int = 5,
 
     if mode == LEGAL_ARGUMENTS:
         for _ in range(cycles):
-            print(f"{_*100/cycles: <4.1f}", end="")
+            # print(f"{_*100/cycles: <4.1f}", end="")
             try:
                 param1 = tools.random_string(1010, path_friendly=True)
                 param2 = tools.random_string(1010, path_friendly=True)
@@ -62,22 +60,18 @@ def test(obj: Callable, params_range: int = 5,
                 if print_process: print(f"ERROR CAUGHT - '{obj.__name__}'")
             except ValueError:
                 if print_process: print(f"ERROR CAUGHT - '{obj.__name__}'")
-            finally:
-                print("", end="\r")
+            # finally: print("", end="\r")
     else:
         recursive_func(n=params_range)
 
-    print(f"OK - '{obj.__name__}' in {mode=} tested.")
+    # print(f"OK - '{obj.__name__}' in {mode=} tested.")
+    return True
 
-@tools.perf_counter_decorator()
-def all_tests():
-    test(obj=MockMainWindow, mode=FULL_CHAOS)
-    test(obj=MockMainWindow, mode=HALF_LEGAL_ARGUMENTS)
-    test(obj=MockMainWindow, mode=LEGAL_ARGUMENTS)
+def test_start_settings_full_chaos():
+    assert hard_test(obj=MockMainWindow, mode=FULL_CHAOS)
 
+def test_start_settings_half_legal_arguments():
+    assert hard_test(obj=MockMainWindow, mode=HALF_LEGAL_ARGUMENTS)
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    loop = QEventLoop()
-    asyncio.set_event_loop(loop)
-    all_tests()
+def test_start_settings_legal_arguments():
+    assert hard_test(obj=MockMainWindow, mode=LEGAL_ARGUMENTS)

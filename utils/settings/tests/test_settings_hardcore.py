@@ -1,5 +1,5 @@
 import string
-from typing import Any, Callable, Generator, Iterable, Tuple
+from typing import Callable, Generator, Iterable, Tuple
 
 from utils import tools
 from utils.settings.settings import Parameter, Settings
@@ -25,11 +25,8 @@ class MockSettings(Settings):
         super().__init__(*args, **kwargs)
         self.path, self.name = args
 
-    def read(self, *args: Any) -> Any:
-        return args
 
-
-def test(obj: Callable, params_range: int = 5, cycles: int = 1000, mode: int = FULL_CHAOS):
+def hard_test(obj: Callable, params_range: int = 5, cycles: int = 1000, mode: int = FULL_CHAOS) -> bool:
 
     def recursive_func(*args, n: int = 0):
         for tp in TEST_PARAMETERS:
@@ -47,27 +44,30 @@ def test(obj: Callable, params_range: int = 5, cycles: int = 1000, mode: int = F
 
     if mode == LEGAL_ARGUMENTS:
         for _ in range(cycles):
-            print(f"{_*100/cycles: <4.1f}", end="")
+            # print(f"{_*100/cycles: <4.1f}", end="")
             try:
                 param1 = tools.random_string(1010, path_friendly=True)
                 param2 = tools.random_string(1010, path_friendly=True)
                 obj(param1, param2)
             except AssertionError: pass
             except ValueError: pass
-            finally: print("", end="\r")
+            # finally: print("", end="\r")
     else:
 
         recursive_func(n=params_range)
 
-    print(f"OK - '{obj.__name__}' in {mode=} tested.")
+    # print(f"OK - '{obj.__name__}' in {mode=} tested.")
+    return True
 
-@tools.perf_counter_decorator()
-def all_tests():
-    test(obj=MockParameter, mode=FULL_CHAOS)
-    test(obj=MockParameter, mode=LEGAL_ARGUMENTS)
-    test(obj=MockSettings, mode=FULL_CHAOS)
-    test(obj=MockSettings, mode=LEGAL_ARGUMENTS)
+def test_parameter_full_chaos():
+    assert hard_test(obj=MockParameter, mode=FULL_CHAOS)
 
+def test_parameter_legal_arguments():
+    assert hard_test(obj=MockParameter, mode=LEGAL_ARGUMENTS)
 
-if __name__ == "__main__":
-    all_tests()
+def test_settings_full_chaos():
+    assert hard_test(obj=MockSettings, mode=FULL_CHAOS)
+
+def test_settings_legal_arguments():
+    assert hard_test(obj=MockSettings, mode=LEGAL_ARGUMENTS)
+
