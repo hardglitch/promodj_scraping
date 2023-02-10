@@ -19,4 +19,4 @@ class Messages:
     MatchingFilesNotFound: str = "Matching files not found or already downloaded"
     AllFilesDownloaded: str = "100% - OK"
     Searching: str = "Searching"
-    LinkAnalysis: str = "Link Analysis"
+    Analysis: str = "Analysis"

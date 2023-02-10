@@ -190,7 +190,7 @@ class MainWindow(QMainWindow):
     def search(self, value: int, mode: int):
         if self.progBar.isVisible(): self.progBar.setVisible(False)
         if mode == 0: self.lblMessage.setText(Messages.Searching + "." * value)
-        elif mode == 1: self.lblMessage.setText(Messages.LinkAnalysis + "." * value)
+        elif mode == 1: self.lblMessage.setText(Messages.Analysis + "." * value)
         else:
             self.lblMessage.setText("")
             self.progBar.setVisible(True)
@@ -233,49 +233,44 @@ class MainWindow(QMainWindow):
 
     @asyncSlot()
     async def set_settings(self):
+        settings_list: Optional[List[Parameter]] = await self._settings_file.read()
+
+        if settings_list:
+            for param in settings_list:
+
+                if param.name == Data.Parameters.LastDownload and param.value.isnumeric():
+                    self._last_launch = abs(int(param.value))
+                    self.setWindowTitle(Data.Inscriptions.PromoDJMusicDownloaderExtended.replace("_",
+                                        str(int(abs((int(time.time()) - self._last_launch) / (3600 * 24))))))
+
+                elif param.name == Data.Parameters.DownloadDirectory and Path(param.value).exists():
+                    self.lblSaveTo.setText(str(Path(param.value)))
+
+                elif param.name == Data.Parameters.Genre and param.value in self._genres.keys():
+                    self.cmbGenre.setCurrentText(param.value)
+
+                elif param.name == Data.Parameters.Form and param.value in Data.FORMS:
+                    self.cmbForm.setCurrentText(param.value)
+
+                elif param.name == Data.Parameters.Lossless and param.value in ["0", "1"]:
+                    self.chbFormat.setChecked(bool(int(param.value)))
+
+                elif param.name == Data.Parameters.Period and param.value in ["0", "1"]:
+                    self.chbPeriod.setChecked(bool(int(param.value)))
+
+                elif param.name == Data.Parameters.RewriteFiles and param.value in ["0", "1"]:
+                    self.chbRewriteFiles.setChecked(bool(int(param.value)))
+
+                elif param.name == Data.Parameters.FileHistory and param.value in ["0", "1"]:
+                    self.chbFileHistory.setChecked(bool(int(param.value)))
+
+                elif param.name == Data.Parameters.Quantity:
+                    param.value = param.value \
+                        if param.value.isnumeric() and int(param.value) <= abs(Data.MaxValues.quantity) \
+                        else str(abs(Data.DefaultValues.quantity))
+                    self.cmbQuantity.setCurrentText(param.value)
+
+                elif param.name == Data.Parameters.Threads:
+                    self.cmbThreads.setCurrentText(param.value)   # controlled by Qt
+
         await self.set_genres()
-
-        try:
-            settings_list: List[Parameter] = await self._settings_file.read()
-
-            if settings_list:
-                for param in settings_list:
-
-                    if param.name == Data.Parameters.LastDownload and param.value.isnumeric():
-                        self._last_launch = abs(int(param.value))
-                        self.setWindowTitle(Data.Inscriptions.PromoDJMusicDownloaderExtended.replace("_",
-                                            str(int(abs((int(time.time()) - self._last_launch) / (3600 * 24))))))
-
-
-                    elif param.name == Data.Parameters.DownloadDirectory and Path(param.value).exists():
-                        self.lblSaveTo.setText(str(Path(param.value)))
-
-                    elif param.name == Data.Parameters.Genre and param.value in self._genres.keys():
-                        self.cmbGenre.setCurrentText(param.value)
-
-                    elif param.name == Data.Parameters.Form and param.value in Data.FORMS:
-                        self.cmbForm.setCurrentText(param.value)
-
-                    elif param.name == Data.Parameters.Lossless and param.value in ["0", "1"]:
-                        self.chbFormat.setChecked(bool(int(param.value)))
-
-                    elif param.name == Data.Parameters.Period and param.value in ["0", "1"]:
-                        self.chbPeriod.setChecked(bool(int(param.value)))
-
-                    elif param.name == Data.Parameters.RewriteFiles and param.value in ["0", "1"]:
-                        self.chbRewriteFiles.setChecked(bool(int(param.value)))
-
-                    elif param.name == Data.Parameters.FileHistory and param.value in ["0", "1"]:
-                        self.chbFileHistory.setChecked(bool(int(param.value)))
-
-                    elif param.name == Data.Parameters.Quantity:
-                        param.value = param.value \
-                            if param.value.isnumeric() and int(param.value) <= abs(Data.MaxValues.quantity) \
-                            else str(abs(Data.DefaultValues.quantity))
-                        self.cmbQuantity.setCurrentText(param.value)
-
-                    elif param.name == Data.Parameters.Threads:
-                        self.cmbThreads.setCurrentText(param.value)   # controlled by Qt
-
-        except FileNotFoundError:
-            pass

@@ -3,8 +3,8 @@ import inspect
 import urllib.parse
 from concurrent.futures import Future
 from pathlib import Path
-from time import sleep, time
-from typing import Awaitable, List, Optional, Set, Tuple
+from time import time
+from typing import List, Optional, Set, Tuple
 
 import aiofiles
 import aiohttp
@@ -54,13 +54,16 @@ class Base(QMainWindow):
         self._downloading: Optional[Future] = None
         self._search: Optional[Future] = None
         self._session: Optional[aiohttp.ClientSession] = None
+        self._file_threshold: int = 50
 
     def get_filtered_links(self, links_massive: ResultSet) -> Set[str]:
         if not links_massive: debug.log(Messages.Errors.NoLinksToFiltering)
         assert isinstance(links_massive, ResultSet)
 
         filtered_links = set()
-        formats: Tuple = Data.LOSSLESS_FORMATS if self.is_lossless else Data.LOSSY_FORMATS
+        formats: Tuple[str] = \
+            tuple(map(sum, zip(Data.LOSSLESS_COMPRESSED_FORMATS, Data.LOSSLESS_UNCOMPRESSED_FORMATS)))\
+            if self.is_lossless else Data.LOSSY_FORMATS
         for link in links_massive:
             for frmt in formats:
                 if link.has_attr("href") and link["href"].find(frmt) > -1 and link["href"].find("/source/") > -1:
@@ -73,21 +76,16 @@ class Base(QMainWindow):
         for link in links: assert isinstance(link, str)
 
         async def micro_task(micro_link: str, counter: int):
+            await asyncio.sleep(0.1)
             async with self._session.get(micro_link, timeout=None) as response:
                 if response.status != 200:
                     return debug.log(Messages.Errors.SomethingWentWrong
                                      + f" in {inspect.stack()[0][3]}. {response.status=}")
                 self._total_size += response.content_length
                 self.search.emit(counter, 1)
-                sleep(0.1)
 
-        count: int = 0
-        micro_tasks: List[Awaitable] = []
-        for link in links:
-            count += 1
-            micro_tasks.append(asyncio.ensure_future(micro_task(link, count)))
-        await asyncio.gather(*micro_tasks)
-        if not micro_tasks: self.succeeded.emit(0)
+        for count, link in enumerate(links):
+            await micro_task(link, count)
 
 
     async def get_all_links(self) -> List[str]:
@@ -100,9 +98,7 @@ class Base(QMainWindow):
         while (len(found_links) < self.quantity and not self.is_period) or self.is_period:
             link = f"https://promodj.com/{self.form}/{self.genre}?{period}bitrate={bitrate}&page={page}"
             async with self._session.get(link, timeout=None) as response:
-                if response.status != 200:
-                    return debug.log(Messages.Errors.SomethingWentWrong
-                                     + f" in {inspect.stack()[0][3]}. {response.status=}")
+                if response.status != 200: break
                 text = str(await response.read())
                 links = BeautifulSoup(urllib.parse.unquote(text), features="html.parser").findAll("a")
 
@@ -116,8 +112,16 @@ class Base(QMainWindow):
                 page += 1
 
         found_links: Set[str] = await db.filter_by_history(found_links) if self.is_file_history else found_links
-        f_links: List[str] = list(found_links)[:self.quantity] if not self.is_period else list(found_links)
-        if 0 < len(f_links) <= 20: await self.get_total_filesize(f_links)
+
+        # Convert {"1.wav", "1.flac", "2.flac", "2.wav"} to ['1.flac', '2.wav']
+        tmp_dict = {}
+        [tmp_dict.update({link.rsplit(".", 1)[0]: link.rsplit(".", 1)[1]}) for link in found_links]
+        f_links = []
+        [f_links.append(".".join(_)) for _ in tmp_dict.items()]
+        # --------------------------------------------
+
+        f_links = f_links[:self.quantity] if not self.is_period else f_links
+        if 0 < len(f_links) < self._file_threshold: await self.get_total_filesize(f_links)
         return f_links if f_links else self.succeeded.emit(0)
 
 
@@ -143,16 +147,20 @@ class Base(QMainWindow):
 
                 async with aiofiles.open(filepath, "wb") as file:
                     debug.print_message(f"Downloading {filename}...\nLink - {link}")
-
-                    chunk_size: int = 16144
-                    async for chunk in response.content.iter_chunked(chunk_size):
-                        if not chunk: break
-                        if 0 < self._total_files <= 20:
-                            self.progress.emit(round(100 * self._total_downloaded / (self._total_size * 1.21)))
-                        elif self._total_files > 20:
-                            self.progress.emit(round((100 * self._total_downloaded_files / self._total_files)))
-                        self._total_downloaded += chunk_size
-                        await file.write(chunk)
+                    try:
+                        chunk_size: int = 16144
+                        async for chunk in response.content.iter_chunked(chunk_size):
+                            if not chunk: break
+                            self._total_downloaded += chunk_size
+                            if 0 < self._total_files < self._file_threshold:
+                                self.progress.emit(round(100 * self._total_downloaded / (self._total_size * 1.21)))
+                            elif self._total_files >= self._file_threshold:
+                                self.progress.emit(round((100 * self._total_downloaded_files / self._total_files)))
+                            else:
+                                pass
+                            await file.write(chunk)
+                    except Exception as error:
+                        raise error
 
         self.file_info.emit(self._total_downloaded_files, self._total_files)
         await download()
