@@ -4,7 +4,7 @@ import urllib.parse
 from concurrent.futures import Future
 from pathlib import Path
 from time import time
-from typing import List, Optional, Set, Tuple
+from typing import List, Optional, Set
 
 import aiofiles
 import aiohttp
@@ -61,8 +61,7 @@ class Base(QMainWindow):
         assert isinstance(links_massive, ResultSet)
 
         filtered_links = set()
-        formats: Tuple[str] = \
-            tuple(map(sum, zip(Data.LOSSLESS_COMPRESSED_FORMATS, Data.LOSSLESS_UNCOMPRESSED_FORMATS)))\
+        formats: List[str] = [*Data.LOSSLESS_COMPRESSED_FORMATS, *Data.LOSSLESS_UNCOMPRESSED_FORMATS] \
             if self.is_lossless else Data.LOSSY_FORMATS
         for link in links_massive:
             for frmt in formats:
