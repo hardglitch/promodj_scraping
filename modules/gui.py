@@ -1,31 +1,31 @@
-import sys
-import time
 from pathlib import Path
+from sys import exit
+from time import time
 from typing import Dict, List, Optional
 
-import aiohttp
 from PyQt6 import QtCore
 from PyQt6.QtGui import QFont, QIcon
 from PyQt6.QtWidgets import QApplication, QCheckBox, QComboBox, QFileDialog, QLabel, QMainWindow, QProgressBar, \
     QPushButton
+from aiohttp import ClientSession
 from bs4 import BeautifulSoup
 from qasync import asyncSlot
 
 from modules import debug
-from modules.base import Base
 from modules.data import Data
+from modules.manager import Manager
 from modules.messages import Messages
 from utils.settings.settings import Parameter, Settings
 
 
 class MainWindow(QMainWindow):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self):
+        super().__init__()
 
         self._settings_file: Settings = Settings()
-        self._last_launch = int(time.time())
-        self._music: Optional[Base] = None
+        self._last_launch = int(time())
+        self._music: Optional[Manager] = None
         self._genres: Dict[str, str] = {}
 
         self.setWindowIcon(QIcon("logo.ico"))
@@ -72,10 +72,10 @@ class MainWindow(QMainWindow):
         self.chbFileHistory.toggled.connect(self.event_chb_file_history)
 
         self.chbRewriteFiles = QCheckBox(Data.Inscriptions.RewriteFiles, self)
-        self.chbRewriteFiles.setChecked(Data.DefaultValues.is_rewrite_files)
         self.chbRewriteFiles.move(130, 40)
         self.chbRewriteFiles.resize(120, 30)
         self.chbRewriteFiles.setEnabled(not self.chbFileHistory.isChecked())
+        self.chbRewriteFiles.setChecked(not Data.DefaultValues.is_file_history)
 
         self.cmbThreads = QComboBox(self)
         self.cmbThreads.resize(34, 24)
@@ -91,7 +91,7 @@ class MainWindow(QMainWindow):
         self.btnSaveTo.setCheckable(True)
         self.btnSaveTo.clicked.connect(self.save_to)
 
-        self.lblSaveTo = QLabel(str(Path.joinpath(Path.cwd(), Data.DefaultValues.download_dir)), self)
+        self.lblSaveTo = QLabel(str(Path(Path.cwd()).joinpath(Data.DefaultValues.download_dir)), self)
         self.lblSaveTo.resize(435, 24)
         self.lblSaveTo.move(85, 85)
 
@@ -101,7 +101,7 @@ class MainWindow(QMainWindow):
 
         self.btnExit = QPushButton(Data.Inscriptions.Exit, self)
         self.btnExit.move(160, 160)
-        self.btnExit.clicked.connect(self.exit)
+        self.btnExit.clicked.connect(self.app_exit)
 
         self.progBar = QProgressBar(self)
         self.progBar.setGeometry(10, 125, 520, 20)
@@ -137,27 +137,28 @@ class MainWindow(QMainWindow):
                    and int(self.cmbQuantity.currentText()) <= abs(Data.MaxValues.quantity) \
                 else abs(Data.DefaultValues.quantity)
 
-            self._music = Base(download_dir=self.lblSaveTo.text(),
-                         genre=self._genres[self.cmbGenre.currentText()],
-                         form=self.cmbForm.currentText(),
-                         is_lossless=self.chbFormat.isChecked(),
-                         quantity=quantity,
-                         is_period=self.chbPeriod.isChecked(),
-                         threads=int(self.cmbThreads.currentText()),
-                         is_rewrite_files=self.chbRewriteFiles.isChecked(),
-                         is_file_history=self.chbFileHistory.isChecked()
+            self._music = Manager(download_dir=self.lblSaveTo.text(),
+                     genre=self._genres[self.cmbGenre.currentText()],
+                     form=self.cmbForm.currentText(),
+                     is_lossless=self.chbFormat.isChecked(),
+                     quantity=quantity,
+                     is_period=self.chbPeriod.isChecked(),
+                     threads=int(self.cmbThreads.currentText()),
+                     is_rewrite_files=self.chbRewriteFiles.isChecked(),
+                     is_file_history=self.chbFileHistory.isChecked()
             )
             if not Path(self.lblSaveTo.text()).exists():
                 Path(Data.DefaultValues.download_dir).mkdir()
 
             self._music.progress.connect(self.progBar.setValue)
-            self._music.succeeded.connect(self.download_successed)
+            self._music.success.connect(self.download_successed)
             self._music.search.connect(self.search)
+            self._music.message.connect(self.message)
             self._music.file_info.connect(self.file_info)
             self._music.start_downloading()
 
             await self._settings_file.write(
-                Parameter(Data.Parameters.LastDownload, str(int(time.time()))),
+                Parameter(Data.Parameters.LastDownload, str(int(time()))),
                 Parameter(Data.Parameters.DownloadDirectory, self.lblSaveTo.text()),
                 Parameter(Data.Parameters.Genre, self.cmbGenre.currentText()),
                 Parameter(Data.Parameters.Form, self.cmbForm.currentText()),
@@ -187,15 +188,25 @@ class MainWindow(QMainWindow):
         self._music.cancel_downloading()
         self._music = None
 
-    def search(self, value: int, mode: int):
+    def search(self, value: int = 0, mode: int = 0):
         if self.progBar.isVisible(): self.progBar.setVisible(False)
-        if mode == 0: self.lblMessage.setText(Messages.Searching + "." * value)
-        elif mode == 1: self.lblMessage.setText(Messages.Analysis + "." * value)
+        if mode == 1:
+            self.lblMessage.setText("." * value + Messages.Searching + "." * value)
+        elif mode == 2:
+            self.lblMessage.setText("." * value + Messages.Analysis + "." * value)
         else:
             self.lblMessage.setText("")
             self.progBar.setVisible(True)
 
-    def file_info(self, total_downloaded: int, total_files: int):
+    def message(self, value: str = ""):
+        if self.progBar.isVisible(): self.progBar.setVisible(False)
+        if value:
+            self.lblMessage.setText(value[:100])
+        else:
+            self.lblMessage.setText("")
+            self.progBar.setVisible(True)
+
+    def file_info(self, total_downloaded: int = 0, total_files: int = 0):
         self.lblFiles.setText(f"{total_downloaded}/{total_files}")
 
     def event_chb_period(self):
@@ -212,17 +223,20 @@ class MainWindow(QMainWindow):
         self.lblSaveTo.setText(str(Path(save_to_dir)))
         self.btnSaveTo.setChecked(False)
 
-    def exit(self):
+    def app_exit(self):
         QApplication.instance().quit()
-        sys.exit(0)
+        exit(0)
 
 
     @asyncSlot()
     async def set_genres(self):
-        async with aiohttp.ClientSession() as session:
+        async with ClientSession() as session:
             tags_link = fr"https://promodj.com/music"
             async with session.get(tags_link) as response:
-                if response.status == 404: return {}
+                if response.status != 200:
+                    self.lblMessage.setText(Messages.Errors.UnableToConnect)
+                    debug.log(Messages.Errors.UnableToConnect + f" {response.status=}")
+                    return
                 links = BeautifulSoup(await response.read(), features="html.parser").findAll("a")
                 for link in links:
                     if link.has_attr("href") and link["href"].find("/music/") > -1:
@@ -241,7 +255,7 @@ class MainWindow(QMainWindow):
                 if param.name == Data.Parameters.LastDownload and param.value.isnumeric():
                     self._last_launch = abs(int(param.value))
                     self.setWindowTitle(Data.Inscriptions.PromoDJMusicDownloaderExtended.replace("_",
-                                        str(int(abs((int(time.time()) - self._last_launch) / (3600 * 24))))))
+                                        str(int(abs((int(time()) - self._last_launch) / (3600 * 24))))))
 
                 elif param.name == Data.Parameters.DownloadDirectory and Path(param.value).exists():
                     self.lblSaveTo.setText(str(Path(param.value)))
@@ -258,11 +272,11 @@ class MainWindow(QMainWindow):
                 elif param.name == Data.Parameters.Period and param.value in ["0", "1"]:
                     self.chbPeriod.setChecked(bool(int(param.value)))
 
-                elif param.name == Data.Parameters.RewriteFiles and param.value in ["0", "1"]:
-                    self.chbRewriteFiles.setChecked(bool(int(param.value)))
-
                 elif param.name == Data.Parameters.FileHistory and param.value in ["0", "1"]:
                     self.chbFileHistory.setChecked(bool(int(param.value)))
+
+                elif param.name == Data.Parameters.RewriteFiles and param.value in ["0", "1"]:
+                    self.chbRewriteFiles.setChecked(bool(int(param.value)))
 
                 elif param.name == Data.Parameters.Quantity:
                     param.value = param.value \

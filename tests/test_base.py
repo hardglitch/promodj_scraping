@@ -3,8 +3,8 @@ from pathlib import Path
 
 import aiohttp
 
-from modules.base import Base
 from modules.data import Data
+from modules.facade import Base
 from tests.prerequisites import Start
 
 Start()

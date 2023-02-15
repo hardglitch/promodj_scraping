@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-dataclass()
+@dataclass()
 class Messages:
 
     class Errors:
@@ -15,8 +15,11 @@ class Messages:
         SomethingWentWrong: str = "Something went wrong"
         NoDate: str = "No Date"
         NoLinkToWrite: str = "No Link to write"
+        UnableToDownloadAFile: str = "Unable to download a file"
+        WrongPath: str = "Wrong Path"
+        WrongFileName: str = "Wrong File Name"
 
     MatchingFilesNotFound: str = "Matching files not found or already downloaded"
     AllFilesDownloaded: str = "100% - OK"
-    Searching: str = "Searching"
-    Analysis: str = "Analysis"
+    Searching: str = "searching"
+    Analysis: str = "analysis"

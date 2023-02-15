@@ -41,7 +41,7 @@ class Settings:
     async def write(self, *params: Parameter):
         for param in params: assert isinstance(param, Parameter)
         try:
-            async with aiofiles.open(Path.joinpath(self.path, self.filename), "w", encoding="utf-8") as file:
+            async with aiofiles.open(Path(self.path).joinpath(self.filename), "w", encoding="utf-8") as file:
                 [await file.writelines(f"{param.name}={param.value}\n") for param in params]
         except IOError as error:
             print("IOError -", error)
@@ -49,7 +49,7 @@ class Settings:
 
     async def read(self) -> Optional[List[Parameter]]:
         try:
-            async with aiofiles.open(Path.joinpath(self.path, self.filename), "r", encoding="utf-8") as file:
+            async with aiofiles.open(Path(self.path).joinpath(self.filename), "r", encoding="utf-8") as file:
                 assert isinstance(file, AsyncTextIOWrapper)
 
                 settings_list = []
@@ -66,7 +66,7 @@ class Settings:
         except FileNotFoundError:
             print("Settings file not found")
             return None
-        except UnicodeDecodeError or TypeError:
+        except (UnicodeDecodeError, TypeError):
             print("Settings file found but corrupted")
             return None
         except IOError as error:
