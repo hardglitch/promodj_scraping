@@ -178,15 +178,14 @@ class MainWindow(QMainWindow):
         self.progBar.setVisible(False)
         self.lblFiles.setText("")
 
-        if value == 1:
-            self.lblMessage.setText(Messages.AllFilesDownloaded)
-        else:
-            self.lblMessage.setText(Messages.MatchingFilesNotFound)
+        if value == 1: self.lblMessage.setText(Messages.AllFilesDownloaded)
+        else: self.lblMessage.setText(Messages.MatchingFilesNotFound)
 
-        self.btnDownload.setText(Data.Inscriptions.Download)
-        self.btnDownload.setChecked(False)
-        self._music.cancel_downloading()
-        self._music = None
+        if self._music:
+            self.btnDownload.setText(Data.Inscriptions.Download)
+            self.btnDownload.setChecked(False)
+            self._music.cancel_downloading()
+            self._music = None
 
     def search(self, value: int = 0, mode: int = 0):
         if self.progBar.isVisible(): self.progBar.setVisible(False)

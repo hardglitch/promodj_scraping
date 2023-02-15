@@ -55,7 +55,8 @@ class Link:
             if page > 1 and not found_links: break
             link = f"https://promodj.com/{CurrentValues.form}/{CurrentValues.genre}?{period}bitrate={bitrate}&page={page}"
             try:
-                async with CurrentValues.session.get(link, timeout=None) as response:
+                async with CurrentValues.session.get(link, timeout=None,
+                                                     headers={"Connection": "keep-alive"}) as response:
                     if response.status != 200: break
                     text = str(await response.read())
                     links = BeautifulSoup(unquote(text), features="html.parser").findAll("a")

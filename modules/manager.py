@@ -40,6 +40,7 @@ class Manager(ManagerInit):
                 file: File = File(link=_link, progress=self.progress, message=self.message, file_info=self.file_info)
                 tasks.append(asyncio.ensure_future(self.payload(file, sem)))
             CurrentValues.total_files = len(tasks)
+            self.search[int, int].emit(0, 0)
             await asyncio.gather(*tasks)
 
             if tasks: self.success[int].emit(1)

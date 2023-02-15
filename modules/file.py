@@ -55,7 +55,8 @@ class File:
     # @debug.is_download()
     async def _download_file(self) -> bool:
         try:
-            async with CurrentValues.session.get(self._link, timeout=None) as response:
+            async with CurrentValues.session.get(self._link, timeout=None,
+                                                 headers={"Connection": "keep-alive"}) as response:
                 if response.status != 200:
                     debug.log(Messages.Errors.SomethingWentWrong + f" in {stack()[0][3]}. {response.status=}")
                     return False
@@ -79,7 +80,6 @@ class File:
                     return True
 
         except Exception as error:
-            print(error)
             debug.log(Messages.Errors.UnableToDownloadAFile + f" in {stack()[0][3]}", error)
             self.message[str].emit(Messages.Errors.UnableToDownloadAFile)
             return False
