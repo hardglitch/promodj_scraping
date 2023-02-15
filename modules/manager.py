@@ -22,7 +22,6 @@ class Manager(ManagerInit):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._downloading: Optional[Future] = None
-        self._interval: float = 0.1
 
     async def _get_files(self):
         async with CurrentValues.session:
