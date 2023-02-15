@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Tuple
 
+
 @dataclass()
 class Data:
 
@@ -20,6 +21,7 @@ class Data:
         is_period: bool = False
         is_rewrite_files: bool = False
         is_file_history: bool = True
+        file_threshold: int = 50
 
     class MaxValues:
         quantity: int = 1000

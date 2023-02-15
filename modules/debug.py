@@ -12,7 +12,7 @@ class Constants:
     LOG_FILE = "logging.log"
 
 
-def log(message: str, error: Optional[Exception] = None):
+def log(message: str, error: Optional[Exception] = None, is_exit: bool = False):
     assert isinstance(message, str)
     assert isinstance(error, Exception | None)
     message = message[:1000]
@@ -20,8 +20,7 @@ def log(message: str, error: Optional[Exception] = None):
         tm = strftime("%Y-%m-%d %H:%M:%S", gmtime())
         logging.basicConfig(filename=Constants.LOG_FILE, encoding="utf-8", level=logging.ERROR)
         logging.exception(tm) if error else logging.error(tm + " - " + message)
-    exit(message + (" - " + str(error) if error else ""))
-
+    if is_exit: exit(message + (" - " + str(error) if error else ""))
 
 def print_message(*args, **kwargs) -> None:
     if Constants.PRINTING: print(*args, **kwargs)
@@ -31,7 +30,7 @@ def is_download() -> Any:
     def wrapper(func: Callable) -> Callable:
         @functools.wraps(func)
         async def wrapped(*args, **kwargs) -> Any:
-            return await func(*args, **kwargs) if Constants.IS_DOWNLOAD else None
+            return await func(*args, **kwargs) if Constants.IS_DOWNLOAD else False
         return wrapped
     return wrapper
 
