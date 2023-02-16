@@ -53,3 +53,4 @@ class Data:
         Exit: str = "Exit"
         Cancel: str = "Cancel"
         LastDays: str = "last days"
+

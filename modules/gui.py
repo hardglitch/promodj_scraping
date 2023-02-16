@@ -259,9 +259,6 @@ class MainWindow(QMainWindow):
                 elif param.name == Data.Parameters.DownloadDirectory and Path(param.value).exists():
                     self.lblSaveTo.setText(str(Path(param.value)))
 
-                elif param.name == Data.Parameters.Genre and param.value in self._genres.keys():
-                    self.cmbGenre.setCurrentText(param.value)
-
                 elif param.name == Data.Parameters.Form and param.value in Data.FORMS:
                     self.cmbForm.setCurrentText(param.value)
 
@@ -287,3 +284,8 @@ class MainWindow(QMainWindow):
                     self.cmbThreads.setCurrentText(param.value)   # controlled by Qt
 
         await self.set_genres()
+
+        if settings_list:
+            for param in settings_list:
+                if param.name == Data.Parameters.Genre and param.value in self._genres.keys():
+                    self.cmbGenre.setCurrentText(param.value)
