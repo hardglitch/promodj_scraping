@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Optional
 
 from PyQt6.QtWidgets import QMainWindow
@@ -10,9 +9,9 @@ from modules.data import Data
 
 class ManagerInit(QMainWindow):
     def __init__(self,
-                 download_dir: Path = Path(Data.DefaultValues.download_dir),
+                 download_dir: str = Data.DefaultValues.download_dir,
                  genre: str = Data.DefaultValues.genre,
-                 form: str = Data.DefaultValues.form,
+                 form: Data.FORMS = Data.DefaultValues.form,
                  is_lossless: bool = Data.DefaultValues.is_lossless,
                  quantity: int = Data.DefaultValues.quantity,
                  is_period: bool = Data.DefaultValues.is_period,
@@ -42,32 +41,14 @@ class ManagerInit(QMainWindow):
         CurrentValues.total_downloaded_files = 0
         CurrentValues.total_downloaded = 0
         CurrentValues.total_size = 0
-        CurrentValues.ass = 0
 
 
 @dataclass
 class CurrentValues:
 
-    __slots__ = [
-        "_download_dir",
-        "_genre",
-        "_form",
-        "_quantity",
-        "_threads",
-        "_is_lossless",
-        "_is_period",
-        "_is_rewrite_files",
-        "_is_file_history",
-        "_session",
-        "_total_files",
-        "_total_downloaded_files",
-        "_total_downloaded",
-        "_total_size",
-    ]
-
     _download_dir: str
     _genre: str
-    _form: str
+    _form: Data.FORMS
     _quantity: int
     _threads: int
     _is_lossless: bool
@@ -109,10 +90,10 @@ class CurrentValues:
     def genre(self, value: str):
         self._genre = value
     @property
-    def form(self) -> str:
+    def form(self) -> Data.FORMS:
         return self._form
     @form.setter
-    def form(self, value: str):
+    def form(self, value: Data.FORMS):
         self._form = value
     @property
     def quantity(self) -> int:

@@ -1,11 +1,11 @@
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Literal, Tuple
 
 
-@dataclass()
+@dataclass(frozen=True)
 class Data:
 
-    FORMS: Tuple[str] = ("mixes", "tracks", "lives")
+    FORMS = Literal["mixes", "tracks", "lives"]
     LOSSLESS_UNCOMPRESSED_FORMATS: Tuple[str] = (".wav", ".aiff")
     LOSSLESS_COMPRESSED_FORMATS: Tuple[str] = (".flac", ".alac", ".tta", ".ape", ".wv")
     LOSSY_FORMATS: Tuple[str] = (".mp3",)

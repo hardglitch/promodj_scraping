@@ -51,7 +51,10 @@ class Link:
         found_links: Set[str] = set()
         bitrate: str = "lossless" if CurrentValues.is_lossless else "high"
         period: str = f"period=last&period_last={CurrentValues.quantity}d&" if CurrentValues.is_period else ""
-        while (len(found_links) < CurrentValues.quantity and not CurrentValues.is_period) or CurrentValues.is_period:
+        while \
+                len(found_links) < CurrentValues.quantity and not CurrentValues.is_period\
+                or CurrentValues.is_period and len(found_links) < Data.MaxValues.quantity:
+
             if page > 1 and not found_links: break
             link = f"https://promodj.com/{CurrentValues.form}/{CurrentValues.genre}?{period}bitrate={bitrate}&page={page}"
             try:
@@ -67,9 +70,6 @@ class Link:
                     if not found_links_on_page & found_links:
                         found_links |= found_links_on_page
                     else: break
-                    if len(found_links) > Data.MaxValues.quantity:
-                        found_links = found_links[:Data.MaxValues.quantity]
-                        break
                     self.search[int, int].emit(page % 5, 1)
                     page += 1
 
@@ -89,9 +89,13 @@ class Link:
         [self._links.append(".".join(_)) for _ in tmp_dict.items()]
         # --------------------------------------------
 
-        self._links = self._links[:CurrentValues.quantity] if not CurrentValues.is_period else self._links
+        self._links = self._links[:CurrentValues.quantity] \
+            if not CurrentValues.is_period \
+            else self._links[:Data.MaxValues.quantity]
+
         if 0 < len(self._links) < Data.DefaultValues.file_threshold:
             await self._get_total_filesize_by_link_list()
+
         return self._links if self._links else self.success[int].emit(0)
 
 

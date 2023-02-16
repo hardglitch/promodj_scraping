@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from time import gmtime, strftime
 from typing import Any, Callable, Optional
 
-@dataclass()
+@dataclass(frozen=True)
 class Constants:
     IS_DOWNLOAD = True     # download simulation (True = Real, False = Simulate)
     PRINTING: bool = True  # console output
@@ -15,6 +15,7 @@ class Constants:
 def log(message: str, error: Optional[Exception] = None, is_exit: bool = False):
     assert isinstance(message, str)
     assert isinstance(error, Exception | None)
+    assert isinstance(is_exit, bool)
     message = message[:1000]
     if Constants.LOGGING:
         tm = strftime("%Y-%m-%d %H:%M:%S", gmtime())

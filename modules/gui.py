@@ -1,7 +1,7 @@
 from pathlib import Path
 from sys import exit
 from time import time
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, get_args
 
 from PyQt6 import QtCore
 from PyQt6.QtGui import QFont, QIcon
@@ -20,8 +20,8 @@ from utils.settings.settings import Parameter, Settings
 
 class MainWindow(QMainWindow):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         self._settings_file: Settings = Settings()
         self._last_launch = int(time())
@@ -41,7 +41,7 @@ class MainWindow(QMainWindow):
         self.cmbForm = QComboBox(self)
         self.cmbForm.resize(70, 24)
         self.cmbForm.move(230, 10)
-        self.cmbForm.addItems(Data.FORMS)
+        self.cmbForm.addItems(get_args(Data.FORMS))
         self.cmbForm.setCurrentIndex(1)
 
         self.cmbQuantity = QComboBox(self)
