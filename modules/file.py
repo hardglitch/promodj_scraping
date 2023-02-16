@@ -40,7 +40,7 @@ class File:
             ext_time: str = str(time()).replace(".", "")
             ext_pos: int = self._name.rfind(".")
             self._name = self._name[:ext_pos] + "_" + ext_time + self._name[ext_pos:]
-            self._path: Path = Path(CurrentValues.download_dir).joinpath(self._name)
+            self._path = Path(CurrentValues.download_dir).joinpath(self._name)
 
     async def get_file(self):
         self._check_path_and_name()

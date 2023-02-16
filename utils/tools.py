@@ -42,3 +42,16 @@ def clear_filename(filename: str):
 def random_string(max_length: int = 1, path_friendly: bool = False) -> str:
     rnd_str = "".join((secrets.choice(string.printable) for _ in range(secrets.choice(range(max_length)))))
     return rnd_str if not path_friendly else clear_path(rnd_str)
+
+
+class Protected(type):
+    # use: ClassName(metaclass=Protected)
+    def __new__(mcs, name, bases, dct):
+        inst = super().__new__(mcs, name, bases, {"_Protected__frozen": False, **dct})
+        inst.__frozen = True
+        return inst
+
+    def __setattr__(self, key, value):
+        if self.__frozen and not hasattr(self, key):
+            raise TypeError(f"Class is Protected")
+        super().__setattr__(key, value)

@@ -14,7 +14,7 @@ class Task:
 
     def __init__(self,
                  micro_link: str,
-                 search: pyqtSignal(str)
+                 search: pyqtSignal(int, int)
         ):
         self._micro_link = micro_link
         self.search = search
@@ -33,7 +33,7 @@ class Pool:
     def __init__(self, threads: int = 4, interval: float = 0.1):
         self.threads: int = threads
         self.interval: float = interval
-        self._queue = asyncio.Queue()
+        self._queue: asyncio.Queue = asyncio.Queue()
 
     async def _worker(self, task: Task):
         self._counter += 1

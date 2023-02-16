@@ -42,5 +42,7 @@ async def filter_by_history(found_links: Set[str]) -> Set[str]:
             return found_links - records
     except aiosqlite.DatabaseError as error:
         debug.log("DB Error -", error)
+        return found_links
     except TypeError as error:
-        debug.log("TypeError -", error)
+        debug.log("TypeError in DB -", error)
+        return found_links
