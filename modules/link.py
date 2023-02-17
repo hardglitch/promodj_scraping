@@ -19,7 +19,6 @@ class Link:
                  success: pyqtSignal(int),
                  search: pyqtSignal(int, int),
         ):
-        # self._links: List = []
         self.message = message
         self.success = success
         self.search = search
