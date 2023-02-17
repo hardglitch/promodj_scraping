@@ -11,6 +11,7 @@ class Data:
     LOSSY_FORMATS: Tuple[str] = (".mp3",)
     DB_NAME: str = "history.db"
 
+    @dataclass(frozen=True)
     class DefaultValues:
         download_dir: str = "Downloaded Music"
         genre: str = "Trance"
@@ -23,10 +24,12 @@ class Data:
         is_file_history: bool = True
         file_threshold: int = 50
 
+    @dataclass(frozen=True)
     class MaxValues:
         quantity: int = 1000
         threads: int = 4
 
+    @dataclass(frozen=True)
     class Parameters:
         DownloadDirectory: str = "DownloadDirectory"
         Genre: str = "Genre"
@@ -39,6 +42,7 @@ class Data:
         FileHistory: str = "FileHistory"
         LastDownload: str = "LastDownload"
 
+    @dataclass(frozen=True)
     class Inscriptions:
         PromoDJMusicDownloader: str = "PromoDJ Music Downloader"
         PromoDJMusicDownloaderExtended: str = PromoDJMusicDownloader + " --- Last download was _ days ago"
