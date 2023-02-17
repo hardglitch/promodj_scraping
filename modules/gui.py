@@ -134,8 +134,9 @@ class MainWindow(QMainWindow):
 
             quantity: int = int(self.cmbQuantity.currentText()) \
                 if self.cmbQuantity.currentText().isnumeric() \
-                   and int(self.cmbQuantity.currentText()) <= abs(Data.MaxValues.quantity) \
+                   and 0 < int(self.cmbQuantity.currentText()) <= abs(Data.MaxValues.quantity) \
                 else abs(Data.DefaultValues.quantity)
+            self.cmbQuantity.setCurrentText(str(quantity))
 
             self._music = Manager(download_dir=self.lblSaveTo.text(),
                      genre=self._genres[self.cmbGenre.currentText()],

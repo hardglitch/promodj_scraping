@@ -24,10 +24,12 @@ def test_default_values():
     assert mng._downloading is None
     assert CurrentValues.session is None
 
-    assert mng.progress
-    assert mng.success
-    assert mng.search
-    assert mng.file_info
+    assert mng.progress[int]
+    assert mng.success[int]
+    assert mng.search[int, int]
+    assert mng.message[str]
+    assert mng.file_info[int, int]
+
     assert CurrentValues.total_files == 0
     assert CurrentValues.total_downloaded_files == 0
     assert CurrentValues.total_downloaded == 0

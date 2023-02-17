@@ -52,7 +52,7 @@ class Link:
         period: str = f"period=last&period_last={CurrentValues.quantity}d&" if CurrentValues.is_period else ""
         while \
                 len(found_links) < CurrentValues.quantity and not CurrentValues.is_period\
-                or CurrentValues.is_period and len(found_links) < Data.MaxValues.quantity:
+                or len(found_links) < Data.MaxValues.quantity and CurrentValues.is_period:
 
             if page > 1 and not found_links: break
             link = f"https://promodj.com/{CurrentValues.form}/{CurrentValues.genre}?{period}bitrate={bitrate}&page={page}"
