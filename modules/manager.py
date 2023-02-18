@@ -37,7 +37,7 @@ class Manager(ManagerInit):
             sem = asyncio.Semaphore(CurrentValues.threads)
             for _link in all_links:
                 file: File = File(link=_link, progress=self.progress, message=self.message, file_info=self.file_info)
-                tasks.append(asyncio.ensure_future(self.payload(file, sem)))
+                tasks.append(asyncio.ensure_future(self._worker(file, sem)))
             CurrentValues.total_files = len(tasks)
             self.search[int, int].emit(0, 0)
             await asyncio.gather(*tasks)
@@ -45,7 +45,7 @@ class Manager(ManagerInit):
             if tasks: self.success[int].emit(1)
             else: self.success[int].emit(0)
 
-    async def payload(self, file: File, sem: asyncio.Semaphore):
+    async def _worker(self, file: File, sem: asyncio.Semaphore):
         async with sem: await file.get_file()
 
     def start_downloading(self):

@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 
-@dataclass()
+@dataclass(frozen=True)
 class Messages:
 
+    @dataclass(frozen=True)
     class Errors:
 
         NoSuitableParameter: str = "No suitable parameter"

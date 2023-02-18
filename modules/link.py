@@ -1,5 +1,5 @@
 from inspect import stack
-from typing import List, Set
+from typing import Dict, List, Set
 from urllib.parse import unquote
 
 from PyQt6.QtCore import pyqtSignal
@@ -19,22 +19,21 @@ class Link:
                  success: pyqtSignal(int),
                  search: pyqtSignal(int, int),
         ):
-        self._links: List = []
         self.message = message
         self.success = success
         self.search = search
 
 
-    def _get_filtered_links(self, links_massive: ResultSet) -> Set[str]:
-        if not links_massive:
+    def _get_filtered_links(self, link_massive: ResultSet) -> Set[str]:
+        if not link_massive:
             debug.log(Messages.Errors.NoLinksToFiltering)
             self.message[str].emit(Messages.Errors.NoLinksToFiltering)
-        assert isinstance(links_massive, ResultSet)
+        assert isinstance(link_massive, ResultSet)
 
-        filtered_links = set()
+        filtered_links: Set = set()
         formats: List[str] = [*Data.LOSSLESS_COMPRESSED_FORMATS, *Data.LOSSLESS_UNCOMPRESSED_FORMATS] \
             if CurrentValues.is_lossless else Data.LOSSY_FORMATS
-        for link in links_massive:
+        for link in link_massive:
             for frmt in formats:
                 if link.has_attr("href") and link["href"].find(frmt) > -1 and link["href"].find("/source/") > -1:
                     filtered_links.add(link["href"])
@@ -53,7 +52,7 @@ class Link:
         period: str = f"period=last&period_last={CurrentValues.quantity}d&" if CurrentValues.is_period else ""
         while \
                 len(found_links) < CurrentValues.quantity and not CurrentValues.is_period\
-                or CurrentValues.is_period and len(found_links) < Data.MaxValues.quantity:
+                or len(found_links) < Data.MaxValues.quantity and CurrentValues.is_period:
 
             if page > 1 and not found_links: break
             link = f"https://promodj.com/{CurrentValues.form}/{CurrentValues.genre}?{period}bitrate={bitrate}&page={page}"
@@ -84,27 +83,26 @@ class Link:
         found_links = await db.filter_by_history(found_links) if CurrentValues.is_file_history else found_links
 
         # Convert {"1.wav", "1.flac", "2.flac", "2.wav"} to ['1.flac', '2.wav']
-        tmp_dict = {}
-        [tmp_dict.update({link.rsplit(".", 1)[0]: link.rsplit(".", 1)[1]}) for link in found_links]
-        [self._links.append(".".join(_)) for _ in tmp_dict.items()]
+        tmp_dict: Dict[str:str] = {}
+        [[tmp_dict.update({n[0]: n[1]}) for n in [link.rsplit(".", 1)]] for link in found_links]
+        f_links: List[str] = []
+        [f_links.append(".".join(_)) for _ in tmp_dict.items()]
         # --------------------------------------------
 
-        self._links = self._links[:CurrentValues.quantity] \
-            if not CurrentValues.is_period \
-            else self._links[:Data.MaxValues.quantity]
+        f_links = f_links[:CurrentValues.quantity] if not CurrentValues.is_period else f_links[:Data.MaxValues.quantity]
 
-        if 0 < len(self._links) < Data.DefaultValues.file_threshold:
-            await self._get_total_filesize_by_link_list()
+        if 0 < len(f_links) < Data.DefaultValues.file_threshold:
+            await self._get_total_filesize_by_link_list(f_links)
 
-        return self._links if self._links else self.success[int].emit(0)
+        return f_links if f_links else self.success[int].emit(0)
 
 
-    async def _get_total_filesize_by_link_list(self):
-        if not self._links: debug.log(Messages.Errors.NoLinksToDownload + f" in {stack()[0][3]}")
-        assert isinstance(self._links, List)
-        assert all(map(lambda x: True if type(x) == str else False, self._links))
+    async def _get_total_filesize_by_link_list(self, f_links: List[str]):
+        if not f_links: debug.log(Messages.Errors.NoLinksToDownload + f" in {stack()[0][3]}")
+        assert isinstance(f_links, List)
+        assert all(map(lambda x: True if type(x) == str else False, f_links))
 
         pool = Pool()
-        for link in self._links: await pool.put(Task(micro_link=link, search=self.search))
+        [await pool.put(Task(micro_link=link, search=self.search)) for link in f_links]
         await pool.start()
         await pool.join()

@@ -30,9 +30,8 @@ class Task:
 class Pool:
 
     _counter: int = 0
-    def __init__(self, threads: int = 4, interval: float = 0.1):
-        self.threads: int = threads
-        self.interval: float = interval
+    def __init__(self, threads: int = 4):
+        self._threads: int = threads
         self._queue: asyncio.Queue = asyncio.Queue()
 
     async def _worker(self, task: Task):
@@ -48,7 +47,6 @@ class Pool:
 
     async def start(self):
         while not self._queue.empty():
-            async with asyncio.Semaphore(self.threads):
+            async with asyncio.Semaphore(self._threads):
                 task = await self._queue.get()
                 asyncio.create_task(self._worker(task))
-                await asyncio.sleep(self.interval)
