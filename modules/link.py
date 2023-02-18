@@ -24,16 +24,16 @@ class Link:
         self.search = search
 
 
-    def _get_filtered_links(self, links_massive: ResultSet) -> Set[str]:
-        if not links_massive:
+    def _get_filtered_links(self, link_massive: ResultSet) -> Set[str]:
+        if not link_massive:
             debug.log(Messages.Errors.NoLinksToFiltering)
             self.message[str].emit(Messages.Errors.NoLinksToFiltering)
-        assert isinstance(links_massive, ResultSet)
+        assert isinstance(link_massive, ResultSet)
 
-        filtered_links = set()
+        filtered_links: Set = set()
         formats: List[str] = [*Data.LOSSLESS_COMPRESSED_FORMATS, *Data.LOSSLESS_UNCOMPRESSED_FORMATS] \
             if CurrentValues.is_lossless else Data.LOSSY_FORMATS
-        for link in links_massive:
+        for link in link_massive:
             for frmt in formats:
                 if link.has_attr("href") and link["href"].find(frmt) > -1 and link["href"].find("/source/") > -1:
                     filtered_links.add(link["href"])

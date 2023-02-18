@@ -260,7 +260,7 @@ class MainWindow(QMainWindow):
                 elif param.name == Data.Parameters.DownloadDirectory and Path(param.value).exists():
                     self.lblSaveTo.setText(str(Path(param.value)))
 
-                elif param.name == Data.Parameters.Form and param.value in Data.FORMS:
+                elif param.name == Data.Parameters.Form and param.value in get_args(Data.FORMS):
                     self.cmbForm.setCurrentText(param.value)
 
                 elif param.name == Data.Parameters.Lossless and param.value in ["0", "1"]:
