@@ -3,7 +3,7 @@ from sys import exit
 from time import time
 from typing import Dict, List, Optional, get_args
 
-from PyQt6 import QtCore
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont, QIcon
 from PyQt6.QtWidgets import QApplication, QCheckBox, QComboBox, QFileDialog, QLabel, QMainWindow, QProgressBar, \
     QPushButton
@@ -112,11 +112,11 @@ class MainWindow(QMainWindow):
 
         self.lblMessage = QLabel("", self)
         self.lblMessage.setGeometry(10, 125, 520, 20)
-        self.lblMessage.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.lblMessage.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.lblFiles = QLabel("", self)
         self.lblFiles.move(30, 160)
-        self.lblFiles.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.lblFiles.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
     @asyncSlot()
     async def download_files(self):

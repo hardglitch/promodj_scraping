@@ -17,6 +17,7 @@
 !README.md
 !_bandit_run.bat
 !_build_app_win.bat
+!_build_app_win - UNPACKED.bat
 !_pyright_run.bat
 !pyrightconfig.json
 !.gitignore
