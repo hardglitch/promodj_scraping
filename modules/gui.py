@@ -26,7 +26,7 @@ class MainWindow(QMainWindow):
         self._settings_file: Settings = Settings()
         self._last_launch = int(time())
         self._music: Optional[Manager] = None
-        self._genres: Dict[str, str] = {}
+        self._genres: Dict[str, str] = Data.DefaultValues.genres
 
         self.setWindowIcon(QIcon("logo.ico"))
 
@@ -37,6 +37,8 @@ class MainWindow(QMainWindow):
         self.cmbGenre = QComboBox(self)
         self.cmbGenre.resize(220, 24)
         self.cmbGenre.move(10, 10)
+        self.cmbGenre.addItems(self._genres.keys())
+        self.cmbGenre.setCurrentText(Data.DefaultValues.genre)
 
         self.cmbForm = QComboBox(self)
         self.cmbForm.resize(70, 24)
@@ -229,7 +231,7 @@ class MainWindow(QMainWindow):
 
 
     @asyncSlot()
-    async def set_genres(self):
+    async def set_actual_genres(self):
         async with ClientSession() as session:
             tags_link = fr"https://promodj.com/music"
             async with session.get(tags_link) as response:
@@ -238,11 +240,15 @@ class MainWindow(QMainWindow):
                     debug.log(Messages.Errors.UnableToConnect + f" {response.status=}")
                     return
                 links = BeautifulSoup(await response.read(), features="html.parser").findAll("a")
+                tmp_dict = {}
                 for link in links:
                     if link.has_attr("href") and link["href"].find("/music/") > -1:
-                        self._genres.update({link.text: link["href"].replace("/music/", "")})
-                self.cmbGenre.addItems(self._genres.keys())
-                self.cmbGenre.setCurrentText(Data.DefaultValues.genre)
+                        tmp_dict.update({link.text: link["href"].replace("/music/", "")})
+                if self._genres != tmp_dict:
+                    self._genres.update(tmp_dict)
+                    self.cmbGenre.clear()
+                    self.cmbGenre.addItems(self._genres.keys())
+                    self.cmbGenre.setCurrentText(Data.DefaultValues.genre)
 
 
     @asyncSlot()
@@ -256,6 +262,8 @@ class MainWindow(QMainWindow):
                     self._last_launch = abs(int(param.value))
                     self.setWindowTitle(Data.Inscriptions.PromoDJMusicDownloaderExtended.replace("_",
                                         str(int(abs((int(time()) - self._last_launch) / (3600 * 24))))))
+                elif param.name == Data.Parameters.Genre and param.value in self._genres.keys():
+                    self.cmbGenre.setCurrentText(param.value)
 
                 elif param.name == Data.Parameters.DownloadDirectory and Path(param.value).exists():
                     self.lblSaveTo.setText(str(Path(param.value)))
@@ -284,7 +292,7 @@ class MainWindow(QMainWindow):
                 elif param.name == Data.Parameters.Threads:
                     self.cmbThreads.setCurrentText(param.value)   # controlled by Qt
 
-        await self.set_genres()
+        await self.set_actual_genres()
 
         if settings_list:
             for param in settings_list:
