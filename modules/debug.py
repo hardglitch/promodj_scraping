@@ -5,11 +5,13 @@ from time import gmtime, strftime
 from typing import Any, Callable, Optional
 
 @dataclass(frozen=True)
-class Constants:
+class __Constants:
     IS_DOWNLOAD = True     # download simulation (True = Real, False = Simulate)
     PRINTING: bool = True  # console output
     LOGGING: bool = True
     LOG_FILE = "logging.log"
+
+Constants = __Constants()
 
 
 def log(message: str, error: Optional[Exception] = None, is_exit: bool = False):

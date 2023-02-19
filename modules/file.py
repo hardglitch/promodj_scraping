@@ -5,10 +5,10 @@ from time import time
 from PyQt6.QtCore import pyqtSignal
 from aiofiles import open
 
+from data.data import CONST
+from data.messages import MESSAGES
 from modules import db, debug
-from modules.data import Data
 from modules.facade import CurrentValues
-from modules.messages import Messages
 
 
 class File:
@@ -23,8 +23,8 @@ class File:
         self.file_info = file_info
 
         if not link:
-            debug.log(Messages.Errors.NoLinkToDownload)
-            self.message[str].emit(Messages.Errors.NoLinkToDownload)
+            debug.log(MESSAGES.Errors.NoLinkToDownload)
+            self.message[str].emit(MESSAGES.Errors.NoLinkToDownload)
             return
 
         self._link: str = link
@@ -58,7 +58,7 @@ class File:
             async with CurrentValues.session.get(self._link, timeout=None,
                                                  headers={"Connection": "keep-alive"}) as response:
                 if response.status != 200:
-                    debug.log(Messages.Errors.SomethingWentWrong + f" in {stack()[0][3]}. {response.status=}")
+                    debug.log(MESSAGES.Errors.SomethingWentWrong + f" in {stack()[0][3]}. {response.status=}")
                     return False
 
                 async with open(self._path, "wb") as file:
@@ -67,10 +67,10 @@ class File:
                     async for chunk in response.content.iter_chunked(chunk_size):
                         if not chunk: break
                         CurrentValues.total_downloaded += chunk_size
-                        if 0 < CurrentValues.total_files < Data.DefaultValues.file_threshold:
+                        if 0 < CurrentValues.total_files < CONST.DefaultValues.file_threshold:
                             self.progress[int].emit(
                                 round(100 * CurrentValues.total_downloaded / (CurrentValues.total_size * 1.21)))
-                        elif CurrentValues.total_files >= Data.DefaultValues.file_threshold:
+                        elif CurrentValues.total_files >= CONST.DefaultValues.file_threshold:
                             self.progress[int].emit(
                                 round((100 * CurrentValues.total_downloaded_files / CurrentValues.total_files)))
                         else: pass
@@ -80,6 +80,6 @@ class File:
                     return True
 
         except Exception as error:
-            debug.log(Messages.Errors.UnableToDownloadAFile + f" in {stack()[0][3]}", error)
-            self.message[str].emit(Messages.Errors.UnableToDownloadAFile)
+            debug.log(MESSAGES.Errors.UnableToDownloadAFile + f" in {stack()[0][3]}", error)
+            self.message[str].emit(MESSAGES.Errors.UnableToDownloadAFile)
             return False

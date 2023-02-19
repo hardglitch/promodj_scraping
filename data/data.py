@@ -12,7 +12,7 @@ class Data:
     DB_NAME: str = "history.db"
 
     @dataclass(frozen=True)
-    class DefaultValues:
+    class __DefaultValues:
         download_dir: str = "Downloaded Music"
         genre: str = "Trance"
         form: str = "tracks"
@@ -283,13 +283,17 @@ class Data:
             "Разговорный": "talk"
         }
 
+    DefaultValues = __DefaultValues()
+
     @dataclass(frozen=True)
-    class MaxValues:
+    class __MaxValues:
         quantity: int = 1000
         threads: int = 4
 
+    MaxValues = __MaxValues()
+
     @dataclass(frozen=True)
-    class Parameters:
+    class __Parameters:
         DownloadDirectory: str = "DownloadDirectory"
         Genre: str = "Genre"
         Form: str = "Form"
@@ -301,8 +305,10 @@ class Data:
         FileHistory: str = "FileHistory"
         LastDownload: str = "LastDownload"
 
+    Parameters = __Parameters()
+
     @dataclass(frozen=True)
-    class Inscriptions:
+    class __Inscriptions:
         PromoDJMusicDownloader: str = "PromoDJ Music Downloader"
         PromoDJMusicDownloaderExtended: str = PromoDJMusicDownloader + " --- Last download was _ days ago"
         Files: str = "files"
@@ -317,3 +323,6 @@ class Data:
         Cancel: str = "Cancel"
         LastDays: str = "last days"
 
+    Inscriptions = __Inscriptions()
+
+CONST = Data()

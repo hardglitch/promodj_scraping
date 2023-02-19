@@ -4,7 +4,7 @@ from dataclasses import dataclass
 class Messages:
 
     @dataclass(frozen=True)
-    class Errors:
+    class __Errors:
 
         NoSuitableParameter: str = "No suitable parameter"
         NoLinksToFiltering: str = "No Links to filtering"
@@ -20,7 +20,11 @@ class Messages:
         WrongPath: str = "Wrong Path"
         WrongFileName: str = "Wrong File Name"
 
+    Errors = __Errors()
+
     MatchingFilesNotFound: str = "Matching files not found or already downloaded"
     AllFilesDownloaded: str = "100% - OK"
     Searching: str = "searching"
     Analysis: str = "analysis"
+
+MESSAGES = Messages()

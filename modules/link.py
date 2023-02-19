@@ -6,10 +6,10 @@ from PyQt6.QtCore import pyqtSignal
 from aiohttp import ClientError
 from bs4 import BeautifulSoup, ResultSet
 
+from data.data import CONST
+from data.messages import MESSAGES
 from modules import db, debug
-from modules.data import Data
 from modules.facade import CurrentValues
-from modules.messages import Messages
 from modules.pool import Pool, Task
 
 
@@ -26,13 +26,13 @@ class Link:
 
     def _get_filtered_links(self, link_massive: ResultSet) -> Set[str]:
         if not link_massive:
-            debug.log(Messages.Errors.NoLinksToFiltering)
-            self.message[str].emit(Messages.Errors.NoLinksToFiltering)
+            debug.log(MESSAGES.Errors.NoLinksToFiltering)
+            self.message[str].emit(MESSAGES.Errors.NoLinksToFiltering)
         assert isinstance(link_massive, ResultSet)
 
         filtered_links: Set = set()
-        formats: List[str] = [*Data.LOSSLESS_COMPRESSED_FORMATS, *Data.LOSSLESS_UNCOMPRESSED_FORMATS] \
-            if CurrentValues.is_lossless else Data.LOSSY_FORMATS
+        formats: List[str] = [*CONST.LOSSLESS_COMPRESSED_FORMATS, *CONST.LOSSLESS_UNCOMPRESSED_FORMATS] \
+            if CurrentValues.is_lossless else CONST.LOSSY_FORMATS
         for link in link_massive:
             for frmt in formats:
                 if link.has_attr("href") and link["href"].find(frmt) > -1 and link["href"].find("/source/") > -1:
@@ -42,8 +42,8 @@ class Link:
 
     async def get_all_links(self) -> List[str]:
         if not CurrentValues.session:
-            debug.log(Messages.Errors.UnableToDownload)
-            self.message[str].emit(Messages.Errors.UnableToDownload)
+            debug.log(MESSAGES.Errors.UnableToDownload)
+            self.message[str].emit(MESSAGES.Errors.UnableToDownload)
             return []
 
         page: int = 1
@@ -52,7 +52,7 @@ class Link:
         period: str = f"period=last&period_last={CurrentValues.quantity}d&" if CurrentValues.is_period else ""
         while \
                 len(found_links) < CurrentValues.quantity and not CurrentValues.is_period\
-                or len(found_links) < Data.MaxValues.quantity and CurrentValues.is_period:
+                or len(found_links) < CONST.MaxValues.quantity and CurrentValues.is_period:
 
             if page > 1 and not found_links: break
             link = f"https://promodj.com/{CurrentValues.form}/{CurrentValues.genre}?{period}bitrate={bitrate}&page={page}"
@@ -73,8 +73,8 @@ class Link:
                     page += 1
 
             except ClientError as error:
-                debug.log(Messages.Errors.UnableToConnect, error)
-                self.message[str].emit(Messages.Errors.UnableToConnect)
+                debug.log(MESSAGES.Errors.UnableToConnect, error)
+                self.message[str].emit(MESSAGES.Errors.UnableToConnect)
 
         if not found_links:
             self.success[int].emit(0)
@@ -89,16 +89,16 @@ class Link:
         [f_links.append(".".join(_)) for _ in tmp_dict.items()]
         # --------------------------------------------
 
-        f_links = f_links[:CurrentValues.quantity] if not CurrentValues.is_period else f_links[:Data.MaxValues.quantity]
+        f_links = f_links[:CurrentValues.quantity] if not CurrentValues.is_period else f_links[:CONST.MaxValues.quantity]
 
-        if 0 < len(f_links) < Data.DefaultValues.file_threshold:
+        if 0 < len(f_links) < CONST.DefaultValues.file_threshold:
             await self._get_total_filesize_by_link_list(f_links)
 
         return f_links if f_links else self.success[int].emit(0)
 
 
     async def _get_total_filesize_by_link_list(self, f_links: List[str]):
-        if not f_links: debug.log(Messages.Errors.NoLinksToDownload + f" in {stack()[0][3]}")
+        if not f_links: debug.log(MESSAGES.Errors.NoLinksToDownload + f" in {stack()[0][3]}")
         assert isinstance(f_links, List)
         assert all(map(lambda x: True if type(x) == str else False, f_links))
 

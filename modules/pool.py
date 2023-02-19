@@ -3,9 +3,9 @@ from inspect import stack
 
 from PyQt6.QtCore import pyqtSignal
 
+from data.messages import MESSAGES
 from modules import debug
 from modules.facade import CurrentValues
-from modules.messages import Messages
 
 
 class Task:
@@ -22,7 +22,7 @@ class Task:
     async def micro_task(self, counter: int = 0):
         async with CurrentValues.session.get(self._micro_link, timeout=None) as response:
             if response.status != 200:
-                return debug.log(Messages.Errors.SomethingWentWrong
+                return debug.log(MESSAGES.Errors.SomethingWentWrong
                                  + f" in {stack()[0][3]}. {response.status=}")
             CurrentValues.total_size += response.content_length if response.content_length else 0
             self.search[int, int].emit(counter % 5, 2)
