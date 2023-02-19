@@ -65,16 +65,16 @@ class MainWindow(QMainWindow):
 
         self.chbFormat = QCheckBox(CONST.Inscriptions.Lossless, self)
         self.chbFormat.setChecked(True)
-        self.chbFormat.move(30, 40)
+        self.chbFormat.move(410, 40)
 
         self.chbFileHistory = QCheckBox(CONST.Inscriptions.FileHistory, self)
         self.chbFileHistory.setChecked(CONST.DefaultValues.is_file_history)
-        self.chbFileHistory.move(390, 40)
+        self.chbFileHistory.move(30, 40)
         self.chbFileHistory.resize(100, 30)
         self.chbFileHistory.toggled.connect(self.event_chb_file_history)
 
         self.chbRewriteFiles = QCheckBox(CONST.Inscriptions.RewriteFiles, self)
-        self.chbRewriteFiles.move(130, 40)
+        self.chbRewriteFiles.move(150, 40)
         self.chbRewriteFiles.resize(120, 30)
         self.chbRewriteFiles.setEnabled(not self.chbFileHistory.isChecked())
         self.chbRewriteFiles.setChecked(not CONST.DefaultValues.is_file_history)
