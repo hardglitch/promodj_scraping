@@ -157,10 +157,10 @@ class ManagerInit(QMainWindow):
             else abs(CONST.DefaultValues.threads)
         CurrentValues.is_rewrite_files = is_rewrite_files
         CurrentValues.is_file_history = is_file_history
-        #
-        # CurrentValues.session = None
-        #
-        # CurrentValues.total_files = 0
-        # CurrentValues.total_downloaded_files = 0
-        # CurrentValues.total_downloaded = 0
-        # CurrentValues.total_size = 0
+
+        CurrentValues.session = None
+
+        CurrentValues.total_files = 0
+        CurrentValues.total_downloaded_files = 0
+        CurrentValues.total_downloaded = 0
+        CurrentValues.total_size = 0
