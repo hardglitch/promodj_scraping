@@ -10,6 +10,23 @@ from data.data import CONST
 @dataclass
 class __CurrentValues:
 
+    __slots__ = (
+        "__download_dir",
+        "__genre",
+        "__form",
+        "__quantity",
+        "__threads",
+        "__is_lossless",
+        "__is_period",
+        "__is_rewrite_files",
+        "__is_file_history",
+        "__session",
+        "__total_files",
+        "__total_downloaded_files",
+        "__total_downloaded",
+        "__total_size"
+    )
+
     __download_dir: str
     __genre: str
     __form: CONST.FORMS

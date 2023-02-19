@@ -1,8 +1,9 @@
-import functools
 import logging
 from dataclasses import dataclass
+from functools import wraps
 from time import gmtime, strftime
 from typing import Any, Callable, Optional
+
 
 @dataclass(frozen=True)
 class __Constants:
@@ -31,7 +32,7 @@ def print_message(*args, **kwargs) -> None:
 
 def is_download() -> Any:
     def wrapper(func: Callable) -> Callable:
-        @functools.wraps(func)
+        @wraps(func)
         async def wrapped(*args, **kwargs) -> Any:
             return await func(*args, **kwargs) if Constants.IS_DOWNLOAD else False
         return wrapped
