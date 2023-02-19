@@ -65,7 +65,7 @@ class MainWindow(QMainWindow):
 
         self.chbFormat = QCheckBox(CONST.Inscriptions.Lossless, self)
         self.chbFormat.setChecked(True)
-        self.chbFormat.move(390, 40)
+        self.chbFormat.move(410, 40)
 
         self.chbFileHistory = QCheckBox(CONST.Inscriptions.FileHistory, self)
         self.chbFileHistory.setChecked(CONST.DefaultValues.is_file_history)
