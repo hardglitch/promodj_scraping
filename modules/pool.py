@@ -3,14 +3,13 @@ from inspect import stack
 
 from PyQt6.QtCore import pyqtSignal
 
+from data.data import Data
 from data.messages import MESSAGES
 from modules import debug
 from modules.facade import CurrentValues
 
 
 class Task:
-
-    search = pyqtSignal(int, int)
 
     def __init__(self,
                  micro_link: str,
@@ -30,9 +29,10 @@ class Task:
 class Pool:
 
     _counter: int = 0
+
     def __init__(self, threads: int = 4):
         self._threads: int = threads
-        self._queue: asyncio.Queue = asyncio.Queue()
+        self._queue: asyncio.Queue = asyncio.Queue(maxsize=Data.MaxValues.quantity)
 
     async def _worker(self, task: Task):
         self._counter += 1
