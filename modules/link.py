@@ -83,7 +83,7 @@ class Link:
         found_links = await db.filter_by_history(found_links) if CurrentValues.is_file_history else found_links
 
         # Convert {"1.wav", "1.flac", "2.flac", "2.wav"} to ['1.flac', '2.wav']
-        tmp_dict: Dict[str:str] = {}
+        tmp_dict: Dict[str, str] = {}
         [[tmp_dict.update({n[0]: n[1]}) for n in [link.rsplit(".", 1)]] for link in found_links]
         f_links: List[str] = []
         [f_links.append(".".join(_)) for _ in tmp_dict.items()]
