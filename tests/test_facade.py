@@ -2,7 +2,7 @@ from concurrent.futures import Future
 
 from aiohttp import ClientSession
 
-from modules.data import Data
+from data.data import Data
 from modules.facade import CurrentValues
 from modules.manager import Manager
 from tests.prerequisites import Start
