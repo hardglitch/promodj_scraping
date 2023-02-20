@@ -1,3 +1,4 @@
+import asyncio
 from inspect import stack
 from typing import Dict, List, Set
 from urllib.parse import unquote
@@ -10,7 +11,6 @@ from data.data import CONST
 from data.messages import MESSAGES
 from modules import db, debug
 from modules.facade import CurrentValues
-from modules.pool import Pool, Task
 
 
 class Link:
@@ -22,6 +22,8 @@ class Link:
         self.message = message
         self.success = success
         self.search = search
+        self._counter: int = 0
+        self._analytic_threads: int = 10
 
 
     def _get_filtered_links(self, link_massive: ResultSet) -> Set[str]:
@@ -33,10 +35,10 @@ class Link:
         filtered_links: Set = set()
         formats: List[str] = [*CONST.LOSSLESS_COMPRESSED_FORMATS, *CONST.LOSSLESS_UNCOMPRESSED_FORMATS] \
             if CurrentValues.is_lossless else CONST.LOSSY_FORMATS
-        for link in link_massive:
-            for frmt in formats:
-                if link.has_attr("href") and link["href"].find(frmt) > -1 and link["href"].find("/source/") > -1:
-                    filtered_links.add(link["href"])
+
+        [[filtered_links.add(link["href"]) for _format in formats
+            if link["href"].endswith(_format) and link["href"].find("/source/", 1) > -1] for link in link_massive]
+
         return filtered_links
 
 
@@ -60,11 +62,9 @@ class Link:
                 async with CurrentValues.session.get(link, timeout=None,
                                                      headers={"Connection": "keep-alive"}) as response:
                     if response.status != 200: break
-                    text = str(await response.read())
-                    links = BeautifulSoup(unquote(text), features="html.parser").findAll("a")
+                    links = BeautifulSoup(unquote(await response.read()), features="html.parser").findAll("a", href=True)
 
                     found_links_on_page: set = self._get_filtered_links(links)
-                    assert isinstance(found_links_on_page, Set)
 
                     if not found_links_on_page & found_links:
                         found_links |= found_links_on_page
@@ -99,10 +99,23 @@ class Link:
 
     async def _get_total_filesize_by_link_list(self, f_links: List[str]):
         if not f_links: debug.log(MESSAGES.Errors.NoLinksToDownload + f" in {stack()[0][3]}")
-        assert isinstance(f_links, List)
-        assert all(map(lambda x: True if type(x) == str else False, f_links))
+        # assert isinstance(f_links, List)
+        # assert all(map(lambda x: True if type(x) == str else False, f_links))
 
-        pool = Pool()
-        [await pool.put(Task(micro_link=link, search=self.search)) for link in f_links]
-        await pool.start()
-        await pool.join()
+        tasks = []
+        sem = asyncio.Semaphore(self._analytic_threads)
+        [tasks.append(asyncio.ensure_future(self._worker(link, sem))) for link in f_links]
+        await asyncio.gather(*tasks)
+
+
+    async def _worker(self, link: str, sem: asyncio.Semaphore):
+        async with sem: await self._micro_task(link)
+
+
+    async def _micro_task(self, link: str):
+        async with CurrentValues.session.get(link, timeout=None, headers={"Connection": "keep-alive"}) as response:
+            if response.status != 200:
+                return debug.log(MESSAGES.Errors.SomethingWentWrong + f" in {stack()[0][3]}. {response.status=}")
+            CurrentValues.total_size += response.content_length if response.content_length else 0
+            self._counter += 1
+            self.search[int, int].emit(self._counter % 5, 2)

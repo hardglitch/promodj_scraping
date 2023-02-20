@@ -30,14 +30,12 @@ class Manager(ManagerInit):
             link: Link = Link(message=self.progress, success=self.success, search=self.search)
             all_links: List[str] = await link.get_all_links()
             if not all_links: return self.success[int].emit(0)
-            assert isinstance(all_links, List)
-            assert all(map(lambda x: True if type(x)==str else False, all_links))
+            # assert isinstance(all_links, List)
+            # assert all(map(lambda x: True if type(x)==str else False, all_links))
 
             tasks = []
             sem = asyncio.Semaphore(CurrentValues.threads)
-            for _link in all_links:
-                file: File = File(link=_link, progress=self.progress, message=self.message, file_info=self.file_info)
-                tasks.append(asyncio.ensure_future(self._worker(file, sem)))
+            [tasks.append(asyncio.ensure_future(self._worker(_link, sem))) for _link in all_links]
             CurrentValues.total_files = len(tasks)
             self.search[int, int].emit(0, 0)
             await asyncio.gather(*tasks)
@@ -45,8 +43,10 @@ class Manager(ManagerInit):
             if tasks: self.success[int].emit(1)
             else: self.success[int].emit(0)
 
-    async def _worker(self, file: File, sem: asyncio.Semaphore):
-        async with sem: await file.get_file()
+    async def _worker(self, link: str, sem: asyncio.Semaphore):
+        async with sem:
+            file: File = File(link=link, progress=self.progress, message=self.message, file_info=self.file_info)
+            await file.get_file()
 
     def start_downloading(self):
         CurrentValues.session = ClientSession(timeout=None, headers={"Connection": "keep-alive"})
