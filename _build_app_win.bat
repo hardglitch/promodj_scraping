@@ -5,5 +5,7 @@
 CALL venv\scripts\activate.bat
 pyinstaller -n="PromoDJScraper" --icon=logo.ico -w --onefile --clean --upx-dir upx  main.py
 CALL venv\scripts\deactivate.bat
-COPY logo.ico dist\PromoDJScraper\
+COPY logo.ico dist\
+COPY LICENSE.txt dist\
+COPY README.txt dist\
 pause

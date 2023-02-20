@@ -1,5 +1,5 @@
-import re
 from pathlib import Path
+from re import sub
 from typing import List, Optional, Union
 
 import aiofiles
@@ -35,7 +35,7 @@ class Settings:
         assert isinstance(filename, str)
         path = Path(str(path)[:1000])
         self.path: Path = path if path.exists() and path.is_file() else Path.cwd()
-        self.filename = re.sub(r"[^a-zA-Z0-9_\-.]", "", filename)[:255]
+        self.filename = sub(r"[^a-zA-Z0-9_\-.]", "", filename)[:255]
 
 
     async def write(self, *params: Parameter):

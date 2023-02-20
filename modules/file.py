@@ -52,7 +52,7 @@ class File:
                 await db.write_file_history(link=self._link, date=int(time()))
 
 
-    # @debug.is_download()
+    @debug.is_download()
     async def _download_file(self) -> bool:
         try:
             async with CurrentValues.session.get(self._link, timeout=None,

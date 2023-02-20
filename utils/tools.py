@@ -1,18 +1,18 @@
-import functools
 import re
 import secrets
 import string
 import time
+from functools import wraps
 from typing import Any, Callable
 
 
 def perf_counter_decorator() -> Any:
     def wrapper(func: Callable) -> Callable:
-        @functools.wraps(func)
-        def wrapped(*args, **kwargs) -> Any:
+        @wraps(func)
+        async def wrapped(*args, **kwargs) -> Any:
             start = time.perf_counter()
             try:
-                return func(*args, **kwargs)
+                return await func(*args, **kwargs)
             finally:
                 end = time.perf_counter()
                 print(f"Work time - {end-start}")
@@ -20,9 +20,9 @@ def perf_counter_decorator() -> Any:
     return wrapper
 
 
-def perf_counter_function(func: Callable, *args, **kwargs) -> Any:
+async def perf_counter_function(func: Callable, *args, **kwargs) -> Any:
     start = time.perf_counter()
-    result = func(*args, **kwargs)
+    result = await func(*args, **kwargs)
     end = time.perf_counter()
     print(f"Work time - {end - start}")
     return result
