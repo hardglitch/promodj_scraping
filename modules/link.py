@@ -84,7 +84,7 @@ class Link:
 
         # Convert {"1.wav", "1.flac", "2.flac", "2.wav"} to ['1.flac', '2.wav']
         tmp_dict: Dict[str, str] = {}
-        [[tmp_dict.update({n[0]: n[1]}) for n in [link.rsplit(".", 1)]] for link in found_links]
+        [[tmp_dict.update({n[0]:n[1]}) for n in [link.rsplit(".", 1)]] for link in found_links]
         f_links: List[str] = []
         [f_links.append(".".join(_)) for _ in tmp_dict.items()]
         # --------------------------------------------
@@ -99,8 +99,8 @@ class Link:
 
     async def _get_total_filesize_by_link_list(self, f_links: List[str]):
         if not f_links: debug.log(MESSAGES.Errors.NoLinksToDownload + f" in {stack()[0][3]}")
-        # assert isinstance(f_links, List)
-        # assert all(map(lambda x: True if type(x) == str else False, f_links))
+        assert isinstance(f_links, List)
+        assert all(map(lambda x: True if type(x) == str else False, f_links))
 
         tasks = []
         sem = asyncio.Semaphore(self._analytic_threads)
@@ -119,3 +119,4 @@ class Link:
             CurrentValues.total_size += response.content_length if response.content_length else 0
             self._counter += 1
             self.search[int, int].emit(self._counter % 5, 2)
+

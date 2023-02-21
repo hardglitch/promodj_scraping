@@ -26,7 +26,9 @@ class MainWindow(QMainWindow):
         self._settings_file: Settings = Settings()
         self._last_launch = int(time())
         self._music: Optional[Manager] = None
-        self._genres: Dict[str, str] = CONST.DefaultValues.genres
+        self._genres: Dict[str, str] = {}
+        [self._genres.update({value: CONST.DefaultValues.genres[n + 1]})
+                for n, value in enumerate(CONST.DefaultValues.genres) if n % 2 == 0]
 
         self.setWindowIcon(QIcon("logo.ico"))
 

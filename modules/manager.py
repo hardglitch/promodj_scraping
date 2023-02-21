@@ -30,8 +30,8 @@ class Manager(ManagerInit):
             link: Link = Link(message=self.progress, success=self.success, search=self.search)
             all_links: List[str] = await link.get_all_links()
             if not all_links: return self.success[int].emit(0)
-            # assert isinstance(all_links, List)
-            # assert all(map(lambda x: True if type(x)==str else False, all_links))
+            assert isinstance(all_links, List)
+            assert all(map(lambda x: True if type(x)==str else False, all_links))
 
             tasks = []
             sem = asyncio.Semaphore(CurrentValues.threads)
