@@ -10,6 +10,7 @@ class Data:
     LOSSLESS_COMPRESSED_FORMATS: Tuple[str] = (".flac", ".alac", ".tta", ".ape", ".wv")
     LOSSY_FORMATS: Tuple[str] = (".mp3",)
     DB_NAME: str = "history.db"
+    INTERNAL_THREADS: int = 10
 
     @dataclass(frozen=True)
     class __DefaultValues:

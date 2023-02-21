@@ -23,7 +23,6 @@ class Link:
         self.success = success
         self.search = search
         self._counter: int = 0
-        self._analytic_threads: int = 10
 
 
     def _get_filtered_links(self, link_massive: ResultSet) -> Set[str]:
@@ -42,12 +41,13 @@ class Link:
         return filtered_links
 
 
-    async def get_all_links(self) -> List[str]:
+    async def get_all_links(self) -> Set[str]:
         if not CurrentValues.session:
             debug.log(MESSAGES.Errors.UnableToDownload)
             self.message[str].emit(MESSAGES.Errors.UnableToDownload)
-            return []
+            return set()
 
+        #1. Get a raw link set
         page: int = 1
         found_links: Set[str] = set()
         bitrate: str = "lossless" if CurrentValues.is_lossless else "high"
@@ -76,34 +76,39 @@ class Link:
                 debug.log(MESSAGES.Errors.UnableToConnect, error)
                 self.message[str].emit(MESSAGES.Errors.UnableToConnect)
 
-        if not found_links:
-            self.success[int].emit(0)
-            return []
+        # 2. Checking found links
+        if not found_links: return self.success[int].emit(0)
+        else:
+            found_links = \
+                set(list(found_links)[:CurrentValues.quantity]) if not CurrentValues.is_period \
+                else set(list(found_links)[:CONST.MaxValues.quantity]) if len(found_links) > CONST.MaxValues.quantity \
+                else found_links
 
+        # 3. Filtering found links
         found_links = await db.filter_by_history(found_links) if CurrentValues.is_file_history else found_links
 
-        # Convert {"1.wav", "1.flac", "2.flac", "2.wav"} to ['1.flac', '2.wav']
+        # -- Convert {"1.wav", "1.flac", "2.flac", "2.wav"} to ['1.flac', '2.wav']
         tmp_dict: Dict[str, str] = {}
         [[tmp_dict.update({n[0]:n[1]}) for n in [link.rsplit(".", 1)]] for link in found_links]
-        f_links: List[str] = []
-        [f_links.append(".".join(_)) for _ in tmp_dict.items()]
+        found_links.clear()
+        [found_links.add(".".join(_)) for _ in tmp_dict.items()]
         # --------------------------------------------
 
-        f_links = f_links[:CurrentValues.quantity] if not CurrentValues.is_period else f_links[:CONST.MaxValues.quantity]
+        # 4. Choosing an algorithm for indicating the GUI download process
+        if 0 < len(found_links) < CONST.DefaultValues.file_threshold:
+            await self._get_total_filesize_by_link_list(found_links)
 
-        if 0 < len(f_links) < CONST.DefaultValues.file_threshold:
-            await self._get_total_filesize_by_link_list(f_links)
-
-        return f_links if f_links else self.success[int].emit(0)
+        # 5. Return result
+        return found_links if found_links else self.success[int].emit(0)
 
 
-    async def _get_total_filesize_by_link_list(self, f_links: List[str]):
+    async def _get_total_filesize_by_link_list(self, f_links: Set[str]):
         if not f_links: debug.log(MESSAGES.Errors.NoLinksToDownload + f" in {stack()[0][3]}")
-        assert isinstance(f_links, List)
+        assert isinstance(f_links, Set)
         assert all(map(lambda x: True if type(x) == str else False, f_links))
 
         tasks = []
-        sem = asyncio.Semaphore(self._analytic_threads)
+        sem = asyncio.Semaphore(CONST.INTERNAL_THREADS)
         [tasks.append(asyncio.ensure_future(self._worker(link, sem))) for link in f_links]
         await asyncio.gather(*tasks)
 
