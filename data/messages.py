@@ -22,6 +22,24 @@ class Messages:
 
     Errors = __Errors()
 
+    @dataclass(frozen=True)
+    class __ToolTips:
+
+        Genre: str = "Genre"
+        Quantity: str = "Number of files (if Period disabled)\n" \
+                        "or days (if Period enabled)"
+        Threads: str = "Number of simultaneously downloaded files"
+        Period: str = "If enabled, search for all files within the specified number of recent days\n" \
+                      "If disabled, search for latest files"
+        Lossless: str = "If enabled, search for files with the following extensions: wav, flac, aiff\n" \
+                        "If disabled, only search for mp3"
+        FileHistory: str = "Enable/Disable history of downloaded files"
+        RewriteFiles: str = "This checkbox only works if File History is DISABLED!\n" \
+                            "If enabled, overwrites existing files on download\n" \
+                            "If disabled, always create new files"
+
+    ToolTips = __ToolTips()
+
     MatchingFilesNotFound: str = "Matching files not found or already downloaded"
     AllFilesDownloaded: str = "100% - OK"
     Searching: str = "searching"

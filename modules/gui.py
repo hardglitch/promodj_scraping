@@ -3,7 +3,7 @@ from sys import exit
 from time import time
 from typing import Dict, List, Optional, get_args
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtGui import QFont, QIcon
 from PyQt6.QtWidgets import QApplication, QCheckBox, QComboBox, QFileDialog, QLabel, QMainWindow, QProgressBar, \
     QPushButton
@@ -30,15 +30,17 @@ class MainWindow(QMainWindow):
         [self._genres.update({value: CONST.DefaultValues.genres[n + 1]})
                 for n, value in enumerate(CONST.DefaultValues.genres) if n % 2 == 0]
 
-        self.setWindowIcon(QIcon("logo.ico"))
+        self.setWindowIcon(QIcon(str(Path("resources").joinpath("logo.ico"))))
 
         self.setFont(QFont("Arial", 12))
         self.setWindowTitle(CONST.Inscriptions.PromoDJMusicDownloader)
         self.setFixedSize(530, 200)
 
         self.cmbGenre = QComboBox(self)
+        self.cmbGenre.setToolTip(MESSAGES.ToolTips.Genre)
         self.cmbGenre.resize(220, 24)
         self.cmbGenre.move(10, 10)
+        self.cmbGenre.setDuplicatesEnabled(False)
         self.cmbGenre.addItems(self._genres.keys())
         self.cmbGenre.setCurrentText(CONST.DefaultValues.genre)
 
@@ -56,6 +58,7 @@ class MainWindow(QMainWindow):
         self.cmbQuantity.addItems([str(i) for i in range(1,11)])
         self.cmbQuantity.addItems(["20", "30", "40", "50", "100"])
         self.cmbQuantity.setCurrentText(str(CONST.DefaultValues.quantity))
+        self.cmbQuantity.setToolTip(MESSAGES.ToolTips.Quantity)
 
         self.lblQuantity = QLabel(CONST.Inscriptions.Files, self)
         self.lblQuantity.move(365, 8)
@@ -64,40 +67,49 @@ class MainWindow(QMainWindow):
         self.chbPeriod.setChecked(CONST.DefaultValues.is_period)
         self.chbPeriod.move(300, 40)
         self.chbPeriod.toggled.connect(self.event_chb_period)
+        self.chbPeriod.setToolTip(MESSAGES.ToolTips.Period)
 
         self.chbFormat = QCheckBox(CONST.Inscriptions.Lossless, self)
         self.chbFormat.setChecked(True)
         self.chbFormat.move(410, 40)
+        self.chbFormat.setToolTip(MESSAGES.ToolTips.Lossless)
 
         self.chbFileHistory = QCheckBox(CONST.Inscriptions.FileHistory, self)
         self.chbFileHistory.setChecked(CONST.DefaultValues.is_file_history)
         self.chbFileHistory.move(30, 40)
         self.chbFileHistory.resize(100, 30)
         self.chbFileHistory.toggled.connect(self.event_chb_file_history)
+        self.chbFileHistory.setToolTip(MESSAGES.ToolTips.FileHistory)
 
         self.chbRewriteFiles = QCheckBox(CONST.Inscriptions.RewriteFiles, self)
         self.chbRewriteFiles.move(150, 40)
-        self.chbRewriteFiles.resize(120, 30)
+        self.chbRewriteFiles.resize(130, 30)
         self.chbRewriteFiles.setEnabled(not self.chbFileHistory.isChecked())
         self.chbRewriteFiles.setChecked(not CONST.DefaultValues.is_file_history)
+        self.chbRewriteFiles.setToolTip(MESSAGES.ToolTips.RewriteFiles)
 
         self.cmbThreads = QComboBox(self)
         self.cmbThreads.resize(34, 24)
         self.cmbThreads.move(433, 10)
         [self.cmbThreads.addItem(str(i), i) for i in range(1, CONST.MaxValues.threads + 1)]
         self.cmbThreads.setCurrentText(str(CONST.DefaultValues.threads))
+        self.cmbThreads.setToolTip(MESSAGES.ToolTips.Threads)
 
         self.lblThreads = QLabel(CONST.Inscriptions.Threads, self)
         self.lblThreads.move(470, 8)
 
-        self.btnSaveTo = QPushButton(CONST.Inscriptions.SaveTo, self)
-        self.btnSaveTo.setGeometry(10, 85, 70, 24)
+        self.btnSaveTo = QPushButton(self)
+        self.btnSaveTo.setIcon(QIcon(str(Path("resources").joinpath("save.ico"))))
+        self.btnSaveTo.setIconSize(QSize(24, 24))
+        self.btnSaveTo.setGeometry(10, 85, 24, 24)
+        self.btnSaveTo.setToolTip(CONST.Inscriptions.SaveTo)
         self.btnSaveTo.setCheckable(True)
         self.btnSaveTo.clicked.connect(self.save_to)
 
         self.lblSaveTo = QLabel(str(Path(Path.cwd()).joinpath(CONST.DefaultValues.download_dir)), self)
-        self.lblSaveTo.resize(435, 24)
-        self.lblSaveTo.move(85, 85)
+        self.lblSaveTo.setToolTip(self.lblSaveTo.text())
+        self.lblSaveTo.resize(480, 24)
+        self.lblSaveTo.move(40, 85)
 
         self.btnDownload = QPushButton(CONST.Inscriptions.Download, self)
         self.btnDownload.move(270, 160)
