@@ -127,7 +127,7 @@ class MainWindow(QMainWindow):
 
         self.lblSaveTo = QLabel(str(Path(Path.cwd()).joinpath(CONST.DefaultValues.download_dir)), self)
         self.lblSaveTo.setToolTip(self.lblSaveTo.text())
-        self.lblSaveTo.setFixedWidth(480)
+        self.lblSaveTo.resize(480, 24)
         self.lblSaveTo.move(40, 85)
         self.lblSaveTo.setFont(self._font)
 
@@ -142,7 +142,7 @@ class MainWindow(QMainWindow):
         self.btnExit.setFont(self._font)
 
         self.progBar = QProgressBar(self)
-        self.progBar.setGeometry(10, 125, 520, 20)
+        self.progBar.setGeometry(10, 125, 510, 20)
         self.progBar.setVisible(False)
         self.progBar.setMaximum(100)
         self.progBar.setFont(self._font)
@@ -153,7 +153,7 @@ class MainWindow(QMainWindow):
         self.lblMessage.setFont(self._font)
 
         self.lblFiles = QLabel("", self)
-        self.lblFiles.move(30, 160)
+        self.lblFiles.move(30, 150)
         self.lblFiles.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.lblFiles.setFont(self._font)
 
@@ -271,7 +271,9 @@ class MainWindow(QMainWindow):
 
     def save_to(self):
         save_to_dir = QFileDialog.getExistingDirectory(self)
-        if save_to_dir: self.lblSaveTo.setText(str(Path(save_to_dir)))
+        if save_to_dir:
+            self.lblSaveTo.setText(str(Path(save_to_dir)))
+            self.lblSaveTo.setToolTip(self.lblSaveTo.text())
         self.btnSaveTo.setChecked(False)
 
     def app_exit(self):
@@ -317,6 +319,7 @@ class MainWindow(QMainWindow):
 
                 elif param.name == CONST.Parameters.DownloadDirectory and Path(param.value).exists():
                     self.lblSaveTo.setText(str(Path(param.value)))
+                    self.lblSaveTo.setToolTip(self.lblSaveTo.text())
 
                 elif param.name == CONST.Parameters.Form and param.value in get_args(CONST.FORMS):
                     self.cmbForm.setCurrentText(param.value)
