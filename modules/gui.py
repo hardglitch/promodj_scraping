@@ -319,6 +319,7 @@ class MainWindow(QMainWindow):
 
                 elif param.name == CONST.Parameters.DownloadDirectory and Path(param.value).exists():
                     self.lblSaveTo.setText(str(Path(param.value)))
+                    self.lblSaveTo.setToolTip(self.lblSaveTo.text())
 
                 elif param.name == CONST.Parameters.Form and param.value in get_args(CONST.FORMS):
                     self.cmbForm.setCurrentText(param.value)
