@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, get_args
 
 import qdarktheme
 from PyQt6.QtCore import QSize, Qt
-from PyQt6.QtGui import QIcon
+from PyQt6.QtGui import QFont, QIcon
 from PyQt6.QtWidgets import QApplication, QCheckBox, QComboBox, QFileDialog, QLabel, QMainWindow, QProgressBar, \
     QPushButton, QStyle
 from aiohttp import ClientSession
@@ -24,6 +24,7 @@ class MainWindow(QMainWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self._font = QFont("Arial", 10)
         self._settings_file: Settings = Settings()
         self._last_launch = int(time())
         self._music: Optional[Manager] = None
@@ -37,7 +38,7 @@ class MainWindow(QMainWindow):
                }
         """
         qdarktheme.setup_theme(theme="auto", additional_qss=qss)
-        self.setWindowIcon(QIcon(str(Path("resources").joinpath("logo.ico"))))
+        self.setWindowIcon(QIcon("logo.ico"))
 
         self.setWindowTitle(CONST.Inscriptions.PromoDJMusicDownloader)
         self.setFixedSize(530, 200)
@@ -49,12 +50,14 @@ class MainWindow(QMainWindow):
         self.cmbGenre.setDuplicatesEnabled(False)
         self.cmbGenre.addItems(self._genres.keys())
         self.cmbGenre.setCurrentText(CONST.DefaultValues.genre)
+        self.cmbGenre.setFont(self._font)
 
         self.cmbForm = QComboBox(self)
         self.cmbForm.resize(70, 24)
         self.cmbForm.move(230, 10)
         self.cmbForm.addItems(get_args(CONST.FORMS))
         self.cmbForm.setCurrentIndex(1)
+        self.cmbForm.setFont(self._font)
 
         self.cmbQuantity = QComboBox(self)
         self.cmbQuantity.resize(60, 24)
@@ -65,20 +68,24 @@ class MainWindow(QMainWindow):
         self.cmbQuantity.addItems(["20", "30", "40", "50", "100"])
         self.cmbQuantity.setCurrentText(str(CONST.DefaultValues.quantity))
         self.cmbQuantity.setToolTip(MESSAGES.ToolTips.Quantity)
+        self.cmbQuantity.setFont(self._font)
 
         self.lblQuantity = QLabel(CONST.Inscriptions.Files, self)
         self.lblQuantity.move(360, 10)
+        self.lblQuantity.setFont(self._font)
 
         self.chbPeriod = QCheckBox(CONST.Inscriptions.Period, self)
         self.chbPeriod.setChecked(CONST.DefaultValues.is_period)
         self.chbPeriod.move(300, 40)
         self.chbPeriod.toggled.connect(self.event_chb_period)
         self.chbPeriod.setToolTip(MESSAGES.ToolTips.Period)
+        self.chbPeriod.setFont(self._font)
 
         self.chbFormat = QCheckBox(CONST.Inscriptions.Lossless, self)
         self.chbFormat.setChecked(True)
         self.chbFormat.move(410, 40)
         self.chbFormat.setToolTip(MESSAGES.ToolTips.Lossless)
+        self.chbFormat.setFont(self._font)
 
         self.chbFileHistory = QCheckBox(CONST.Inscriptions.FileHistory, self)
         self.chbFileHistory.setChecked(CONST.DefaultValues.is_file_history)
@@ -86,6 +93,7 @@ class MainWindow(QMainWindow):
         self.chbFileHistory.resize(100, 30)
         self.chbFileHistory.toggled.connect(self.event_chb_file_history)
         self.chbFileHistory.setToolTip(MESSAGES.ToolTips.FileHistory)
+        self.chbFileHistory.setFont(self._font)
 
         self.chbRewriteFiles = QCheckBox(CONST.Inscriptions.RewriteFiles, self)
         self.chbRewriteFiles.move(150, 40)
@@ -93,6 +101,7 @@ class MainWindow(QMainWindow):
         self.chbRewriteFiles.setEnabled(not self.chbFileHistory.isChecked())
         self.chbRewriteFiles.setChecked(not CONST.DefaultValues.is_file_history)
         self.chbRewriteFiles.setToolTip(MESSAGES.ToolTips.RewriteFiles)
+        self.chbRewriteFiles.setFont(self._font)
 
         self.cmbThreads = QComboBox(self)
         self.cmbThreads.resize(40, 24)
@@ -100,9 +109,11 @@ class MainWindow(QMainWindow):
         [self.cmbThreads.addItem(str(i), i) for i in range(1, CONST.MaxValues.threads + 1)]
         self.cmbThreads.setCurrentText(str(CONST.DefaultValues.threads))
         self.cmbThreads.setToolTip(MESSAGES.ToolTips.Threads)
+        self.cmbThreads.setFont(self._font)
 
         self.lblThreads = QLabel(CONST.Inscriptions.Threads, self)
         self.lblThreads.move(475, 10)
+        self.lblThreads.setFont(self._font)
 
         self.btnSaveTo = QPushButton(self)
         save_pixmap = QStyle.StandardPixmap.SP_DialogSaveButton
@@ -118,27 +129,37 @@ class MainWindow(QMainWindow):
         self.lblSaveTo.setToolTip(self.lblSaveTo.text())
         self.lblSaveTo.setFixedWidth(480)
         self.lblSaveTo.move(40, 85)
+        self.lblSaveTo.setFont(self._font)
 
         self.btnDownload = QPushButton(CONST.Inscriptions.Download, self)
         self.btnDownload.move(270, 160)
         self.btnDownload.clicked.connect(self.download_files)
+        self.btnDownload.setFont(self._font)
 
         self.btnExit = QPushButton(CONST.Inscriptions.Exit, self)
         self.btnExit.move(160, 160)
         self.btnExit.clicked.connect(self.app_exit)
+        self.btnExit.setFont(self._font)
 
         self.progBar = QProgressBar(self)
         self.progBar.setGeometry(10, 125, 520, 20)
         self.progBar.setVisible(False)
         self.progBar.setMaximum(100)
+        self.progBar.setFont(self._font)
 
         self.lblMessage = QLabel("", self)
         self.lblMessage.setGeometry(10, 125, 520, 20)
         self.lblMessage.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.lblMessage.setFont(self._font)
 
         self.lblFiles = QLabel("", self)
         self.lblFiles.move(30, 160)
         self.lblFiles.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.lblFiles.setFont(self._font)
+
+        self.lblVersion = QLabel("v1.4.7", self)
+        self.lblVersion.setFont(QFont("Arial", 8))
+        self.lblVersion.move(5, 175)
 
     @asyncSlot()
     async def download_files(self):
