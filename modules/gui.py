@@ -157,9 +157,15 @@ class MainWindow(QMainWindow):
         self.lblFiles.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.lblFiles.setFont(self._font)
 
-        self.lblVersion = QLabel("v1.4.7", self)
+        self.lblVersion = QLabel(CONST.VERSION, self)
         self.lblVersion.setFont(QFont("Arial", 8))
         self.lblVersion.move(5, 175)
+
+        self.lblAuthor = QLabel('<a href="https://github.com/hardglitch/promodj_scraping" style="text-decoration:none">homepage</a>', self)
+        self.lblAuthor.setFont(QFont("Arial", 8))
+        self.lblAuthor.setOpenExternalLinks(True)
+        self.lblAuthor.move(40, 175)
+        self.lblAuthor.setToolTip("https://github.com/hardglitch/promodj_scraping")
 
     @asyncSlot()
     async def download_files(self):

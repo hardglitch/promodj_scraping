@@ -11,6 +11,7 @@ class Data:
     LOSSY_FORMATS: Tuple[str] = (".mp3",)
     DB_NAME: str = "history.db"
     INTERNAL_THREADS: int = 10
+    VERSION: str = "v1.5.0"
 
     @dataclass(frozen=True)
     class __DefaultValues:
