@@ -127,7 +127,7 @@ class MainWindow(QMainWindow):
 
         self.lblSaveTo = QLabel(str(Path(Path.cwd()).joinpath(CONST.DefaultValues.download_dir)), self)
         self.lblSaveTo.setToolTip(self.lblSaveTo.text())
-        self.lblSaveTo.setFixedWidth(480)
+        self.lblSaveTo.resize(480, 24)
         self.lblSaveTo.move(40, 85)
         self.lblSaveTo.setFont(self._font)
 
