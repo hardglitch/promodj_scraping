@@ -12,8 +12,6 @@
 !/utils/settings/*.py
 !/utils/settings/tests
 !/utils/settings/tests/*.py
-!/resources
-!/resources/*.ico
 !main.py
 !logo.png
 !requirements.txt

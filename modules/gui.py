@@ -3,10 +3,11 @@ from sys import exit
 from time import time
 from typing import Dict, List, Optional, get_args
 
+import qdarktheme
 from PyQt6.QtCore import QSize, Qt
-from PyQt6.QtGui import QFont, QIcon
+from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QCheckBox, QComboBox, QFileDialog, QLabel, QMainWindow, QProgressBar, \
-    QPushButton
+    QPushButton, QStyle
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
 from qasync import asyncSlot
@@ -30,9 +31,14 @@ class MainWindow(QMainWindow):
         [self._genres.update({value: CONST.DefaultValues.genres[n + 1]})
                 for n, value in enumerate(CONST.DefaultValues.genres) if n % 2 == 0]
 
+        qss = """
+        QToolTip { 
+               color: black;
+               }
+        """
+        qdarktheme.setup_theme(theme="auto", additional_qss=qss)
         self.setWindowIcon(QIcon(str(Path("resources").joinpath("logo.ico"))))
 
-        self.setFont(QFont("Arial", 12))
         self.setWindowTitle(CONST.Inscriptions.PromoDJMusicDownloader)
         self.setFixedSize(530, 200)
 
@@ -61,7 +67,7 @@ class MainWindow(QMainWindow):
         self.cmbQuantity.setToolTip(MESSAGES.ToolTips.Quantity)
 
         self.lblQuantity = QLabel(CONST.Inscriptions.Files, self)
-        self.lblQuantity.move(365, 8)
+        self.lblQuantity.move(360, 10)
 
         self.chbPeriod = QCheckBox(CONST.Inscriptions.Period, self)
         self.chbPeriod.setChecked(CONST.DefaultValues.is_period)
@@ -89,17 +95,19 @@ class MainWindow(QMainWindow):
         self.chbRewriteFiles.setToolTip(MESSAGES.ToolTips.RewriteFiles)
 
         self.cmbThreads = QComboBox(self)
-        self.cmbThreads.resize(34, 24)
+        self.cmbThreads.resize(40, 24)
         self.cmbThreads.move(433, 10)
         [self.cmbThreads.addItem(str(i), i) for i in range(1, CONST.MaxValues.threads + 1)]
         self.cmbThreads.setCurrentText(str(CONST.DefaultValues.threads))
         self.cmbThreads.setToolTip(MESSAGES.ToolTips.Threads)
 
         self.lblThreads = QLabel(CONST.Inscriptions.Threads, self)
-        self.lblThreads.move(470, 8)
+        self.lblThreads.move(475, 10)
 
         self.btnSaveTo = QPushButton(self)
-        self.btnSaveTo.setIcon(QIcon(str(Path("resources").joinpath("save.ico"))))
+        save_pixmap = QStyle.StandardPixmap.SP_DialogSaveButton
+        save_icon = self.style().standardIcon(save_pixmap)
+        self.btnSaveTo.setIcon(save_icon)
         self.btnSaveTo.setIconSize(QSize(24, 24))
         self.btnSaveTo.setGeometry(10, 85, 24, 24)
         self.btnSaveTo.setToolTip(CONST.Inscriptions.SaveTo)
@@ -108,7 +116,7 @@ class MainWindow(QMainWindow):
 
         self.lblSaveTo = QLabel(str(Path(Path.cwd()).joinpath(CONST.DefaultValues.download_dir)), self)
         self.lblSaveTo.setToolTip(self.lblSaveTo.text())
-        self.lblSaveTo.resize(480, 24)
+        self.lblSaveTo.setFixedWidth(480)
         self.lblSaveTo.move(40, 85)
 
         self.btnDownload = QPushButton(CONST.Inscriptions.Download, self)
