@@ -6,7 +6,7 @@ PromoDJ.com is The Great Site for electronic music lovers like me.
 
 My App will give you the opportunity to download music from this site in a convenient way.
 
-The Code is written in asynchronous and multithreaded Python and built using Pyinstaller.
+The Code is written in asynchronous Python and built using Pyinstaller.
 GUI created with PyQt6.
 
 PromoDJ Scraper is completely portable
