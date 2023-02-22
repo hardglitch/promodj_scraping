@@ -142,7 +142,7 @@ class MainWindow(QMainWindow):
         self.btnExit.setFont(self._font)
 
         self.progBar = QProgressBar(self)
-        self.progBar.setGeometry(10, 125, 520, 20)
+        self.progBar.setGeometry(10, 125, 510, 20)
         self.progBar.setVisible(False)
         self.progBar.setMaximum(100)
         self.progBar.setFont(self._font)
@@ -153,7 +153,7 @@ class MainWindow(QMainWindow):
         self.lblMessage.setFont(self._font)
 
         self.lblFiles = QLabel("", self)
-        self.lblFiles.move(30, 160)
+        self.lblFiles.move(30, 150)
         self.lblFiles.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.lblFiles.setFont(self._font)
 
