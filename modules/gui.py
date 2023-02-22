@@ -271,7 +271,9 @@ class MainWindow(QMainWindow):
 
     def save_to(self):
         save_to_dir = QFileDialog.getExistingDirectory(self)
-        if save_to_dir: self.lblSaveTo.setText(str(Path(save_to_dir)))
+        if save_to_dir:
+            self.lblSaveTo.setText(str(Path(save_to_dir)))
+            self.lblSaveTo.setToolTip(self.lblSaveTo.text())
         self.btnSaveTo.setChecked(False)
 
     def app_exit(self):
