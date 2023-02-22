@@ -7,9 +7,11 @@ class Data:
 
     FORMS = Literal["mixes", "tracks", "lives"]
     LOSSLESS_UNCOMPRESSED_FORMATS: Tuple[str] = (".wav", ".aiff")
-    LOSSLESS_COMPRESSED_FORMATS: Tuple[str] = (".flac", ".alac", ".tta", ".ape", ".wv")
+    LOSSLESS_COMPRESSED_FORMATS: Tuple[str] = (".flac",)
     LOSSY_FORMATS: Tuple[str] = (".mp3",)
     DB_NAME: str = "history.db"
+    INTERNAL_THREADS: int = 10
+    VERSION: str = "v1.5.0"
 
     @dataclass(frozen=True)
     class __DefaultValues:
@@ -315,7 +317,7 @@ class Data:
         Period: str = "Period"
         Lossless: str = "Lossless"
         FileHistory: str = "File History"
-        RewriteFiles: str = "Rewrite Files"
+        RewriteFiles: str = "Overwrite Files"
         Threads: str = "threads"
         SaveTo: str = "Save to"
         Download: str = "Download"

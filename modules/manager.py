@@ -1,6 +1,6 @@
 import asyncio
 from concurrent.futures import Future
-from typing import List, Optional
+from typing import Optional, Set
 
 from PyQt6.QtCore import pyqtSignal
 from aiohttp import ClientSession
@@ -28,9 +28,9 @@ class Manager(ManagerInit):
             if CurrentValues.is_file_history: await db.create_history_db()
 
             link: Link = Link(message=self.progress, success=self.success, search=self.search)
-            all_links: List[str] = await link.get_all_links()
+            all_links: Set[str] = await link.get_all_links()
             if not all_links: return self.success[int].emit(0)
-            assert isinstance(all_links, List)
+            assert isinstance(all_links, Set)
             assert all(map(lambda x: True if type(x)==str else False, all_links))
 
             tasks = []
