@@ -5,3 +5,4 @@ aiofiles==23.1.0
 aiosqlite==0.18.0
 beautifulsoup4==4.11.2
 pyqtdarktheme==2.1.0
+lxml==4.9.2
