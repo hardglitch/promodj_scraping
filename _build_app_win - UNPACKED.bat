@@ -3,7 +3,7 @@
 @CHCP 65001
 
 CALL venv\scripts\activate.bat
-pyinstaller -n="PromoDJScraper" --icon=logo.ico -w --onedir --clean --upx-dir upx  main.py
+pyinstaller -n="PromoDJScraper" --icon=logo.ico -w --onedir --upx-dir upx  main.py
 CALL venv\scripts\deactivate.bat
 COPY logo.ico dist\PromoDJScraper\
 COPY LICENSE.txt dist\PromoDJScraper\

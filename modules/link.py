@@ -111,9 +111,8 @@ class Link:
         assert isinstance(f_links, Set)
         assert all(map(lambda x: True if type(x) == str else False, f_links))
 
-        tasks = []
         sem = asyncio.Semaphore(CONST.INTERNAL_THREADS)
-        [tasks.append(asyncio.ensure_future(self._worker(link, sem))) for link in f_links]
+        tasks = [asyncio.ensure_future(self._worker(link, sem)) for link in f_links]
         await asyncio.gather(*tasks)
 
 
