@@ -1,5 +1,4 @@
 import asyncio
-from concurrent.futures import Future
 from typing import Optional, Set
 
 from PyQt6.QtCore import pyqtSignal
@@ -21,7 +20,7 @@ class Manager(ManagerInit):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._downloading: Optional[Future] = None
+        self._downloading: Optional[asyncio.Future] = None
 
     async def _get_files(self):
         async with CurrentValues.session:

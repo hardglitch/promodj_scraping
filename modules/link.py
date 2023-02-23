@@ -5,7 +5,7 @@ from urllib.parse import unquote
 
 from PyQt6.QtCore import pyqtSignal
 from aiohttp import ClientError
-from bs4 import BeautifulSoup, ResultSet
+from bs4 import BeautifulSoup, ResultSet, SoupStrainer
 
 from data.data import CONST
 from data.messages import MESSAGES
@@ -62,9 +62,13 @@ class Link:
                 async with CurrentValues.session.get(link, timeout=None,
                                                      headers={"Connection": "keep-alive"}) as response:
                     if response.status != 200: break
-                    links = BeautifulSoup(unquote(await response.read()), features="html.parser").findAll("a", href=True)
+                    link_massive = BeautifulSoup(
+                        unquote(await response.read()),
+                        features="lxml",
+                        parse_only=SoupStrainer("a")
+                    ).findAll(href=True)
 
-                    found_links_on_page: set = self._get_filtered_links(links)
+                    found_links_on_page: set = self._get_filtered_links(link_massive)
 
                     if not found_links_on_page & found_links:
                         found_links |= found_links_on_page
