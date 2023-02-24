@@ -9,6 +9,7 @@ from data.data import CONST
 from data.messages import MESSAGES
 from modules import db, debug
 from modules.shared import CurrentValues
+from util import tools
 
 
 class File:
@@ -28,7 +29,7 @@ class File:
             return
 
         self._link: str = link
-        self._name: str = self._link.rsplit("/", 1)[-1]
+        self._name: str = str(tools.clear_path(self._link.rsplit("/", 1)[-1]))
         self._path: Path = Path(CurrentValues.download_dir).joinpath(self._name)
         assert isinstance(self._link, str)
         assert isinstance(self._name, str)

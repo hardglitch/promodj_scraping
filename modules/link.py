@@ -11,7 +11,6 @@ from data.data import CONST
 from data.messages import MESSAGES
 from modules import db, debug
 from modules.shared import CurrentValues
-from util import tools
 
 
 class Link:
@@ -76,7 +75,7 @@ class Link:
         formats: List[str] = [*CONST.LOSSLESS_COMPRESSED_FORMATS, *CONST.LOSSLESS_UNCOMPRESSED_FORMATS] \
             if CurrentValues.is_lossless else CONST.LOSSY_FORMATS
 
-        [[filtered_links.add(tools.clear_path(link["href"])) for _format in formats
+        [[filtered_links.add(link["href"]) for _format in formats
             if link["href"].endswith(_format) and link["href"].find("/source/", 1) > -1] for link in link_massive]
 
         return filtered_links
