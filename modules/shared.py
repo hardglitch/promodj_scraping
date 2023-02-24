@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from PyQt6.QtWidgets import QMainWindow
 from aiohttp import ClientSession
 
 from data.data import CONST
@@ -145,39 +144,3 @@ class __CurrentValues:
 
 
 CurrentValues = __CurrentValues("", "", "", 0, 0, False, False, False, False, None, 0, 0, 0, 0)
-
-
-class ManagerInit(QMainWindow):
-    def __init__(self,
-                 download_dir: str = CONST.DefaultValues.download_dir,
-                 genre: str = CONST.DefaultValues.genre,
-                 form: CONST.FORMS = CONST.DefaultValues.form,
-                 is_lossless: bool = CONST.DefaultValues.is_lossless,
-                 quantity: int = CONST.DefaultValues.quantity,
-                 is_period: bool = CONST.DefaultValues.is_period,
-                 threads: int = CONST.DefaultValues.threads,
-                 is_rewrite_files: bool = CONST.DefaultValues.is_rewrite_files,
-                 is_file_history: bool = CONST.DefaultValues.is_file_history,
-        ):
-
-        super().__init__()
-        CurrentValues.download_dir = download_dir
-        CurrentValues.genre = genre
-        CurrentValues.form = form
-        CurrentValues.is_lossless = is_lossless
-        CurrentValues.quantity = quantity \
-            if 0 < quantity <= abs(CONST.MaxValues.quantity) \
-            else abs(CONST.DefaultValues.quantity)
-        CurrentValues.is_period = is_period
-        CurrentValues.threads = threads \
-            if 0 < threads <= abs(CONST.MaxValues.threads) \
-            else abs(CONST.DefaultValues.threads)
-        CurrentValues.is_rewrite_files = is_rewrite_files
-        CurrentValues.is_file_history = is_file_history
-
-        CurrentValues.session = None
-
-        CurrentValues.total_files = 0
-        CurrentValues.total_downloaded_files = 0
-        CurrentValues.total_downloaded = 0
-        CurrentValues.total_size = 0

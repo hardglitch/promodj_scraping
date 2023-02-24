@@ -8,7 +8,7 @@ from aiofiles import open
 from data.data import CONST
 from data.messages import MESSAGES
 from modules import db, debug
-from modules.facade import CurrentValues
+from modules.shared import CurrentValues
 
 
 class File:
@@ -23,7 +23,7 @@ class File:
         self.file_info = file_info
 
         if not link:
-            debug.log(MESSAGES.Errors.NoLinkToDownload)
+            debug.log(MESSAGES.Errors.NoLinkToDownload + f" in {stack()[0][3]}")
             self.message[str].emit(MESSAGES.Errors.NoLinkToDownload)
             return
 
@@ -73,7 +73,6 @@ class File:
                         elif CurrentValues.total_files >= CONST.DefaultValues.file_threshold:
                             self.progress[int].emit(
                                 round((100 * CurrentValues.total_downloaded_files / CurrentValues.total_files)))
-                        else: pass
                         await file.write(chunk)
 
                     debug.print_message(f"File save as {self._path}")
