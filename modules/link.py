@@ -82,7 +82,9 @@ class Link:
 
 
     async def _filtered_found_links(self, found_links: Set[str]) -> Set[str]:
-        if not found_links: debug.log(MESSAGES.Errors.NoLinksToDownload + f" in {stack()[0][3]}")
+        if not found_links:
+            debug.log(MESSAGES.Errors.NoLinksToDownload + f" in {stack()[0][3]}")
+            return set()
 
         found_links = await db.filter_by_history(found_links) if CurrentValues.is_file_history else found_links
 
@@ -96,8 +98,8 @@ class Link:
 
 
 
-    async def _get_total_filesize_by_link_list(self, f_links: Set[str]):
-        if not f_links: debug.log(MESSAGES.Errors.NoLinksToDownload + f" in {stack()[0][3]}")
+    async def _get_total_filesize_by_link_list(self, f_links: Set[str]) -> None:
+        if not f_links: return debug.log(MESSAGES.Errors.NoLinksToDownload + f" in {stack()[0][3]}")
         assert isinstance(f_links, Set)
         assert all(map(lambda x: True if type(x) == str else False, f_links))
 
@@ -108,7 +110,7 @@ class Link:
     async def _worker(self, link: str, sem: asyncio.Semaphore):
         async with sem: await self._micro_task(link)
 
-    async def _micro_task(self, link: str):
+    async def _micro_task(self, link: str) -> None:
         async with CurrentValues.session.get(link, timeout=None, headers={"Connection": "keep-alive"}) as response:
             if response.status != 200:
                 return debug.log(MESSAGES.Errors.SomethingWentWrong + f" in {stack()[0][3]}. {response.status=}")
@@ -131,5 +133,4 @@ class Page:
                 return BeautifulSoup(unquote(await response.read()), "lxml", parse_only=SoupStrainer("a")).findAll(href=True)
 
         except ClientError as error:
-            debug.log(MESSAGES.Errors.UnableToConnect, error)
-            return None
+            return debug.log(MESSAGES.Errors.UnableToConnect, error)
