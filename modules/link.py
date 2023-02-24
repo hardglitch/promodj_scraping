@@ -54,11 +54,11 @@ class Link:
                 else found_links
 
         # 3. Filtering found links
-        f_links: Set[str] = await self._filtered_found_links(found_links)
+        found_links = await self._filtered_found_links(found_links)
 
         # 4. Choosing an algorithm for indicating the GUI download process
-        if 0 < len(f_links) < CONST.DefaultValues.file_threshold:
-            await self._get_total_filesize_by_link_list(f_links)
+        if 0 < len(found_links) < CONST.DefaultValues.file_threshold:
+            await self._get_total_filesize_by_link_list(found_links)
 
         # 5. Return result
         return found_links if found_links else self.success[int].emit(0)
@@ -133,4 +133,3 @@ class Page:
         except ClientError as error:
             debug.log(MESSAGES.Errors.UnableToConnect, error)
             return None
-
