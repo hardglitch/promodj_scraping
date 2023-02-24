@@ -6,11 +6,11 @@
 !/tests/
 !/tests/*.py
 !/tests/pytest.ini
-!/utils
+!/util
 !/utils/*.py
-!/utils/settings
+!/util/settings
 !/utils/settings/*.py
-!/utils/settings/tests
+!/util/settings/tests
 !/utils/settings/tests/*.py
 !main.py
 !logo.png

@@ -3,8 +3,8 @@ from typing import Callable, Iterable, Optional
 
 from modules.gui import MainWindow
 from tests.prerequisites import Start
-from utils import tools
-from utils.settings.settings import Settings
+from util import tools
+from util.settings.settings import Settings
 
 FULL_CHAOS: int = 0
 HALF_LEGAL_ARGUMENTS: int = 1
