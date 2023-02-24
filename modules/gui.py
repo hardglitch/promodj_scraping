@@ -16,7 +16,7 @@ from data.data import CONST
 from data.messages import MESSAGES
 from modules import debug
 from modules.manager import Manager
-from utils.settings.settings import Parameter, Settings
+from util.settings.settings import Parameter, Settings
 
 
 class MainWindow(QMainWindow):
