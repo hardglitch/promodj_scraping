@@ -3,8 +3,8 @@ from concurrent.futures import Future
 from aiohttp import ClientSession
 
 from data.data import Data
-from modules.facade import CurrentValues
 from modules.manager import Manager
+from modules.shared import CurrentValues
 from tests.prerequisites import Start
 
 Start()

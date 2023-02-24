@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup, ResultSet, SoupStrainer
 from data.data import CONST
 from data.messages import MESSAGES
 from modules import db, debug
-from modules.facade import CurrentValues
+from modules.shared import CurrentValues
 
 
 class Link:
