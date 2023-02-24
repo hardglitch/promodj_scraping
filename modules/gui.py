@@ -32,11 +32,7 @@ class MainWindow(QMainWindow):
         [self._genres.update({value: CONST.DefaultValues.genres[n + 1]})
                 for n, value in enumerate(CONST.DefaultValues.genres) if n % 2 == 0]
 
-        qss = """
-        QToolTip { 
-               color: black;
-               }
-        """
+        qss = """QToolTip {color: black;}"""
         qdarktheme.setup_theme(theme="auto", additional_qss=qss)
         self.setWindowIcon(QIcon("logo.ico"))
 
