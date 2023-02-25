@@ -1,6 +1,7 @@
 import asyncio
 from asyncio import Semaphore, Task
 from concurrent.futures import Future
+from inspect import stack
 from typing import List, Optional, Set
 
 from PyQt6.QtCore import pyqtBoundSignal, pyqtSignal
@@ -8,7 +9,8 @@ from PyQt6.QtWidgets import QMainWindow
 from aiohttp import ClientSession
 
 from data.data import CONST
-from modules import db
+from data.messages import MESSAGES
+from modules import db, debug
 from modules.file import File
 from modules.link import Link
 from modules.shared import CurrentValues
@@ -59,9 +61,14 @@ class Manager(QMainWindow):
         self._downloading: Optional[Future] = None
         self._success: pyqtBoundSignal = self.success[int]
         self._search: pyqtBoundSignal = self.search[int, int]
+        self._message: pyqtBoundSignal = self.message[str]
 
 
     async def _get_files(self) -> None:
+        if not CurrentValues.session:
+            debug.log(MESSAGES.Errors.SomethingWentWrong + f" in {stack()[0][3]}")
+            return self._message.emit(MESSAGES.Errors.SomethingWentWrong)
+
         async with CurrentValues.session:
             if CurrentValues.is_file_history: await db.create_history_db()
 
