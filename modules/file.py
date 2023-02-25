@@ -2,7 +2,7 @@ from inspect import stack
 from pathlib import Path
 from time import time
 
-from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtCore import pyqtBoundSignal
 from aiofiles import open
 
 from data.data import CONST
@@ -15,9 +15,9 @@ from util import tools
 class File:
     def __init__(self,
                  link: str,
-                 progress: pyqtSignal(int),
-                 message: pyqtSignal(str),
-                 file_info: pyqtSignal(int, int),
+                 progress: pyqtBoundSignal,
+                 message: pyqtBoundSignal,
+                 file_info: pyqtBoundSignal,
         ):
         self.progress = progress
         self.message = message
@@ -25,7 +25,7 @@ class File:
 
         if not link:
             debug.log(MESSAGES.Errors.NoLinkToDownload + f" in {stack()[0][3]}")
-            self.message[str].emit(MESSAGES.Errors.NoLinkToDownload)
+            self.message.emit(MESSAGES.Errors.NoLinkToDownload)
             return
 
         self._link: str = link
@@ -36,19 +36,19 @@ class File:
         assert isinstance(self._path, Path)
 
 
-    def _check_path_and_name(self):
+    def _check_path_and_name(self) -> None:
         if Path(self._path).exists() and not CurrentValues.is_rewrite_files and not CurrentValues.is_file_history:
             ext_time: str = str(time()).replace(".", "")
             ext_pos: int = self._name.rfind(".")
             self._name = self._name[:ext_pos] + "_" + ext_time + self._name[ext_pos:]
             self._path = Path(CurrentValues.download_dir).joinpath(self._name)
 
-    async def get_file(self):
+    async def get_file(self) -> None:
         self._check_path_and_name()
-        self.file_info[int, int].emit(CurrentValues.total_downloaded_files, CurrentValues.total_files)
+        self.file_info.emit(CurrentValues.total_downloaded_files, CurrentValues.total_files)
         if await self._download_file():
             CurrentValues.total_downloaded_files += 1
-            self.file_info[int, int].emit(CurrentValues.total_downloaded_files, CurrentValues.total_files)
+            self.file_info.emit(CurrentValues.total_downloaded_files, CurrentValues.total_files)
             if CurrentValues.is_file_history:
                 await db.write_file_history(link=self._link, date=int(time()))
 
@@ -69,10 +69,10 @@ class File:
                         if not chunk: break
                         CurrentValues.total_downloaded += chunk_size
                         if 0 < CurrentValues.total_files < CONST.DefaultValues.file_threshold:
-                            self.progress[int].emit(
+                            self.progress.emit(
                                 round(100 * CurrentValues.total_downloaded / (CurrentValues.total_size * 1.21)))
                         elif CurrentValues.total_files >= CONST.DefaultValues.file_threshold:
-                            self.progress[int].emit(
+                            self.progress.emit(
                                 round((100 * CurrentValues.total_downloaded_files / CurrentValues.total_files)))
                         await file.write(chunk)
 
@@ -81,5 +81,5 @@ class File:
 
         except Exception as error:
             debug.log(MESSAGES.Errors.UnableToDownloadAFile + f" in {stack()[0][3]}", error)
-            self.message[str].emit(MESSAGES.Errors.UnableToDownloadAFile)
+            self.message.emit(MESSAGES.Errors.UnableToDownloadAFile)
             return False

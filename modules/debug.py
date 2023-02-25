@@ -15,7 +15,7 @@ class __Constants:
 Constants = __Constants()
 
 
-def log(message: str, error: Optional[Exception] = None, is_exit: bool = False):
+def log(message: str, error: Optional[Exception] = None, is_exit: bool = False) -> None:
     assert isinstance(message, str)
     assert isinstance(error, Exception | None)
     assert isinstance(is_exit, bool)
@@ -26,14 +26,15 @@ def log(message: str, error: Optional[Exception] = None, is_exit: bool = False):
         logging.exception(tm) if error else logging.error(tm + " - " + message)
     if is_exit: exit(message + (" - " + str(error) if error else ""))
 
-def print_message(*args, **kwargs) -> None:
+
+def print_message(*args: Any, **kwargs: Any) -> None:
     if Constants.PRINTING: print(*args, **kwargs)
 
 
 def is_download() -> Any:
     def wrapper(func: Callable) -> Callable:
         @wraps(func)
-        async def wrapped(*args, **kwargs) -> Any:
+        async def wrapped(*args: Any, **kwargs: Any) -> Any:
             return await func(*args, **kwargs) if Constants.IS_DOWNLOAD else False
         return wrapped
     return wrapper

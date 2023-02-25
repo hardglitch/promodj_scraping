@@ -5,8 +5,7 @@ from typing import Literal, Tuple
 @dataclass(frozen=True)
 class Data:
 
-    FORMS = Literal["mixes", "tracks", "lives"]
-    LOSSLESS_UNCOMPRESSED_FORMATS: Tuple[str] = (".wav", ".aiff")
+    LOSSLESS_UNCOMPRESSED_FORMATS: Tuple[str, str] = (".wav", ".aiff")
     LOSSLESS_COMPRESSED_FORMATS: Tuple[str] = (".flac",)
     LOSSY_FORMATS: Tuple[str] = (".mp3",)
     DB_NAME: str = "history.db"
@@ -15,9 +14,11 @@ class Data:
 
     @dataclass(frozen=True)
     class __DefaultValues:
+        FORMS = Literal["mixes", "tracks", "lives"]
+
         download_dir: str = "Downloaded Music"
         genre: str = "Trance"
-        form: str = "tracks"
+        form: FORMS = "tracks"
         quantity: int = 10
         threads: int = 1
         is_lossless: bool = True
@@ -25,7 +26,7 @@ class Data:
         is_rewrite_files: bool = False
         is_file_history: bool = True
         file_threshold: int = 50
-        genres: Tuple[str] = (
+        genres: Tuple[str, ...] = (
             "2 Step", "2_step",
             "8-bit", "8bit",
             "Abstract Hip-Hop", "abstract_hip-hop",
