@@ -9,21 +9,17 @@ from aiofiles.threadpool.text import AsyncTextIOWrapper
 class Parameter:
 
     def __init__(self, name: str, value: str):
-        assert isinstance(name, str)
-        assert isinstance(value, str)
+        if not isinstance(name, str): raise TypeError("'name' is not 'str' type")
+        if not isinstance(value, str): raise TypeError("'value' is not 'str' type")
         self.name: str = self.name_check(name)
         self.value: str = self.value_check(value)
 
     def name_check(self, name: str) -> str:
-        assert isinstance(name, str)
-        if not name.isalpha():
-            raise ValueError("Parameter Name is incorrect")
+        if not name.isalpha(): raise ValueError("Parameter Name is incorrect")
         return name[:1000]
 
     def value_check(self, value: str) -> str:
-        assert isinstance(value, str)
-        if not value:
-            raise ValueError("Parameter Value is incorrect")
+        if not value: raise ValueError("Parameter Value is incorrect")
         return value[:1000]
 
 
@@ -31,8 +27,8 @@ class Settings:
     def __init__(self,
                  path: Union[str, Path] = Path.cwd(),
                  filename: str = "settings.ini"):
-        assert isinstance(path, str|Path)
-        assert isinstance(filename, str)
+        if not isinstance(path, str|Path): raise TypeError("'path' is not Union[Path, str] type")
+        if not isinstance(filename, str): raise TypeError("'filename' is not 'str' type")
         path = Path(str(path)[:1000])
         self.path: Path = path if path.exists() and path.is_file() else Path.cwd()
         self.filename = sub(r"[^a-zA-Z0-9_\-.]", "", filename)[:255]
