@@ -7,7 +7,7 @@ from data.messages import Messages
 from modules import debug
 
 
-async def create_history_db():
+async def create_history_db() -> None:
     try:
         async with aiosqlite.connect(database=Data.DB_NAME) as db_connection:
             sql_request = """CREATE TABLE IF NOT EXISTS file_history(link TEXT NOT NULL, date INTEGER NOT NULL);"""
@@ -16,7 +16,7 @@ async def create_history_db():
         debug.log("DB Error -", error)
 
 
-async def write_file_history(link: str, date: int):
+async def write_file_history(link: str, date: int) -> None:
     if link is None: exit(Messages.Errors.NoLinkToWrite)
     if date is None: exit(Messages.Errors.NoDate)
     assert isinstance(link, str) and isinstance(date, int)

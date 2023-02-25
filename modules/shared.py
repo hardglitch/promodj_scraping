@@ -28,7 +28,7 @@ class __CurrentValues:
 
     __download_dir: str
     __genre: str
-    __form: CONST.FORMS
+    __form: CONST.DefaultValues.FORMS
     __quantity: int
     __threads: int
     __is_lossless: bool
@@ -41,7 +41,7 @@ class __CurrentValues:
     __total_downloaded: int
     __total_size: int
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.download_dir = self.__download_dir
         self.genre = self.__genre
         self.form = self.__form
@@ -61,86 +61,96 @@ class __CurrentValues:
     def download_dir(self) -> str:
         return self.__download_dir
     @download_dir.setter
-    def download_dir(self, value: str):
+    def download_dir(self, value: str) -> None:
         self.__download_dir = value
     @property
     def genre(self) -> str:
         return self.__genre
     @genre.setter
-    def genre(self, value: str):
+    def genre(self, value: str) -> None:
         self.__genre = value
     @property
-    def form(self) -> CONST.FORMS:
+    def form(self) -> CONST.DefaultValues.FORMS:
         return self.__form
     @form.setter
-    def form(self, value: CONST.FORMS):
+    def form(self, value: CONST.DefaultValues.FORMS) -> None:
         self.__form = value
     @property
     def quantity(self) -> int:
         return self.__quantity
     @quantity.setter
-    def quantity(self, value: int):
+    def quantity(self, value: int) -> None:
         self.__quantity = value
     @property
     def threads(self) -> int:
         return self.__threads
     @threads.setter
-    def threads(self, value: int):
+    def threads(self, value: int) -> None:
         self.__threads = value
     @property
     def is_lossless(self) -> bool:
         return self.__is_lossless
     @is_lossless.setter
-    def is_lossless(self, value: bool):
+    def is_lossless(self, value: bool) -> None:
         self.__is_lossless = value
     @property
     def is_period(self) -> bool:
         return self.__is_period
     @is_period.setter
-    def is_period(self, value: bool):
+    def is_period(self, value: bool) -> None:
         self.__is_period = value
     @property
     def is_rewrite_files(self) -> bool:
         return self.__is_rewrite_files
     @is_rewrite_files.setter
-    def is_rewrite_files(self, value: bool):
+    def is_rewrite_files(self, value: bool) -> None:
         self.__is_rewrite_files = value
     @property
     def is_file_history(self) -> bool:
         return self.__is_file_history
     @is_file_history.setter
-    def is_file_history(self, value: bool):
+    def is_file_history(self, value: bool) -> None:
         self.__is_file_history = value
     @property
     def session(self) -> Optional[ClientSession]:
         return self.__session
     @session.setter
-    def session(self, value: Optional[ClientSession]):
+    def session(self, value: Optional[ClientSession]) -> None:
         self.__session = value
     @property
     def total_files(self) -> int:
         return self.__total_files
     @total_files.setter
-    def total_files(self, value: int):
+    def total_files(self, value: int) -> None:
         self.__total_files = value
     @property
     def total_downloaded_files(self) -> int:
         return self.__total_downloaded_files
     @total_downloaded_files.setter
-    def total_downloaded_files(self, value: int):
+    def total_downloaded_files(self, value: int) -> None:
         self.__total_downloaded_files = value
     @property
     def total_downloaded(self) -> int:
         return self.__total_downloaded
     @total_downloaded.setter
-    def total_downloaded(self, value: int):
+    def total_downloaded(self, value: int) -> None:
         self.__total_downloaded = value
     @property
     def total_size(self) -> int:
         return self.__total_size
     @total_size.setter
-    def total_size(self, value: int):
+    def total_size(self, value: int) -> None:
         self.__total_size = value
 
 
-CurrentValues = __CurrentValues("", "", "", 0, 0, False, False, False, False, None, 0, 0, 0, 0)
+CurrentValues = __CurrentValues(
+    CONST.DefaultValues.download_dir,
+    CONST.DefaultValues.genre,
+    CONST.DefaultValues.form,
+    CONST.DefaultValues.quantity,
+    CONST.DefaultValues.threads,
+    CONST.DefaultValues.is_lossless,
+    CONST.DefaultValues.is_period,
+    CONST.DefaultValues.is_rewrite_files,
+    CONST.DefaultValues.is_file_history,
+    None, 0, 0, 0, 0)

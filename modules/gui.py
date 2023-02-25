@@ -1,7 +1,7 @@
 from pathlib import Path
 from sys import exit
 from time import time
-from typing import Dict, List, Optional, get_args
+from typing import Any, Dict, List, Optional, get_args
 
 import qdarktheme
 from PyQt6.QtCore import QSize, Qt
@@ -21,7 +21,7 @@ from util.settings.settings import Parameter, Settings
 
 class MainWindow(QMainWindow):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
         self._font = QFont("Arial", 10)
@@ -51,7 +51,7 @@ class MainWindow(QMainWindow):
         self.cmbForm = QComboBox(self)
         self.cmbForm.resize(70, 24)
         self.cmbForm.move(230, 10)
-        self.cmbForm.addItems(get_args(CONST.FORMS))
+        self.cmbForm.addItems(get_args(CONST.DefaultValues.FORMS))
         self.cmbForm.setCurrentIndex(1)
         self.cmbForm.setFont(self._font)
 
@@ -164,7 +164,7 @@ class MainWindow(QMainWindow):
         self.lblAuthor.setToolTip("https://github.com/hardglitch/promodj_scraping")
 
     @asyncSlot()
-    async def download_files(self):
+    async def download_files(self) -> None:
         try:
             self.progBar.setVisible(False)
             self.lblFiles.setText("")
@@ -222,7 +222,7 @@ class MainWindow(QMainWindow):
             debug.log("Error", error=error)
 
 
-    def download_successed(self, value: int):
+    def download_successed(self, value: int) -> None:
         self.progBar.setVisible(False)
         self.lblFiles.setText("")
 
@@ -235,7 +235,7 @@ class MainWindow(QMainWindow):
             self._music.cancel_downloading()
             self._music = None
 
-    def search(self, value: int = 0, mode: int = 0):
+    def search(self, value: int = 0, mode: int = 0) -> None:
         if self.progBar.isVisible(): self.progBar.setVisible(False)
         if mode == 1:
             self.lblMessage.setText("." * value + MESSAGES.Searching + "." * value)
@@ -245,7 +245,7 @@ class MainWindow(QMainWindow):
             self.lblMessage.setText("")
             self.progBar.setVisible(True)
 
-    def message(self, value: str = ""):
+    def message(self, value: str = "") -> None:
         if self.progBar.isVisible(): self.progBar.setVisible(False)
         if value:
             self.lblMessage.setText(value[:100])
@@ -253,32 +253,32 @@ class MainWindow(QMainWindow):
             self.lblMessage.setText("")
             self.progBar.setVisible(True)
 
-    def file_info(self, total_downloaded: int = 0, total_files: int = 0):
+    def file_info(self, total_downloaded: int = 0, total_files: int = 0) -> None:
         self.lblFiles.setText(f"{total_downloaded}/{total_files}")
 
-    def event_chb_period(self):
+    def event_chb_period(self) -> None:
         if self.chbPeriod.isChecked():
             self.lblQuantity.setText(CONST.Inscriptions.LastDays)
         else:
             self.lblQuantity.setText(CONST.Inscriptions.Files)
 
-    def event_chb_file_history(self):
+    def event_chb_file_history(self) -> None:
         self.chbRewriteFiles.setEnabled(not self.chbFileHistory.isChecked())
 
-    def save_to(self):
+    def save_to(self) -> None:
         save_to_dir = QFileDialog.getExistingDirectory(self)
         if save_to_dir:
             self.lblSaveTo.setText(str(Path(save_to_dir)))
             self.lblSaveTo.setToolTip(self.lblSaveTo.text())
         self.btnSaveTo.setChecked(False)
 
-    def app_exit(self):
+    def app_exit(self) -> None:
         QApplication.instance().quit()
         exit(0)
 
 
     @asyncSlot()
-    async def set_actual_genres(self):
+    async def set_actual_genres(self) -> None:
         async with ClientSession() as session:
             tags_link = fr"https://promodj.com/music"
             async with session.get(tags_link) as response:
@@ -299,7 +299,7 @@ class MainWindow(QMainWindow):
 
 
     @asyncSlot()
-    async def set_settings(self):
+    async def set_settings(self) -> None:
         settings_list: Optional[List[Parameter]] = await self._settings_file.read()
 
         if settings_list:
@@ -317,7 +317,7 @@ class MainWindow(QMainWindow):
                     self.lblSaveTo.setText(str(Path(param.value)))
                     self.lblSaveTo.setToolTip(self.lblSaveTo.text())
 
-                elif param.name == CONST.Parameters.Form and param.value in get_args(CONST.FORMS):
+                elif param.name == CONST.Parameters.Form and param.value in get_args(CONST.DefaultValues.FORMS):
                     self.cmbForm.setCurrentText(param.value)
 
                 elif param.name == CONST.Parameters.Lossless and param.value in ["0", "1"]:

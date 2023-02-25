@@ -7,11 +7,11 @@
 !/tests/*.py
 !/tests/pytest.ini
 !/util
-!/utils/*.py
+!/util/*.py
 !/util/settings
-!/utils/settings/*.py
+!/util/settings/*.py
 !/util/settings/tests
-!/utils/settings/tests/*.py
+!/util/settings/tests/*.py
 !main.py
 !logo.png
 !requirements.txt
