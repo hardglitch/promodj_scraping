@@ -43,9 +43,6 @@ def hard_test(obj: Callable, params_range: int = 5, cycles: int = 1000, mode: in
                     "is not 'str' type"
                 ]]):
                     raise error
-                # if str(error).find("positional argument") < 0 \
-                #     or str(error).find("is not Union[Path, str] type") < 0 \
-                #     or str(error).find("is not 'str' type") < 0:
             except ValueError as error:
                 if str(error).find("not enough values to unpack") < 0: raise error
 
