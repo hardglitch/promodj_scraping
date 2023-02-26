@@ -34,9 +34,6 @@ class File:
         self._link: str = link
         self._name: str = str(tools.clear_path(self._link.rsplit("/", 1)[-1]))
         self._path: Path = Path(CurrentValues.download_dir).joinpath(self._name)
-        assert isinstance(self._link, str)
-        assert isinstance(self._name, str)
-        assert isinstance(self._path, Path)
 
 
     def _check_path_and_name(self) -> None:

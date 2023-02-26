@@ -1,32 +1,27 @@
 from data.data import Data
 from modules.shared import CurrentValues
 
-def test_set_attribut():
+
+def test_set_attribute():
     try:
         CurrentValues.arg = 1
     except:
         assert AttributeError
 
-def test_set_wrong_attribut_types():
-    try:
-        CurrentValues.session = 23
-        CurrentValues.quantity = "str"
-        CurrentValues.genre = 1
-        CurrentValues.form = 12
-        CurrentValues.is_period = [1,3]
-        CurrentValues.is_file_history = {1:2}
-        CurrentValues.is_rewrite_files = "genre"
-        CurrentValues.is_lossless = -45
-        CurrentValues.threads = 2.0
-        CurrentValues.download_dir = -3.5
-        CurrentValues.total_files = "1"
-        CurrentValues.total_downloaded = 1.4
-        CurrentValues.total_size = -2
-        CurrentValues.total_downloaded_files = ["-ABC"]
-    except:
-        assert TypeError
 
-def test_set_wrong_value():
+def test_set_wrong_attribute_types():
+    test_values = [1, 2.0, -10, "1", {1:2}, ["f", 1], "genre", ()]
+    for attr in CurrentValues.__slots__:
+        for value in test_values:
+            try:
+                setattr(CurrentValues, attr[2:], value)
+            except TypeError:
+                assert TypeError
+            except ValueError:
+                assert ValueError
+
+
+def test_set_incorrect_value():
     CurrentValues.genre = "My Favorite Genre"
     assert CurrentValues.genre == Data.DefaultValues.genre
 
