@@ -24,17 +24,7 @@ class Manager(QMainWindow):
     message = pyqtSignal(str)
     file_info = pyqtSignal(int, int)
 
-    __slots__ = (
-        "download_dir",
-        "genre",
-        "form",
-        "quantity",
-        "threads",
-        "is_lossless",
-        "is_period",
-        "is_rewrite_files",
-        "is_file_history"
-    )
+    __slots__ = "_downloading", "_success", "_search", "_message"
 
     def __init__(self,
                  download_dir: str,

@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Optional
 
 from aiohttp import ClientSession
@@ -5,6 +6,7 @@ from aiohttp import ClientSession
 from data.data import CONST
 
 
+@dataclass
 class __CurrentValues:
 
     __slots__ = (
@@ -25,20 +27,20 @@ class __CurrentValues:
     )
 
     def __init__(self) -> None:
-        self.__download_dir: str = CONST.DefaultValues.download_dir
-        self.__genre: str = CONST.DefaultValues.genre
-        self.__form: CONST.DefaultValues.FORMS = CONST.DefaultValues.form
-        self.__quantity: int = CONST.DefaultValues.quantity
-        self.__threads: int = CONST.DefaultValues.threads
-        self.__is_lossless: bool = CONST.DefaultValues.is_lossless
-        self.__is_period: bool = CONST.DefaultValues.is_period
-        self.__is_rewrite_files: bool = CONST.DefaultValues.is_rewrite_files
-        self.__is_file_history: bool = CONST.DefaultValues.is_file_history
-        self.__session: Optional[ClientSession] = None
-        self.__total_files: int = 0
-        self.__total_downloaded_files: int = 0
-        self.__total_downloaded: int = 0
-        self.__total_size: int = 0
+        self.download_dir: str = CONST.DefaultValues.download_dir
+        self.genre: str = CONST.DefaultValues.genre
+        self.form: CONST.DefaultValues.FORMS = CONST.DefaultValues.form
+        self.quantity: int = CONST.DefaultValues.quantity
+        self.threads: int = CONST.DefaultValues.threads
+        self.is_lossless: bool = CONST.DefaultValues.is_lossless
+        self.is_period: bool = CONST.DefaultValues.is_period
+        self.is_rewrite_files: bool = CONST.DefaultValues.is_rewrite_files
+        self.is_file_history: bool = CONST.DefaultValues.is_file_history
+        self.session: Optional[ClientSession] = None
+        self.total_files: int = 0
+        self.total_downloaded_files: int = 0
+        self.total_downloaded: int = 0
+        self.total_size: int = 0
 
 
     @property

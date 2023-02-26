@@ -13,6 +13,9 @@ from util import tools
 
 
 class File:
+
+    __slots__ = "_link", "_name", "_path", "progress", "message", "file_info"
+
     def __init__(self,
                  link: str,
                  progress: pyqtBoundSignal,

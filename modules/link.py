@@ -14,6 +14,9 @@ from modules.shared import CurrentValues
 
 
 class Link:
+
+    __slots__ = "_counter", "success", "message", "search"
+
     def __init__(self,
                  message: pyqtBoundSignal,
                  success: pyqtBoundSignal,

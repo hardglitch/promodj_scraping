@@ -3,7 +3,6 @@ from sys import exit
 from time import time
 from typing import Any, Dict, List, Optional, get_args
 
-import qdarktheme
 from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtGui import QFont, QIcon
 from PyQt6.QtWidgets import QApplication, QCheckBox, QComboBox, QFileDialog, QLabel, QMainWindow, QProgressBar, \
@@ -11,6 +10,7 @@ from PyQt6.QtWidgets import QApplication, QCheckBox, QComboBox, QFileDialog, QLa
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
 from qasync import asyncSlot
+from qdarktheme import setup_theme
 
 from data.data import CONST
 from data.messages import MESSAGES
@@ -32,8 +32,7 @@ class MainWindow(QMainWindow):
         [self._genres.update({value: CONST.DefaultValues.genres[n + 1]})
                 for n, value in enumerate(CONST.DefaultValues.genres) if n % 2 == 0]
 
-        qss = """QToolTip {color: black;}"""
-        qdarktheme.setup_theme(theme="auto", additional_qss=qss)
+        setup_theme(theme="auto", additional_qss="QToolTip {color: black;}")
         self.setWindowIcon(QIcon("logo.ico"))
 
         self.setWindowTitle(CONST.Inscriptions.PromoDJMusicDownloader)
