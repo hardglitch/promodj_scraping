@@ -2,7 +2,7 @@ from data.data import Data
 from modules.shared import CurrentValues
 
 
-def test_set_attribute():
+def test_set_wrong_attribute():
     try:
         CurrentValues.arg = 1
     except:
