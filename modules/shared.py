@@ -1,9 +1,11 @@
 from dataclasses import dataclass
-from typing import Optional
+from inspect import stack
+from typing import Optional, get_args
 
 from aiohttp import ClientSession
 
 from data.data import CONST
+from modules import debug
 
 
 @dataclass
@@ -48,7 +50,9 @@ class __CurrentValues:
         return self.__download_dir
     @download_dir.setter
     def download_dir(self, value: str) -> None:
-        if not isinstance(value, str): raise TypeError
+        if not isinstance(value, str):
+            debug.log(f"TypeError in {stack()[0][3]}")
+            raise TypeError
         self.__download_dir = value
 
     @property
@@ -56,7 +60,9 @@ class __CurrentValues:
         return self.__genre
     @genre.setter
     def genre(self, value: str) -> None:
-        if not isinstance(value, str): raise TypeError
+        if not isinstance(value, str):
+            debug.log(f"TypeError in {stack()[0][3]}")
+            raise TypeError
         if value in CONST.DefaultValues.genres: self.__genre = value
 
     @property
@@ -64,35 +70,39 @@ class __CurrentValues:
         return self.__form
     @form.setter
     def form(self, value: CONST.DefaultValues.FORMS) -> None:
-        if not isinstance(value, str): raise TypeError
-        self.__form = value
+        if not isinstance(value, str):
+            debug.log(f"TypeError in {stack()[0][3]}")
+            raise TypeError
+        if value in get_args(CONST.DefaultValues.FORMS): self.__form = value
 
     @property
     def quantity(self) -> int:
         return self.__quantity
     @quantity.setter
     def quantity(self, value: int) -> None:
-        if not isinstance(value, int): raise TypeError
-        self.__quantity = value \
-            if 0 < value <= abs(CONST.MaxValues.quantity) \
-            else abs(CONST.DefaultValues.quantity)
+        if not isinstance(value, int):
+            debug.log(f"TypeError in {stack()[0][3]}")
+            raise TypeError
+        self.__quantity = CONST.MaxValues.quantity if value >= CONST.MaxValues.quantity else 0 if value <= 0 else value
 
     @property
     def threads(self) -> int:
         return self.__threads
     @threads.setter
     def threads(self, value: int) -> None:
-        if not isinstance(value, int): raise TypeError
-        self.__threads = value \
-            if 0 < value <= abs(CONST.MaxValues.threads) \
-            else abs(CONST.DefaultValues.threads)
+        if not isinstance(value, int):
+            debug.log(f"TypeError in {stack()[0][3]}")
+            raise TypeError
+        self.__threads = CONST.MaxValues.threads if value >= CONST.MaxValues.threads else 1 if value <= 1 else value
 
     @property
     def is_lossless(self) -> bool:
         return self.__is_lossless
     @is_lossless.setter
     def is_lossless(self, value: bool) -> None:
-        if not isinstance(value, bool): raise TypeError
+        if not isinstance(value, bool):
+            debug.log(f"TypeError in {stack()[0][3]}")
+            raise TypeError
         self.__is_lossless = value
 
     @property
@@ -100,7 +110,9 @@ class __CurrentValues:
         return self.__is_period
     @is_period.setter
     def is_period(self, value: bool) -> None:
-        if not isinstance(value, bool): raise TypeError
+        if not isinstance(value, bool):
+            debug.log(f"TypeError in {stack()[0][3]}")
+            raise TypeError
         self.__is_period = value
 
     @property
@@ -108,7 +120,9 @@ class __CurrentValues:
         return self.__is_rewrite_files
     @is_rewrite_files.setter
     def is_rewrite_files(self, value: bool) -> None:
-        if not isinstance(value, bool): raise TypeError
+        if not isinstance(value, bool):
+            debug.log(f"TypeError in {stack()[0][3]}")
+            raise TypeError
         self.__is_rewrite_files = value
 
     @property
@@ -116,7 +130,9 @@ class __CurrentValues:
         return self.__is_file_history
     @is_file_history.setter
     def is_file_history(self, value: bool) -> None:
-        if not isinstance(value, bool): raise TypeError
+        if not isinstance(value, bool):
+            debug.log(f"TypeError in {stack()[0][3]}")
+            raise TypeError
         self.__is_file_history = value
 
     @property
@@ -124,7 +140,9 @@ class __CurrentValues:
         return self.__session
     @session.setter
     def session(self, value: Optional[ClientSession]) -> None:
-        if not isinstance(value, Optional[ClientSession]): raise TypeError
+        if not isinstance(value, Optional[ClientSession]):
+            debug.log(f"TypeError in {stack()[0][3]}")
+            raise TypeError
         self.__session = value
 
     @property
@@ -132,32 +150,42 @@ class __CurrentValues:
         return self.__total_files
     @total_files.setter
     def total_files(self, value: int) -> None:
-        if not isinstance(value, int): raise TypeError
-        self.__total_files = value
+        if not isinstance(value, int):
+            debug.log(f"TypeError in {stack()[0][3]}")
+            raise TypeError
+        self.__total_files = CONST.MaxValues.quantity if value >= CONST.MaxValues.quantity else 0 if value <= 0 else value
 
     @property
     def total_downloaded_files(self) -> int:
         return self.__total_downloaded_files
     @total_downloaded_files.setter
     def total_downloaded_files(self, value: int) -> None:
-        if not isinstance(value, int): raise TypeError
-        self.__total_downloaded_files = value
+        if not isinstance(value, int):
+            debug.log(f"TypeError in {stack()[0][3]}")
+            raise TypeError
+        self.__total_downloaded_files = CONST.MaxValues.quantity if value >= CONST.MaxValues.quantity else 0 if value <= 0 else value
 
     @property
     def total_downloaded(self) -> int:
         return self.__total_downloaded
     @total_downloaded.setter
     def total_downloaded(self, value: int) -> None:
-        if not isinstance(value, int): raise TypeError
-        self.__total_downloaded = value
+        if not isinstance(value, int):
+            debug.log(f"TypeError in {stack()[0][3]}")
+            raise TypeError
+        if value >= 0: self.__total_downloaded = abs(value)
+        else: debug.log(f"ValueError in {stack()[0][3]}")
 
     @property
     def total_size(self) -> int:
         return self.__total_size
     @total_size.setter
     def total_size(self, value: int) -> None:
-        if not isinstance(value, int): raise TypeError
-        self.__total_size = value
+        if not isinstance(value, int):
+            debug.log(f"TypeError in {stack()[0][3]}")
+            raise TypeError
+        if value >= 0: self.__total_size = value
+        else: debug.log(f"ValueError in {stack()[0][3]}")
 
 
 CurrentValues = __CurrentValues()
