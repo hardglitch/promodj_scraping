@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Optional
 
 from aiohttp import ClientSession
@@ -6,7 +5,6 @@ from aiohttp import ClientSession
 from data.data import CONST
 
 
-@dataclass
 class __CurrentValues:
 
     __slots__ = (
@@ -26,131 +24,138 @@ class __CurrentValues:
         "__total_size"
     )
 
-    __download_dir: str
-    __genre: str
-    __form: CONST.DefaultValues.FORMS
-    __quantity: int
-    __threads: int
-    __is_lossless: bool
-    __is_period: bool
-    __is_rewrite_files: bool
-    __is_file_history: bool
-    __session: Optional[ClientSession]
-    __total_files: int
-    __total_downloaded_files: int
-    __total_downloaded: int
-    __total_size: int
+    def __init__(self) -> None:
+        self.__download_dir: str = CONST.DefaultValues.download_dir
+        self.__genre: str = CONST.DefaultValues.genre
+        self.__form: CONST.DefaultValues.FORMS = CONST.DefaultValues.form
+        self.__quantity: int = CONST.DefaultValues.quantity
+        self.__threads: int = CONST.DefaultValues.threads
+        self.__is_lossless: bool = CONST.DefaultValues.is_lossless
+        self.__is_period: bool = CONST.DefaultValues.is_period
+        self.__is_rewrite_files: bool = CONST.DefaultValues.is_rewrite_files
+        self.__is_file_history: bool = CONST.DefaultValues.is_file_history
+        self.__session: Optional[ClientSession] = None
+        self.__total_files: int = 0
+        self.__total_downloaded_files: int = 0
+        self.__total_downloaded: int = 0
+        self.__total_size: int = 0
 
-    def __post_init__(self) -> None:
-        self.download_dir = self.__download_dir
-        self.genre = self.__genre
-        self.form = self.__form
-        self.quantity = self.__quantity
-        self.threads = self.__threads
-        self.is_lossless = self.__is_lossless
-        self.is_period = self.__is_period
-        self.is_rewrite_files = self.__is_rewrite_files
-        self.is_file_history = self.__is_file_history
-        self.session = self.__session
-        self.total_files = self.__total_files
-        self.total_downloaded_files = self.__total_downloaded_files
-        self.total_downloaded = self.__total_downloaded
-        self.total_size = self.__total_size
 
     @property
     def download_dir(self) -> str:
         return self.__download_dir
     @download_dir.setter
     def download_dir(self, value: str) -> None:
+        if not isinstance(value, str): raise TypeError
         self.__download_dir = value
+
     @property
     def genre(self) -> str:
         return self.__genre
     @genre.setter
     def genre(self, value: str) -> None:
-        self.__genre = value
+        if not isinstance(value, str): raise TypeError
+        if value in CONST.DefaultValues.genres: self.__genre = value
+
     @property
     def form(self) -> CONST.DefaultValues.FORMS:
         return self.__form
     @form.setter
     def form(self, value: CONST.DefaultValues.FORMS) -> None:
+        if not isinstance(value, str): raise TypeError
         self.__form = value
+
     @property
     def quantity(self) -> int:
         return self.__quantity
     @quantity.setter
     def quantity(self, value: int) -> None:
-        self.__quantity = value
+        if not isinstance(value, int): raise TypeError
+        self.__quantity = value \
+            if 0 < value <= abs(CONST.MaxValues.quantity) \
+            else abs(CONST.DefaultValues.quantity)
+
     @property
     def threads(self) -> int:
         return self.__threads
     @threads.setter
     def threads(self, value: int) -> None:
-        self.__threads = value
+        if not isinstance(value, int): raise TypeError
+        self.__threads = value \
+            if 0 < value <= abs(CONST.MaxValues.threads) \
+            else abs(CONST.DefaultValues.threads)
+
     @property
     def is_lossless(self) -> bool:
         return self.__is_lossless
     @is_lossless.setter
     def is_lossless(self, value: bool) -> None:
+        if not isinstance(value, bool): raise TypeError
         self.__is_lossless = value
+
     @property
     def is_period(self) -> bool:
         return self.__is_period
     @is_period.setter
     def is_period(self, value: bool) -> None:
+        if not isinstance(value, bool): raise TypeError
         self.__is_period = value
+
     @property
     def is_rewrite_files(self) -> bool:
         return self.__is_rewrite_files
     @is_rewrite_files.setter
     def is_rewrite_files(self, value: bool) -> None:
+        if not isinstance(value, bool): raise TypeError
         self.__is_rewrite_files = value
+
     @property
     def is_file_history(self) -> bool:
         return self.__is_file_history
     @is_file_history.setter
     def is_file_history(self, value: bool) -> None:
+        if not isinstance(value, bool): raise TypeError
         self.__is_file_history = value
+
     @property
     def session(self) -> Optional[ClientSession]:
         return self.__session
     @session.setter
     def session(self, value: Optional[ClientSession]) -> None:
+        if not isinstance(value, Optional[ClientSession]): raise TypeError
         self.__session = value
+
     @property
     def total_files(self) -> int:
         return self.__total_files
     @total_files.setter
     def total_files(self, value: int) -> None:
+        if not isinstance(value, int): raise TypeError
         self.__total_files = value
+
     @property
     def total_downloaded_files(self) -> int:
         return self.__total_downloaded_files
     @total_downloaded_files.setter
     def total_downloaded_files(self, value: int) -> None:
+        if not isinstance(value, int): raise TypeError
         self.__total_downloaded_files = value
+
     @property
     def total_downloaded(self) -> int:
         return self.__total_downloaded
     @total_downloaded.setter
     def total_downloaded(self, value: int) -> None:
+        if not isinstance(value, int): raise TypeError
         self.__total_downloaded = value
+
     @property
     def total_size(self) -> int:
         return self.__total_size
     @total_size.setter
     def total_size(self, value: int) -> None:
+        if not isinstance(value, int): raise TypeError
         self.__total_size = value
 
 
-CurrentValues = __CurrentValues(
-    CONST.DefaultValues.download_dir,
-    CONST.DefaultValues.genre,
-    CONST.DefaultValues.form,
-    CONST.DefaultValues.quantity,
-    CONST.DefaultValues.threads,
-    CONST.DefaultValues.is_lossless,
-    CONST.DefaultValues.is_period,
-    CONST.DefaultValues.is_rewrite_files,
-    CONST.DefaultValues.is_file_history,
-    None, 0, 0, 0, 0)
+CurrentValues = __CurrentValues()

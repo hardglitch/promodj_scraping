@@ -1,5 +1,6 @@
 from concurrent.futures import Future
 
+from PyQt6.QtCore import pyqtBoundSignal
 from aiohttp import ClientSession
 
 from data.data import Data
@@ -49,6 +50,12 @@ def test_default_types():
 
     assert isinstance(mng._downloading, Future | None)
     assert isinstance(CurrentValues.session, ClientSession | None)
+
+    assert isinstance(mng.progress[int], pyqtBoundSignal)
+    assert isinstance(mng.success[int], pyqtBoundSignal)
+    assert isinstance(mng.search[int, int], pyqtBoundSignal)
+    assert isinstance(mng.message[str], pyqtBoundSignal)
+    assert isinstance(mng.file_info[int, int], pyqtBoundSignal)
 
     assert isinstance(CurrentValues.total_files, int)
     assert isinstance(CurrentValues.total_downloaded_files, int)
