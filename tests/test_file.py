@@ -70,8 +70,8 @@ async def test_check_path_and_name(tmp_path):
 async def test_write_file_from_stream(tmp_path) -> None:
     CurrentValues.download_dir = str(tmp_path)
     file = File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int])
-    debug.Constants.IS_PRINTING = False
-    debug.Constants.IS_GUI.value = False
+    debug.Switches.IS_PRINTING = False
+    debug.Switches.IS_GUI.value = False
     assert await file._write_file(await _fake_stream())
     file._path.unlink()
 

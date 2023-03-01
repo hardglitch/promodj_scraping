@@ -37,13 +37,7 @@ class File:
         self._path: Path = Path(CurrentValues.download_dir).joinpath(self._name)
 
 
-    def _check_path_and_name(self) -> None:
-        if Path(self._path).exists() and not CurrentValues.is_rewrite_files and not CurrentValues.is_file_history:
-            ext_time: str = str(time()).replace(".", "")
-            ext_pos: int = self._name.rfind(".")
-            self._name = self._name[:ext_pos] + "_" + ext_time + self._name[ext_pos:]
-            self._path = Path(CurrentValues.download_dir).joinpath(self._name)
-
+    @debug.switch(debug.Switches.IS_GET_FILE)
     async def get_file(self) -> None:
         self._check_path_and_name()
         self.file_info.emit(CurrentValues.total_downloaded_files, CurrentValues.total_files)
@@ -53,8 +47,17 @@ class File:
             if CurrentValues.is_file_history:
                 await db.write_file_history(link=self._link, date=int(time()))
 
+# --------------------------------------------------------------------------------------
 
-    @debug.switch(debug.Constants.IS_DOWNLOAD)
+    def _check_path_and_name(self) -> None:
+        if Path(self._path).exists() and not CurrentValues.is_rewrite_files and not CurrentValues.is_file_history:
+            ext_time: str = str(time()).replace(".", "")
+            ext_pos: int = self._name.rfind(".")
+            self._name = self._name[:ext_pos] + "_" + ext_time + self._name[ext_pos:]
+            self._path = Path(CurrentValues.download_dir).joinpath(self._name)
+
+
+    @debug.switch(debug.Switches.IS_DOWNLOAD)
     async def _download_file(self) -> bool:
         try:
             async with CurrentValues.session.get(self._link, timeout=None,
@@ -71,9 +74,11 @@ class File:
 
         except Exception as error:
             debug.log(MESSAGES.Errors.UnableToDownloadAFile + f" in {stack()[0][3]}", error)
-            self.gui_exception()
+            self._gui_exception()
             return False
 
+
+    @debug.switch(debug.Switches.IS_WRITE_FILE)
     async def _write_file(self, content: StreamReader) -> bool:
         async with open(self._path, "wb") as file:
             debug.print_message(f"Downloading - {self._link}")
@@ -81,12 +86,12 @@ class File:
             async for chunk in content.iter_chunked(chunk_size):
                 if not chunk: return False
                 CurrentValues.total_downloaded += chunk_size
-                self.gui_progress()
+                self._gui_progress()
                 await file.write(chunk)
             return True
 
-    @debug.switch(debug.Constants.IS_GUI)
-    def gui_progress(self) -> None:
+    @debug.switch(debug.Switches.IS_GUI)
+    def _gui_progress(self) -> None:
         if 0 < CurrentValues.total_files < CONST.DefaultValues.file_threshold:
             self.progress.emit(
                 round(100 * CurrentValues.total_downloaded / (CurrentValues.total_size * 1.21)))
@@ -94,6 +99,6 @@ class File:
             self.progress.emit(
                 round((100 * CurrentValues.total_downloaded_files / CurrentValues.total_files)))
 
-    @debug.switch(debug.Constants.IS_GUI)
-    def gui_exception(self) -> None:
+    @debug.switch(debug.Switches.IS_GUI)
+    def _gui_exception(self) -> None:
         self.message.emit(MESSAGES.Errors.UnableToDownloadAFile)
