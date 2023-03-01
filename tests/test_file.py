@@ -7,7 +7,7 @@ import pytest
 from PyQt6.QtCore import pyqtSignal
 from aiohttp import StreamReader, streams
 
-from modules.debug import Constants
+from modules import debug
 from modules.file import File
 from modules.shared import CurrentValues
 from util.tools import byte_dumb
@@ -66,17 +66,18 @@ async def test_check_path_and_name(tmp_path):
     pre_path.unlink()
 
 
+@pytest.mark.asyncio
+async def test_responses(tmp_path) -> None:
+    CurrentValues.download_dir = str(tmp_path)
+    file = File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int])
+    debug.Constants.PRINTING = False
+    debug.Constants.GUI = False
+    assert await file._write_file(await _fake_stream())
+    file._path.unlink()
+
 async def _fake_stream() -> StreamReader:
     protocol = mock.Mock(_reading_paused=False)
     stream = streams.StreamReader(protocol, 1024, loop=asyncio.get_event_loop())
     stream.feed_data(byte_dumb(100))
     stream.feed_eof()
     return stream
-
-@pytest.mark.asyncio
-async def test_responses(tmp_path) -> None:
-    CurrentValues.download_dir = str(tmp_path)
-    file = File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int])
-    Constants.GUI = False
-    assert await file._write_file(await _fake_stream())
-    file._path.unlink()

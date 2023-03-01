@@ -5,7 +5,7 @@ from time import gmtime, strftime
 from typing import Any, Callable, Optional
 
 
-@dataclass
+@dataclass(slots=True)
 class __Constants:
     GUI: bool = True       # need for some tests
     IS_DOWNLOAD = True     # download simulation (True = Real)
@@ -40,3 +40,11 @@ def is_download() -> Any:
         return wrapped
     return wrapper
 
+
+def gui_disabler() -> Any:
+    def wrapper(func: Callable) -> Callable:
+        @wraps(func)
+        async def wrapped(*args: Any, **kwargs: Any) -> Any:
+            return await func(*args, **kwargs) if Constants.GUI else False
+        return wrapped
+    return wrapper
