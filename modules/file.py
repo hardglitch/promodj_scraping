@@ -4,11 +4,13 @@ from time import time
 
 from PyQt6.QtCore import pyqtBoundSignal
 from aiofiles import open
+from aiohttp import StreamReader
 
 from data.data import CONST
 from data.messages import MESSAGES
 from modules import db, debug
 from modules.shared import CurrentValues
+from tests.helpers import helpers
 from util import tools
 
 
@@ -20,7 +22,7 @@ class File:
                  link: str,
                  progress: pyqtBoundSignal,
                  message: pyqtBoundSignal,
-                 file_info: pyqtBoundSignal,
+                 file_info: pyqtBoundSignal
         ):
         self.progress = progress
         self.message = message
@@ -61,25 +63,38 @@ class File:
                 if response.status != 200:
                     debug.log(MESSAGES.Errors.SomethingWentWrong + f" in {stack()[0][3]}. {response.status=}")
                     return False
-
-                async with open(self._path, "wb") as file:
-                    debug.print_message(f"Downloading - {self._link}")
-                    chunk_size: int = 16144
-                    async for chunk in response.content.iter_chunked(chunk_size):
-                        if not chunk: break
-                        CurrentValues.total_downloaded += chunk_size
-                        if 0 < CurrentValues.total_files < CONST.DefaultValues.file_threshold:
-                            self.progress.emit(
-                                round(100 * CurrentValues.total_downloaded / (CurrentValues.total_size * 1.21)))
-                        elif CurrentValues.total_files >= CONST.DefaultValues.file_threshold:
-                            self.progress.emit(
-                                round((100 * CurrentValues.total_downloaded_files / CurrentValues.total_files)))
-                        await file.write(chunk)
-
+                if await self._write_file(response.content):
                     debug.print_message(f"File save as {self._path}")
                     return True
+                else:
+                    debug.log(MESSAGES.Errors.UnableToDownloadAFile + f" in {stack()[0][3]}")
+                    return False
 
         except Exception as error:
             debug.log(MESSAGES.Errors.UnableToDownloadAFile + f" in {stack()[0][3]}", error)
-            self.message.emit(MESSAGES.Errors.UnableToDownloadAFile)
+            self.gui_exception()
             return False
+
+    async def _write_file(self, content: StreamReader) -> bool:
+        async with open(self._path, "wb") as file:
+            debug.print_message(f"Downloading - {self._link}")
+            chunk_size: int = 16144
+            async for chunk in content.iter_chunked(chunk_size):
+                if not chunk: return False
+                CurrentValues.total_downloaded += chunk_size
+                self.gui_progress()
+                await file.write(chunk)
+            return True
+
+    @helpers.gui_disabler()
+    def gui_progress(self):
+        if 0 < CurrentValues.total_files < CONST.DefaultValues.file_threshold:
+            self.progress.emit(
+                round(100 * CurrentValues.total_downloaded / (CurrentValues.total_size * 1.21)))
+        elif CurrentValues.total_files >= CONST.DefaultValues.file_threshold:
+            self.progress.emit(
+                round((100 * CurrentValues.total_downloaded_files / CurrentValues.total_files)))
+
+    @helpers.gui_disabler()
+    def gui_exception(self):
+        self.message.emit(MESSAGES.Errors.UnableToDownloadAFile)
