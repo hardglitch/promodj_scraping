@@ -54,7 +54,7 @@ class File:
                 await db.write_file_history(link=self._link, date=int(time()))
 
 
-    @debug.is_download()
+    @debug.switch(debug.Constants.IS_DOWNLOAD)
     async def _download_file(self) -> bool:
         try:
             async with CurrentValues.session.get(self._link, timeout=None,
@@ -85,8 +85,8 @@ class File:
                 await file.write(chunk)
             return True
 
-    @debug.gui_disabler()
-    def gui_progress(self):
+    @debug.switch(debug.Constants.IS_GUI)
+    def gui_progress(self) -> None:
         if 0 < CurrentValues.total_files < CONST.DefaultValues.file_threshold:
             self.progress.emit(
                 round(100 * CurrentValues.total_downloaded / (CurrentValues.total_size * 1.21)))
@@ -94,6 +94,6 @@ class File:
             self.progress.emit(
                 round((100 * CurrentValues.total_downloaded_files / CurrentValues.total_files)))
 
-    @debug.gui_disabler()
-    def gui_exception(self):
+    @debug.switch(debug.Constants.IS_GUI)
+    def gui_exception(self) -> None:
         self.message.emit(MESSAGES.Errors.UnableToDownloadAFile)

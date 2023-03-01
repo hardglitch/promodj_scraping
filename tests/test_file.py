@@ -67,11 +67,11 @@ async def test_check_path_and_name(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_responses(tmp_path) -> None:
+async def test_write_file_from_stream(tmp_path) -> None:
     CurrentValues.download_dir = str(tmp_path)
     file = File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int])
-    debug.Constants.PRINTING = False
-    debug.Constants.GUI = False
+    debug.Constants.IS_PRINTING = False
+    debug.Constants.IS_GUI.value = False
     assert await file._write_file(await _fake_stream())
     file._path.unlink()
 

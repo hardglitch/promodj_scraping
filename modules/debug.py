@@ -1,3 +1,4 @@
+import inspect
 import logging
 from dataclasses import dataclass
 from functools import wraps
@@ -5,12 +6,18 @@ from time import gmtime, strftime
 from typing import Any, Callable, Optional
 
 
+@dataclass()
+class DebugParam:
+    name: str
+    value: bool
+
 @dataclass(slots=True)
 class __Constants:
-    GUI: bool = True       # need for some tests
-    IS_DOWNLOAD = True     # download simulation (True = Real)
-    PRINTING: bool = True  # console output
-    LOGGING: bool = True
+    IS_GUI = DebugParam("IS_GUI", True)
+    IS_DOWNLOAD = DebugParam("IS_DOWNLOAD", True)       # download simulation (True = Real)
+    IS_WRITE_FILE = DebugParam("IS_WRITE_FILE", True)
+    IS_PRINTING: bool = True                            # console output
+    IS_LOGGING: bool = True
     LOG_FILE = "logging.log"
 
 Constants = __Constants()
@@ -21,7 +28,7 @@ def log(message: str, error: Optional[Exception] = None, is_exit: bool = False) 
     assert isinstance(error, Exception | None)
     assert isinstance(is_exit, bool)
     message = message[:1000]
-    if Constants.LOGGING:
+    if Constants.IS_LOGGING:
         tm = strftime("%Y-%m-%d %H:%M:%S", gmtime())
         logging.basicConfig(filename=Constants.LOG_FILE, encoding="utf-8", level=logging.ERROR)
         logging.exception(tm) if error else logging.error(tm + " - " + message)
@@ -29,22 +36,21 @@ def log(message: str, error: Optional[Exception] = None, is_exit: bool = False) 
 
 
 def print_message(*args: Any, **kwargs: Any) -> None:
-    if Constants.PRINTING: print(*args, **kwargs)
+    if Constants.IS_PRINTING: print(*args, **kwargs)
 
 
-def is_download() -> Any:
-    def wrapper(func: Callable) -> Callable:
-        @wraps(func)
-        async def wrapped(*args: Any, **kwargs: Any) -> Any:
-            return await func(*args, **kwargs) if Constants.IS_DOWNLOAD else False
+def switch(debug_param: DebugParam) -> Any:
+    def wrapper(func: Callable):
+        if inspect.iscoroutinefunction(func):
+            @wraps(func)
+            async def wrapped(*args: Any, **kwargs: Any) -> Any:
+                if getattr(Constants, debug_param.name):
+                    return await func(*args, **kwargs) if debug_param.value else False
+        else:
+            @wraps(func)
+            def wrapped(*args: Any, **kwargs: Any) -> Any:
+                if getattr(Constants, debug_param.name):
+                    return func(*args, **kwargs) if debug_param.value else False
         return wrapped
     return wrapper
 
-
-def gui_disabler() -> Any:
-    def wrapper(func: Callable) -> Callable:
-        @wraps(func)
-        async def wrapped(*args: Any, **kwargs: Any) -> Any:
-            return await func(*args, **kwargs) if Constants.GUI else False
-        return wrapped
-    return wrapper
