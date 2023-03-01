@@ -5,9 +5,10 @@ from time import gmtime, strftime
 from typing import Any, Callable, Optional
 
 
-@dataclass(frozen=True)
+@dataclass
 class __Constants:
-    IS_DOWNLOAD = True     # download simulation (True = Real, False = Simulate)
+    GUI: bool = True       # need for some tests
+    IS_DOWNLOAD = True     # download simulation (True = Real)
     PRINTING: bool = True  # console output
     LOGGING: bool = True
     LOG_FILE = "logging.log"

@@ -10,7 +10,6 @@ from data.data import CONST
 from data.messages import MESSAGES
 from modules import db, debug
 from modules.shared import CurrentValues
-from tests.helpers import helpers
 from util import tools
 
 
@@ -72,8 +71,9 @@ class File:
 
         except Exception as error:
             debug.log(MESSAGES.Errors.UnableToDownloadAFile + f" in {stack()[0][3]}", error)
-            self.gui_exception()
+            if debug.Constants.GUI: self.message.emit(MESSAGES.Errors.UnableToDownloadAFile)
             return False
+
 
     async def _write_file(self, content: StreamReader) -> bool:
         async with open(self._path, "wb") as file:
@@ -82,19 +82,12 @@ class File:
             async for chunk in content.iter_chunked(chunk_size):
                 if not chunk: return False
                 CurrentValues.total_downloaded += chunk_size
-                self.gui_progress()
+                if debug.Constants.GUI:
+                    if 0 < CurrentValues.total_files < CONST.DefaultValues.file_threshold:
+                        self.progress.emit(
+                            round(100 * CurrentValues.total_downloaded / (CurrentValues.total_size * 1.21)))
+                    elif CurrentValues.total_files >= CONST.DefaultValues.file_threshold:
+                        self.progress.emit(
+                            round((100 * CurrentValues.total_downloaded_files / CurrentValues.total_files)))
                 await file.write(chunk)
             return True
-
-    @helpers.gui_disabler()
-    def gui_progress(self):
-        if 0 < CurrentValues.total_files < CONST.DefaultValues.file_threshold:
-            self.progress.emit(
-                round(100 * CurrentValues.total_downloaded / (CurrentValues.total_size * 1.21)))
-        elif CurrentValues.total_files >= CONST.DefaultValues.file_threshold:
-            self.progress.emit(
-                round((100 * CurrentValues.total_downloaded_files / CurrentValues.total_files)))
-
-    @helpers.gui_disabler()
-    def gui_exception(self):
-        self.message.emit(MESSAGES.Errors.UnableToDownloadAFile)

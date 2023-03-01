@@ -7,9 +7,9 @@ import pytest
 from PyQt6.QtCore import pyqtSignal
 from aiohttp import StreamReader, streams
 
+from modules.debug import Constants
 from modules.file import File
 from modules.shared import CurrentValues
-from tests.helpers import helpers
 from util.tools import byte_dumb
 
 progress = pyqtSignal(int)
@@ -77,6 +77,6 @@ async def _fake_stream() -> StreamReader:
 async def test_responses(tmp_path) -> None:
     CurrentValues.download_dir = str(tmp_path)
     file = File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int])
-    helpers.GUI = False
+    Constants.GUI = False
     assert await file._write_file(await _fake_stream())
     file._path.unlink()
