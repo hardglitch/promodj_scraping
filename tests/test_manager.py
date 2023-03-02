@@ -1,5 +1,6 @@
 from concurrent.futures import Future
 
+import pytest
 from PyQt6.QtCore import pyqtBoundSignal
 from aiohttp import ClientSession
 
@@ -8,9 +9,13 @@ from modules.manager import Manager
 from modules.shared import CurrentValues
 from tests.prerequisites import Start
 
-Start()
 
-def test_default_values():
+@pytest.fixture(scope="function")
+def start():
+    Start()
+
+
+def test_default_values(start):
     mng = Manager(
         download_dir=Data.DefaultValues.download_dir,
         genre=Data.DefaultValues.genre,
@@ -47,7 +52,7 @@ def test_default_values():
     assert CurrentValues.total_size == 0
 
 
-def test_default_types():
+def test_default_types(start):
     mng = Manager(
         download_dir=Data.DefaultValues.download_dir,
         genre=Data.DefaultValues.genre,

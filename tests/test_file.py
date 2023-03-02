@@ -1,11 +1,11 @@
 import asyncio
 from pathlib import Path
-from unittest import mock
 
-import aiofiles
 import pytest
 from PyQt6.QtCore import pyqtSignal
 from aiohttp import StreamReader, streams
+# from unittest import mock
+from asyncmock import AsyncMock
 
 from modules import debug
 from modules.file import File
@@ -37,8 +37,7 @@ def test_types():
     assert isinstance(file._path, Path)
 
 
-@pytest.mark.asyncio
-async def test_check_path_and_name(tmp_path):
+def test_check_path_and_name(tmp_path):
     file = File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int])
 
     # 1. file not exists
@@ -53,7 +52,7 @@ async def test_check_path_and_name(tmp_path):
     CurrentValues.is_rewrite_files = False
     CurrentValues.is_file_history = False
     file = File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int])
-    async with aiofiles.open(file._path, "wb") as _file: await _file.write(b"")
+    with open(file._path, "wb") as _file: _file.write(b"")
 
     pre_name = file._name
     pre_path = file._path
@@ -76,8 +75,8 @@ async def test_write_file_from_stream(tmp_path) -> None:
     file._path.unlink()
 
 async def _fake_stream() -> StreamReader:
-    protocol = mock.Mock(_reading_paused=False)
-    stream = streams.StreamReader(protocol, 1024, loop=asyncio.get_event_loop())
-    stream.feed_data(byte_dumb(100))
+    protocol = AsyncMock(_reading_paused=False)
+    stream = streams.StreamReader(protocol, 16144, loop=asyncio.get_event_loop())
+    stream.feed_data(byte_dumb(200))
     stream.feed_eof()
     return stream
