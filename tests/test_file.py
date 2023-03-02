@@ -4,7 +4,6 @@ from pathlib import Path
 import pytest
 from PyQt6.QtCore import pyqtSignal
 from aiohttp import StreamReader, streams
-# from unittest import mock
 from asyncmock import AsyncMock
 
 from modules import debug
@@ -20,7 +19,7 @@ file_info = pyqtSignal(int, int)
 
 link = "https://promodj.com/some_beautiful_track.flac"
 
-def test_set_wrong_attributes():
+def test_set_wrong_attributes() -> None:
     try: File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int], new=1)
     except: assert TypeError
     try: File(progress=progress[int], message=message[str], file_info=file_info[int, int])
@@ -29,7 +28,7 @@ def test_set_wrong_attributes():
     except: assert ValueError
 
 
-def test_types():
+def test_types() -> None:
     file = File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int])
     assert isinstance(file, File)
     assert isinstance(file._link, str)
@@ -37,7 +36,7 @@ def test_types():
     assert isinstance(file._path, Path)
 
 
-def test_check_path_and_name(tmp_path):
+def test_check_path_and_name(tmp_path) -> None:
     file = File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int])
 
     # 1. file not exists
