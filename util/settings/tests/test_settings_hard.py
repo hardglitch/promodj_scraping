@@ -36,9 +36,13 @@ def hard_test(obj: Callable, params_range: int = 5, cycles: int = 1000, mode: in
             try:
                 if mode == FULL_CHAOS: _ = obj(*args, tp)
                 else: _ = obj(MockSettings(*args, tp))
-            except AssertionError: pass
             except TypeError as error:
-                if str(error).find("positional argument") < 0: raise error
+                if all([str(error).find(text) < 0 for text in [
+                    "positional argument",
+                    "is not Union[Path, str] type",
+                    "is not 'str' type"
+                ]]):
+                    raise error
             except ValueError as error:
                 if str(error).find("not enough values to unpack") < 0: raise error
 

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Literal, Tuple
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class Data:
 
     LOSSLESS_UNCOMPRESSED_FORMATS: Tuple[str, str] = (".wav", ".aiff")
@@ -12,7 +12,7 @@ class Data:
     INTERNAL_THREADS: int = 10
     VERSION: str = "v1.5.2"
 
-    @dataclass(frozen=True)
+    @dataclass(frozen=True, slots=True)
     class __DefaultValues:
         FORMS = Literal["mixes", "tracks", "lives"]
 
@@ -288,14 +288,14 @@ class Data:
 
     DefaultValues = __DefaultValues()
 
-    @dataclass(frozen=True)
+    @dataclass(frozen=True, slots=True)
     class __MaxValues:
         quantity: int = 1000
         threads: int = 4
 
     MaxValues = __MaxValues()
 
-    @dataclass(frozen=True)
+    @dataclass(frozen=True, slots=True)
     class __Parameters:
         DownloadDirectory: str = "DownloadDirectory"
         Genre: str = "Genre"
@@ -310,7 +310,7 @@ class Data:
 
     Parameters = __Parameters()
 
-    @dataclass(frozen=True)
+    @dataclass(frozen=True, slots=True)
     class __Inscriptions:
         PromoDJMusicDownloader: str = "PromoDJ Music Downloader"
         PromoDJMusicDownloaderExtended: str = PromoDJMusicDownloader + " --- Last download was _ days ago"

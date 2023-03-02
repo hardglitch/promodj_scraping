@@ -1,5 +1,7 @@
 from concurrent.futures import Future
 
+import pytest
+from PyQt6.QtCore import pyqtBoundSignal
 from aiohttp import ClientSession
 
 from data.data import Data
@@ -7,10 +9,24 @@ from modules.manager import Manager
 from modules.shared import CurrentValues
 from tests.prerequisites import Start
 
-Start()
 
-def test_default_values():
-    mng = Manager()
+@pytest.fixture(scope="function")
+def start():
+    Start()
+
+
+def test_default_values(start):
+    mng = Manager(
+        download_dir=Data.DefaultValues.download_dir,
+        genre=Data.DefaultValues.genre,
+        form=Data.DefaultValues.form,
+        is_lossless=Data.DefaultValues.is_lossless,
+        quantity=Data.DefaultValues.quantity,
+        is_period=Data.DefaultValues.is_period,
+        threads=Data.DefaultValues.threads,
+        is_rewrite_files=Data.DefaultValues.is_rewrite_files,
+        is_file_history=Data.DefaultValues.is_file_history
+    )
     assert CurrentValues.download_dir == Data.DefaultValues.download_dir
     assert CurrentValues.genre == Data.DefaultValues.genre
     assert CurrentValues.form == Data.DefaultValues.form
@@ -35,8 +51,19 @@ def test_default_values():
     assert CurrentValues.total_downloaded == 0
     assert CurrentValues.total_size == 0
 
-def test_default_types():
-    mng = Manager()
+
+def test_default_types(start):
+    mng = Manager(
+        download_dir=Data.DefaultValues.download_dir,
+        genre=Data.DefaultValues.genre,
+        form=Data.DefaultValues.form,
+        is_lossless=Data.DefaultValues.is_lossless,
+        quantity=Data.DefaultValues.quantity,
+        is_period=Data.DefaultValues.is_period,
+        threads=Data.DefaultValues.threads,
+        is_rewrite_files=Data.DefaultValues.is_rewrite_files,
+        is_file_history=Data.DefaultValues.is_file_history
+    )
     assert isinstance(CurrentValues.download_dir, str)
     assert isinstance(CurrentValues.genre, str)
     assert isinstance(CurrentValues.form, str)
@@ -49,6 +76,12 @@ def test_default_types():
 
     assert isinstance(mng._downloading, Future | None)
     assert isinstance(CurrentValues.session, ClientSession | None)
+
+    assert isinstance(mng.progress[int], pyqtBoundSignal)
+    assert isinstance(mng.success[int], pyqtBoundSignal)
+    assert isinstance(mng.search[int, int], pyqtBoundSignal)
+    assert isinstance(mng.message[str], pyqtBoundSignal)
+    assert isinstance(mng.file_info[int, int], pyqtBoundSignal)
 
     assert isinstance(CurrentValues.total_files, int)
     assert isinstance(CurrentValues.total_downloaded_files, int)

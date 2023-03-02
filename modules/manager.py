@@ -24,16 +24,18 @@ class Manager(QMainWindow):
     message = pyqtSignal(str)
     file_info = pyqtSignal(int, int)
 
+    __slots__ = "_downloading", "_success", "_search", "_message"
+
     def __init__(self,
-                 download_dir: str = CONST.DefaultValues.download_dir,
-                 genre: str = CONST.DefaultValues.genre,
-                 form: CONST.DefaultValues.FORMS = CONST.DefaultValues.form,
-                 is_lossless: bool = CONST.DefaultValues.is_lossless,
-                 quantity: int = CONST.DefaultValues.quantity,
-                 is_period: bool = CONST.DefaultValues.is_period,
-                 threads: int = CONST.DefaultValues.threads,
-                 is_rewrite_files: bool = CONST.DefaultValues.is_rewrite_files,
-                 is_file_history: bool = CONST.DefaultValues.is_file_history
+                 download_dir: str,
+                 genre: str,
+                 form: CONST.DefaultValues.FORMS,
+                 is_lossless: bool,
+                 quantity: int,
+                 is_period: bool,
+                 threads: int,
+                 is_rewrite_files: bool,
+                 is_file_history: bool
         ):
 
         super().__init__()
@@ -41,18 +43,12 @@ class Manager(QMainWindow):
         CurrentValues.genre = genre
         CurrentValues.form = form
         CurrentValues.is_lossless = is_lossless
-        CurrentValues.quantity = quantity \
-            if 0 < quantity <= abs(CONST.MaxValues.quantity) \
-            else abs(CONST.DefaultValues.quantity)
+        CurrentValues.quantity = quantity
         CurrentValues.is_period = is_period
-        CurrentValues.threads = threads \
-            if 0 < threads <= abs(CONST.MaxValues.threads) \
-            else abs(CONST.DefaultValues.threads)
+        CurrentValues.threads = threads
         CurrentValues.is_rewrite_files = is_rewrite_files
         CurrentValues.is_file_history = is_file_history
-
         CurrentValues.session = None
-
         CurrentValues.total_files = 0
         CurrentValues.total_downloaded_files = 0
         CurrentValues.total_downloaded = 0
