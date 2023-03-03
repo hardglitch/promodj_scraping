@@ -1,9 +1,10 @@
 import asyncio
+from asyncio import Semaphore
 from inspect import stack
 from typing import Optional, Sequence, Set
 from urllib.parse import unquote
 
-from PyQt6.QtCore import pyqtBoundSignal
+from PyQt6.QtCore import pyqtBoundSignal, pyqtSignal
 from aiohttp import ClientError
 from bs4 import BeautifulSoup, ResultSet, SoupStrainer
 
@@ -26,6 +27,13 @@ class Link:
         self.success = success
         self.search = search
         self._counter: int = 0
+
+        if not isinstance(self.success, pyqtBoundSignal) and not isinstance(self.success, pyqtSignal) \
+            or not isinstance(self.message, pyqtBoundSignal) and not isinstance(self.message, pyqtSignal) \
+            or not isinstance(self.search, pyqtBoundSignal) and not isinstance(self.search, pyqtSignal):
+                debug.log(MESSAGES.Errors.NoLinkToDownload + f" in {stack()[0][3]}")
+                if debug.Switches.IS_GUI: self.message.emit(MESSAGES.Errors.NoLinkToDownload)
+                return
 
 
     async def get_all_links(self) -> Optional[Set[str]]:
@@ -90,33 +98,43 @@ class Link:
         return set(".".join(_) for _ in {k:v for k, v in [link.rsplit(".", 1) for link in found_links]}.items())
 
 
-
     async def _get_total_filesize_by_link_list(self, found_links: Set[str]) -> None:
         if not found_links or not isinstance(found_links, Set)\
                 or not all(map(lambda x: True if type(x) == str else False, found_links)):
             return debug.log(MESSAGES.Errors.NoLinksToDownload + f" in {stack()[0][3]}")
-        # assert isinstance(found_links, Set)
-        # assert all(map(lambda x: True if type(x) == str else False, found_links))
 
         sem = asyncio.Semaphore(CONST.INTERNAL_THREADS)
         tasks = [asyncio.ensure_future(self._worker(link, sem)) for link in found_links]
         await asyncio.gather(*tasks)
 
-    async def _worker(self, link: str, sem: asyncio.Semaphore) -> None:
-        async with sem: await self._micro_task(link)
+    async def _worker(self, link: str, sem: Semaphore) -> None:
+        if isinstance(link, str) and isinstance(sem, Semaphore):
+            async with sem: await self._micro_task(link)
 
     async def _micro_task(self, link: str) -> None:
-        async with CurrentValues.session.get(link, timeout=None, headers={"Connection": "keep-alive"}) as response:
-            if response.status != 200:
-                return debug.log(MESSAGES.Errors.SomethingWentWrong + f" in {stack()[0][3]}. {response.status=}")
-            CurrentValues.total_size += response.content_length if response.content_length else 0
-            self._counter += 1
-            self.search.emit(self._counter % 5, 2)
+        if isinstance(link, str):
+            async with CurrentValues.session.get(link, timeout=None, headers={"Connection": "keep-alive"}) as response:
+                if response.status != 200:
+                    return debug.log(MESSAGES.Errors.SomethingWentWrong + f" in {stack()[0][3]}. {response.status=}")
+                await self._nano_task(response.content_length)
+                if debug.Switches.IS_GUI: self.search.emit(self._counter % 5, 2)
+        else:
+            return debug.log(repr(TypeError(MESSAGES.Errors.LinkIsNotAStrType)) + f" in {stack()[0][3]}")
 
+    async def _nano_task(self, content_length: int) -> None:
+        if isinstance(content_length, int):
+            CurrentValues.total_size += content_length if content_length else 0
+            self._counter += 1
 
 
 class Page:
+
+    __slots__ = "_link"
+
     def __init__(self, number: int):
+        if not isinstance(number, int) or number <= 0:
+            debug.log(MESSAGES.Errors.SomethingWentWrong + f" in {stack()[0][3]}")
+            return
         bitrate: str = "lossless" if CurrentValues.is_lossless else "high"
         period: str = f"period=last&period_last={CurrentValues.quantity}d&" if CurrentValues.is_period else ""
         self._link = f"https://promodj.com/{CurrentValues.form}/{CurrentValues.genre}?{period}bitrate={bitrate}&page={number}"

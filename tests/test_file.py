@@ -9,6 +9,7 @@ from asyncmock import AsyncMock
 from modules import debug
 from modules.file import File
 from modules.shared import CurrentValues
+from util import tools
 from util.tools import byte_dumb
 
 progress = pyqtSignal(int)
@@ -18,6 +19,16 @@ message = pyqtSignal(str)
 file_info = pyqtSignal(int, int)
 
 link = "https://promodj.com/some_beautiful_track.flac"
+file = File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int])
+debug.Switches.IS_GUI = False
+
+
+@pytest.mark.asyncio
+async def test_file_init_bruteforce():
+    assert await tools.fuzzer(File.__init__)
+
+def test_set_attribute():
+    debug.set_attribute_test(file)
 
 def test_set_wrong_attributes() -> None:
     try: File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int], new=1)
@@ -29,7 +40,6 @@ def test_set_wrong_attributes() -> None:
 
 
 def test_types() -> None:
-    file = File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int])
     assert isinstance(file, File)
     assert isinstance(file._link, str)
     assert isinstance(file._name, str)
@@ -63,13 +73,16 @@ def test_check_path_and_name(tmp_path) -> None:
 
     pre_path.unlink()
 
+@pytest.mark.asyncio
+async def test_check_path_and_name_bruteforce():
+    assert await tools.fuzzer(file._check_path_and_name)
 
 @pytest.mark.asyncio
 async def test_write_file_from_stream(tmp_path) -> None:
     CurrentValues.download_dir = str(tmp_path)
     file = File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int])
     debug.Switches.IS_PRINTING = False
-    debug.Switches.IS_GUI.value = False
+    debug.Switches.IS_GUI = False
     assert await file._write_file(await _fake_stream())
     file._path.unlink()
 
@@ -79,3 +92,7 @@ async def _fake_stream() -> StreamReader:
     stream.feed_data(byte_dumb(200))
     stream.feed_eof()
     return stream
+
+@pytest.mark.asyncio
+async def test_write_file_bruteforce():
+    assert await tools.fuzzer(file._write_file)

@@ -3,7 +3,8 @@ import secrets
 import string
 import time
 from functools import wraps
-from typing import Any, Callable, Dict
+from inspect import iscoroutinefunction
+from typing import Any, Callable, Dict, Iterable
 
 
 def perf_counter_decorator() -> Any:
@@ -43,3 +44,26 @@ def random_string(max_length: int = 1, path_friendly: bool = False) -> str:
 def byte_dumb(cycles: int = 1) -> bytes:
     """1 cycle = 100 bytes = 1 string.printable"""
     return b"".join(string.printable.encode() for _ in range(cycles))
+
+
+async def fuzzer(obj: Callable, params_range: int = 5) -> bool:
+    BASE_TYPES = (1, -1, 0, 0.1, range(10000), "s", string.printable)
+    LIST = list(BASE_TYPES)
+    DICTS = (({x: y} for x in (*BASE_TYPES, LIST) if not isinstance(x, Iterable)) for y in (*BASE_TYPES, LIST))
+    SPECIAL_CHARS = string.punctuation
+    TEST_PARAMETERS = (*BASE_TYPES, LIST, *[([x for x in y]) for y in DICTS], *SPECIAL_CHARS)
+
+    async def recursive_func(*args, n: int = 0):
+        for tp in TEST_PARAMETERS:
+            if n > 0:
+                n -= 1
+                await recursive_func(*args, tp, n=n)
+            try:
+                if iscoroutinefunction(obj): await obj(*args, tp)
+                else: obj(*args, tp)
+            except TypeError as error:
+                if str(error).find("positional argument") < 0: raise error
+            except ValueError as error:
+                if str(error).find("not enough values to unpack") < 0: raise error
+        await recursive_func(n=params_range)
+    return True

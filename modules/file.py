@@ -2,7 +2,7 @@ from inspect import stack
 from pathlib import Path
 from time import time
 
-from PyQt6.QtCore import pyqtBoundSignal
+from PyQt6.QtCore import pyqtBoundSignal, pyqtSignal
 from aiofiles import open
 from aiohttp import StreamReader
 
@@ -27,9 +27,13 @@ class File:
         self.message = message
         self.file_info = file_info
 
-        if not link:
+        if not link\
+                or not isinstance(link, str) \
+                or not isinstance(self.progress, pyqtBoundSignal) and not isinstance(self.progress, pyqtSignal) \
+                or not isinstance(self.message, pyqtBoundSignal) and not isinstance(self.message, pyqtSignal) \
+                or not isinstance(self.file_info, pyqtBoundSignal) and not isinstance(self.file_info, pyqtSignal):
             debug.log(MESSAGES.Errors.NoLinkToDownload + f" in {stack()[0][3]}")
-            self.message.emit(MESSAGES.Errors.NoLinkToDownload)
+            if debug.Switches.IS_GUI: self.message.emit(MESSAGES.Errors.NoLinkToDownload)
             return
 
         self._link: str = link
@@ -80,6 +84,7 @@ class File:
 
     @debug.switch(debug.Switches.IS_WRITE_FILE)
     async def _write_file(self, content: StreamReader) -> bool:
+        if not isinstance(content, StreamReader): return False
         async with open(self._path, "wb") as file:
             debug.print_message(f"Downloading - {self._link}")
             chunk_size: int = 16144

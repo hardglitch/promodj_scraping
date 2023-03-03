@@ -19,6 +19,8 @@ class Messages:
         UnableToDownloadAFile: str = "Unable to download a file"
         WrongPath: str = "Wrong Path"
         WrongFileName: str = "Wrong File Name"
+        LinkIsNotAStrType: str = "Link is not a 'str' type"
+        SecurityThreat: str = "Security Threat"
 
     Errors = __Errors()
 

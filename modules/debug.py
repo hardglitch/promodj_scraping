@@ -5,6 +5,8 @@ from functools import wraps
 from time import gmtime, strftime
 from typing import Any, Callable, Optional
 
+from data.messages import MESSAGES
+
 
 @dataclass()
 class DebugParam:
@@ -61,3 +63,11 @@ def switch(debug_param: DebugParam) -> Any:
                     return func(*args, **kwargs) if debug_param.value else False
         return wrapped
     return wrapper
+
+def set_attribute_test(instance: Any) -> bool:
+    try: setattr(instance, "new", 1)
+    except:
+        assert AttributeError
+        return True
+    else: raise MESSAGES.Errors.SecurityThreat
+
