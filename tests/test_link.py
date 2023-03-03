@@ -21,8 +21,9 @@ CurrentValues.is_file_history = False
 debug.Switches.IS_GUI = False
 link = Link(message=progress[int], success=success[int], search=search[int, int])
 
+
 class FakeLink(Link):
-    def __init__(self, content_length: int, *args, **kwargs):
+    def __init__(self, content_length: int, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._content_length = content_length
 
@@ -31,23 +32,23 @@ class FakeLink(Link):
 
 
 @pytest.mark.asyncio
-async def test_link_init_bruteforce():
+async def test_link_init_bruteforce() -> None:
     assert await tools.fuzzer(Link.__init__)
 
-def test_set_attribute_link():
+def test_set_attribute_link() -> None:
     assert debug.set_attribute_test(link)
 
 @pytest.mark.asyncio
-async def test_page_init_bruteforce():
+async def test_page_init_bruteforce() -> None:
     assert await tools.fuzzer(Page.__init__)
 
-def test_set_attribute_page():
+def test_set_attribute_page() -> None:
     assert debug.set_attribute_test(Page(1))
 
 # -------------------------
 
 @pytest.mark.asyncio
-async def test_filtered_found_links_positive():
+async def test_filtered_found_links_positive() -> None:
     found_links = {"1.flac", "2.flac", "2.wav","1.wav"}
     assert isinstance(found_links, Set)
     assert all(map(lambda x: True if type(x)==str else False, found_links))
@@ -55,50 +56,51 @@ async def test_filtered_found_links_positive():
         {"1.flac", "2.flac"}, {"1.wav", "2.wav"}, {"1.flac", "2.wav"}, {"1.wav", "2.flac"}]
 
 @pytest.mark.asyncio
-async def test_filtered_found_links_legal():
+async def test_filtered_found_links_legal() -> None:
     found_links = set()
     assert await link._filtered_found_links(found_links) == set()
 
 @pytest.mark.asyncio
-async def test_filtered_found_links_bruteforce():
+async def test_filtered_found_links_bruteforce() -> None:
     assert await tools.fuzzer(link._filtered_found_links)
 
 # -------------------------
 
-async def setup_resultset() -> ResultSet:
+async def _setup_resultset() -> ResultSet:
     async with aiofiles.open("testpage.html", "r", encoding="utf-8") as file: test_page = await file.read()
     return BeautifulSoup(test_page, "lxml", parse_only=SoupStrainer("a")).findAll(href=True)
 
+
 @pytest.mark.asyncio
-async def test_get_filtered_links_lossless():
+async def test_get_filtered_links_lossless() -> None:
     CurrentValues.is_lossless = True
-    assert link._get_filtered_links(await setup_resultset()) == {
+    assert link._get_filtered_links(await _setup_resultset()) == {
         fr"https://promodj.com/source/some1.flac",
         fr"https://promodj.com/source/some2.wav",
         fr"https://promodj.com/source/some22.aiff",
     }
 
 @pytest.mark.asyncio
-async def test_get_filtered_links_lossy():
+async def test_get_filtered_links_lossy() -> None:
     CurrentValues.is_lossless = True
-    assert link._get_filtered_links(await setup_resultset()) == {
+    assert link._get_filtered_links(await _setup_resultset()) == {
         fr"https://promodj.com/source/some3.mp3"
     }
 
 @pytest.mark.asyncio
-async def test_get_filtered_links_lossy():
+async def test_get_filtered_links_lossy() -> None:
     link_massive = ResultSet(SoupStrainer())
     assert isinstance(link_massive, ResultSet)
     assert link._get_filtered_links(link_massive) == set()
 
 @pytest.mark.asyncio
-async def test_get_filtered_links_bruteforce():
+async def test_get_filtered_links_bruteforce() -> None:
     assert await tools.fuzzer(link._get_filtered_links)
 
 # -------------------------
 
 @pytest.mark.asyncio
-async def test_get_total_filesize_by_link_list():
+async def test_get_total_filesize_by_link_list() -> None:
     found_links = {"1", "2", "3"}
     content_length = 100
     assert isinstance(found_links, Set)
@@ -109,5 +111,23 @@ async def test_get_total_filesize_by_link_list():
     assert CurrentValues.total_size == len(found_links) * content_length
 
 @pytest.mark.asyncio
-async def test_get_total_filesize_by_link_list_bruteforce():
+async def test_get_total_filesize_by_link_list_bruteforce() -> None:
     assert await tools.fuzzer(link._get_total_filesize_by_link_list)
+
+# -------------------------
+
+@pytest.mark.asyncio
+async def test_get_all_links() -> None:
+    debug.Switches.IS_PARSE.fake_func = _setup_resultset
+    debug.Switches.IS_WORKER.fake_func = _fake_worker
+    CurrentValues.is_file_history = False
+    CurrentValues.is_lossless = True
+
+    assert await link.get_all_links() == {
+        fr"https://promodj.com/source/some1.flac",
+        fr"https://promodj.com/source/some2.wav",
+        fr"https://promodj.com/source/some22.aiff",
+    }
+
+def _fake_worker() -> None:
+    pass

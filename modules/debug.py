@@ -1,17 +1,18 @@
-import inspect
 import logging
 from dataclasses import dataclass
 from functools import wraps
+from inspect import iscoroutinefunction
 from time import gmtime, strftime
 from typing import Any, Callable, Optional
 
 from data.messages import MESSAGES
 
 
-@dataclass()
+@dataclass(slots=True)
 class DebugParam:
     name: str
     value: bool
+    fake_func: Optional[Callable] = None
 
 @dataclass(slots=True, frozen=True)
 class __Constants:
@@ -29,6 +30,10 @@ class __Switches:
     IS_DOWNLOAD = DebugParam("IS_DOWNLOAD", True)
     IS_GET_FILE = DebugParam("IS_GET_FILE", True)
     IS_WRITE_FILE = DebugParam("IS_WRITE_FILE", True)
+
+    # -- link.py --
+    IS_PARSE = DebugParam("IS_PARSE", True)
+    IS_WORKER = DebugParam("IS_WORKER", True)
 
 Switches = __Switches()
 
@@ -51,16 +56,22 @@ def print_message(*args: Any, **kwargs: Any) -> None:
 
 def switch(debug_param: DebugParam) -> Any:
     def wrapper(func: Callable):
-        if inspect.iscoroutinefunction(func):
+        if iscoroutinefunction(func):
             @wraps(func)
             async def wrapped(*args: Any, **kwargs: Any) -> Any:
                 if getattr(Switches, debug_param.name):
-                    return await func(*args, **kwargs) if debug_param.value else False
+                    if debug_param.fake_func:
+                        return await debug_param.fake_func() if iscoroutinefunction(debug_param.fake_func) \
+                                else debug_param.fake_func()
+                    if debug_param.value: return await func(*args, **kwargs)
+                    return False
         else:
             @wraps(func)
             def wrapped(*args: Any, **kwargs: Any) -> Any:
                 if getattr(Switches, debug_param.name):
-                    return func(*args, **kwargs) if debug_param.value else False
+                    if debug_param.fake_func: return debug_param.fake_func()
+                    if debug_param.value: return func(*args, **kwargs)
+                    return False
         return wrapped
     return wrapper
 

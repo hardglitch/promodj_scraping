@@ -45,16 +45,20 @@ class Link:
 
             if page_number > 1 and not found_links: break
             page = Page(page_number)
-            if not (link_massive := await page.parse()): return self.message.emit(MESSAGES.Errors.UnableToConnect)
+            if not (link_massive := await page.parse()):
+                if debug.Switches.IS_GUI: self.message.emit(MESSAGES.Errors.UnableToConnect)
+                return None
             found_links_on_page: Set[str] = self._get_filtered_links(link_massive)
 
             if not found_links_on_page & found_links: found_links |= found_links_on_page
             else: break
-            self.search.emit(page_number % 5, 1)
+            if debug.Switches.IS_GUI: self.search.emit(page_number % 5, 1)
             page_number += 1
 
         # 2. Checking found links
-        if not found_links: return self.success.emit(0)
+        if not found_links:
+            if debug.Switches.IS_GUI: self.success.emit(0)
+            return None
         else:
             found_links = \
                 set(list(found_links)[:CurrentValues.quantity]) if not CurrentValues.is_period \
@@ -69,7 +73,7 @@ class Link:
             await self._get_total_filesize_by_link_list(found_links)
 
         # 5. Return result
-        return found_links if found_links else self.success.emit(0)
+        return found_links if found_links else self.success.emit(0) if debug.Switches.IS_GUI else None
 
 # --------------------------------------------------------------------------
 
@@ -107,6 +111,7 @@ class Link:
         tasks = [asyncio.ensure_future(self._worker(link, sem)) for link in found_links]
         await asyncio.gather(*tasks)
 
+    @debug.switch(debug.Switches.IS_WORKER)
     async def _worker(self, link: str, sem: Semaphore) -> None:
         if isinstance(link, str) and isinstance(sem, Semaphore):
             async with sem: await self._micro_task(link)
@@ -139,6 +144,8 @@ class Page:
         period: str = f"period=last&period_last={CurrentValues.quantity}d&" if CurrentValues.is_period else ""
         self._link = f"https://promodj.com/{CurrentValues.form}/{CurrentValues.genre}?{period}bitrate={bitrate}&page={number}"
 
+
+    @debug.switch(debug.Switches.IS_PARSE)
     async def parse(self) -> Optional[ResultSet]:
         try:
             async with CurrentValues.session.get(self._link, timeout=None, headers={"Connection": "keep-alive"}) as response:
