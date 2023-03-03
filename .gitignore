@@ -6,6 +6,8 @@
 !/tests/
 !/tests/*.py
 !/tests/pytest.ini
+!/tests/testpage.html
+!/tests/pytest.ini
 !/util
 !/util/*.py
 !/util/settings

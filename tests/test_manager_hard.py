@@ -4,7 +4,7 @@ from typing import Callable, Iterable, Optional
 import pytest
 
 from modules.gui import MainWindow
-from tests.prerequisites import Start
+from tests.setup import Setup
 from util import tools
 from util.settings.settings import Settings
 
@@ -20,8 +20,8 @@ TEST_PARAMETERS = (*BASE_TYPES, LIST, *[([x for x in y]) for y in DICTS], *SPECI
 
 
 @pytest.fixture(scope="function")
-def start():
-    Start()
+def setup():
+    Setup()
 
 
 class MockSettings(Settings):
@@ -66,11 +66,11 @@ def hard_test(obj: Callable, params_range: int = 5, cycles: int = 100, mode: int
     # print(f"OK - '{obj.__name__}' in {mode=} tested.")
     return True
 
-def test_start_settings_full_chaos(start):
+def test_start_settings_full_chaos(setup):
     assert hard_test(obj=MockMainWindow, mode=FULL_CHAOS)
 
-def test_start_settings_half_legal_arguments(start):
+def test_start_settings_half_legal_arguments(setup):
     assert hard_test(obj=MockMainWindow, mode=HALF_LEGAL_ARGUMENTS)
 
-def test_start_settings_legal_arguments(start):
+def test_start_settings_legal_arguments(setup):
     assert hard_test(obj=MockMainWindow, mode=LEGAL_ARGUMENTS)

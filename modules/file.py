@@ -74,7 +74,7 @@ class File:
 
         except Exception as error:
             debug.log(MESSAGES.Errors.UnableToDownloadAFile + f" in {stack()[0][3]}", error)
-            self._gui_exception()
+            if debug.Switches.IS_GUI: self.message.emit(MESSAGES.Errors.UnableToDownloadAFile)
             return False
 
 
@@ -86,19 +86,12 @@ class File:
             async for chunk in content.iter_chunked(chunk_size):
                 if not chunk: return False
                 CurrentValues.total_downloaded += chunk_size
-                self._gui_progress()
+                if debug.Switches.IS_GUI:
+                    if 0 < CurrentValues.total_files < CONST.DefaultValues.file_threshold:
+                        self.progress.emit(
+                            round(100 * CurrentValues.total_downloaded / (CurrentValues.total_size * 1.21)))
+                    elif CurrentValues.total_files >= CONST.DefaultValues.file_threshold:
+                        self.progress.emit(
+                            round((100 * CurrentValues.total_downloaded_files / CurrentValues.total_files)))
                 await file.write(chunk)
             return True
-
-    @debug.switch(debug.Switches.IS_GUI)
-    def _gui_progress(self) -> None:
-        if 0 < CurrentValues.total_files < CONST.DefaultValues.file_threshold:
-            self.progress.emit(
-                round(100 * CurrentValues.total_downloaded / (CurrentValues.total_size * 1.21)))
-        elif CurrentValues.total_files >= CONST.DefaultValues.file_threshold:
-            self.progress.emit(
-                round((100 * CurrentValues.total_downloaded_files / CurrentValues.total_files)))
-
-    @debug.switch(debug.Switches.IS_GUI)
-    def _gui_exception(self) -> None:
-        self.message.emit(MESSAGES.Errors.UnableToDownloadAFile)

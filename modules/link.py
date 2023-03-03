@@ -66,11 +66,10 @@ class Link:
 # --------------------------------------------------------------------------
 
     def _get_filtered_links(self, link_massive: ResultSet) -> Set[str]:
-        if not link_massive:
+        if not link_massive or not isinstance(link_massive, ResultSet):
             debug.log(MESSAGES.Errors.NoLinksToFiltering)
-            self.message.emit(MESSAGES.Errors.NoLinksToFiltering)
+            if debug.Switches.IS_GUI: self.message.emit(MESSAGES.Errors.NoLinksToFiltering)
             return set()
-        assert isinstance(link_massive, ResultSet)
 
         formats: Sequence[str] = [*CONST.LOSSLESS_COMPRESSED_FORMATS, *CONST.LOSSLESS_UNCOMPRESSED_FORMATS] \
             if CurrentValues.is_lossless else CONST.LOSSY_FORMATS
@@ -80,7 +79,8 @@ class Link:
 
 
     async def _filtered_found_links(self, found_links: Set[str]) -> Set[str]:
-        if not found_links:
+        if not found_links or not isinstance(found_links, Set) \
+                or not all(map(lambda x: True if type(x) == str else False, found_links)):
             debug.log(MESSAGES.Errors.NoLinksToDownload + f" in {stack()[0][3]}")
             return set()
 
@@ -91,13 +91,15 @@ class Link:
 
 
 
-    async def _get_total_filesize_by_link_list(self, f_links: Set[str]) -> None:
-        if not f_links: return debug.log(MESSAGES.Errors.NoLinksToDownload + f" in {stack()[0][3]}")
-        assert isinstance(f_links, Set)
-        assert all(map(lambda x: True if type(x) == str else False, f_links))
+    async def _get_total_filesize_by_link_list(self, found_links: Set[str]) -> None:
+        if not found_links or not isinstance(found_links, Set)\
+                or not all(map(lambda x: True if type(x) == str else False, found_links)):
+            return debug.log(MESSAGES.Errors.NoLinksToDownload + f" in {stack()[0][3]}")
+        # assert isinstance(found_links, Set)
+        # assert all(map(lambda x: True if type(x) == str else False, found_links))
 
         sem = asyncio.Semaphore(CONST.INTERNAL_THREADS)
-        tasks = [asyncio.ensure_future(self._worker(link, sem)) for link in f_links]
+        tasks = [asyncio.ensure_future(self._worker(link, sem)) for link in found_links]
         await asyncio.gather(*tasks)
 
     async def _worker(self, link: str, sem: asyncio.Semaphore) -> None:

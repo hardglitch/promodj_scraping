@@ -21,9 +21,9 @@ Constants = __Constants()
 class __Switches:
     IS_PRINTING: bool = True    # output to the console additional info
     IS_LOGGING: bool = True
+    IS_GUI: bool = True
 
     # -- file.py --
-    IS_GUI = DebugParam("IS_GUI", True)
     IS_DOWNLOAD = DebugParam("IS_DOWNLOAD", True)
     IS_GET_FILE = DebugParam("IS_GET_FILE", True)
     IS_WRITE_FILE = DebugParam("IS_WRITE_FILE", True)
@@ -61,4 +61,3 @@ def switch(debug_param: DebugParam) -> Any:
                     return func(*args, **kwargs) if debug_param.value else False
         return wrapped
     return wrapper
-
