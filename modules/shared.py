@@ -1,14 +1,16 @@
 from dataclasses import dataclass
 from inspect import stack
+from platform import system
 from typing import Optional, get_args
 
 from aiohttp import ClientSession
 
-from data.data import CONST
+from data.data import CONST, Data
 from modules import debug
+from util import tools
 
 
-@dataclass
+@dataclass()
 class __CurrentValues:
 
     __slots__ = (
@@ -51,7 +53,10 @@ class __CurrentValues:
 
     @download_dir.setter
     def download_dir(self, value: str) -> None:
-        if not isinstance(value, str):
+        value = tools.clear_path(value)
+        if value != Data.DefaultValues.download_dir and system() == "Windows":
+            value = tools.insert_string(value, ":", 1)
+        if not isinstance(value, str) or not value:
             debug.log(f"TypeError in {stack()[0][3]}")
             raise TypeError
         self.__download_dir = value
@@ -63,7 +68,7 @@ class __CurrentValues:
 
     @genre.setter
     def genre(self, value: str) -> None:
-        if not isinstance(value, str):
+        if not isinstance(value, str) or not value:
             debug.log(f"TypeError in {stack()[0][3]}")
             raise TypeError
         if value in CONST.DefaultValues.genres: self.__genre = value
@@ -90,7 +95,7 @@ class __CurrentValues:
         if not isinstance(value, int):
             debug.log(f"TypeError in {stack()[0][3]}")
             raise TypeError
-        self.__quantity = CONST.MaxValues.quantity if value >= CONST.MaxValues.quantity else 0 if value <= 0 else value
+        self.__quantity = CONST.MaxValues.quantity if value > CONST.MaxValues.quantity else 0 if value <= 0 else value
 
 
     @property

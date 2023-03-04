@@ -22,6 +22,7 @@ class DebugParam:
 
 @dataclass(slots=True)
 class __Switches:
+    IS_HARD_MODE: bool = True   # more brutal test mode
     IS_PRINTING: bool = True    # output to the console additional info
     IS_LOGGING: bool = True
     IS_GUI: bool = True

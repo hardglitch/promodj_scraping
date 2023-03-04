@@ -1,10 +1,18 @@
 import re
 import secrets
 import string
+import sys
 import time
 from functools import wraps
 from inspect import iscoroutinefunction
 from typing import Any, Callable, Dict, Iterable
+
+
+BASE_TYPES = (sys.maxsize, -1, 0, 0.1, range(10000), "", " ", b"s", string.printable)
+LIST = list(BASE_TYPES)
+DICTS = (({x: y} for x in (*BASE_TYPES, LIST) if not isinstance(x, Iterable)) for y in (*BASE_TYPES, LIST))
+SPECIAL_CHARS = string.punctuation
+TEST_PARAMETERS = (*BASE_TYPES, LIST, *[([x for x in y]) for y in DICTS], *SPECIAL_CHARS)
 
 
 def perf_counter_decorator() -> Any:
@@ -29,11 +37,15 @@ def dict_value_sort(dictionary: Dict[Any, Any], asc: bool = True) -> Dict[Any, A
 
 
 def clear_path(path: str) -> str:
-    return re.sub(r"[^\w\(\)\\\/\[\]\.\,\+\-\&\ \=\']", "", path)
+    return (re.sub(r"[^\w\(\)\\\/\[\]\.\,\+\-\&\ \=\']", "", path)).strip()
 
 
 def clear_filename(filename: str) -> str:
     return re.sub(r"[^a-zA-Z0-9_\-.]", "", filename)[:255]
+
+
+def insert_string(old_str: str, patch_str: str, position: int) -> str:
+    return old_str[:position] + patch_str + old_str[position:]
 
 
 def random_string(max_length: int = 1, path_friendly: bool = False) -> str:
@@ -46,15 +58,13 @@ def byte_dumb(cycles: int = 1) -> bytes:
     return b"".join(string.printable.encode() for _ in range(cycles))
 
 
-async def fuzzer(obj: Callable, params_range: int = 5) -> bool:
-    BASE_TYPES = (1, -1, 0, 0.1, range(10000), "", " ", b"s", string.printable)
-    LIST = list(BASE_TYPES)
-    DICTS = (({x: y} for x in (*BASE_TYPES, LIST) if not isinstance(x, Iterable)) for y in (*BASE_TYPES, LIST))
-    SPECIAL_CHARS = string.punctuation
-    TEST_PARAMETERS = (*BASE_TYPES, LIST, *[([x for x in y]) for y in DICTS], *SPECIAL_CHARS)
+BRUTAL_TEST_PARAMETERS = (*TEST_PARAMETERS, *(random_string(1100) for _ in range(50)))
+
+async def fuzzer(obj: Callable, params_range: int = 5, hard_mode: bool = False) -> bool:
+    # test_parameters = BRUTAL_TEST_PARAMETERS if hard_mode else TEST_PARAMETERS
 
     async def recursive_func(*args, n: int = 0):
-        for tp in TEST_PARAMETERS:
+        for tp in BRUTAL_TEST_PARAMETERS if hard_mode else TEST_PARAMETERS:
             if n > 0:
                 n -= 1
                 await recursive_func(*args, tp, n=n)

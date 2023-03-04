@@ -33,14 +33,14 @@ class FakeLink(Link):
 
 @pytest.mark.asyncio
 async def test_link_init_bruteforce() -> None:
-    assert await tools.fuzzer(Link.__init__)
+    assert await tools.fuzzer(Link.__init__, hard_mode=debug.Switches.IS_HARD_MODE)
 
 def test_set_attribute_link() -> None:
     assert debug.set_attribute_test(link)
 
 @pytest.mark.asyncio
 async def test_page_init_bruteforce() -> None:
-    assert await tools.fuzzer(Page.__init__)
+    assert await tools.fuzzer(Page.__init__, hard_mode=debug.Switches.IS_HARD_MODE)
 
 def test_set_attribute_page() -> None:
     assert debug.set_attribute_test(Page(1))
@@ -62,7 +62,7 @@ async def test_filtered_found_links_legal() -> None:
 
 @pytest.mark.asyncio
 async def test_filtered_found_links_bruteforce() -> None:
-    assert await tools.fuzzer(link._filtered_found_links)
+    assert await tools.fuzzer(link._filtered_found_links, hard_mode=debug.Switches.IS_HARD_MODE)
 
 # -------------------------
 
@@ -95,7 +95,7 @@ async def test_get_filtered_links_lossy() -> None:
 
 @pytest.mark.asyncio
 async def test_get_filtered_links_bruteforce() -> None:
-    assert await tools.fuzzer(link._get_filtered_links)
+    assert await tools.fuzzer(link._get_filtered_links, hard_mode=debug.Switches.IS_HARD_MODE)
 
 # -------------------------
 
@@ -112,7 +112,7 @@ async def test_get_total_filesize_by_link_list() -> None:
 
 @pytest.mark.asyncio
 async def test_get_total_filesize_by_link_list_bruteforce() -> None:
-    assert await tools.fuzzer(link._get_total_filesize_by_link_list)
+    assert await tools.fuzzer(link._get_total_filesize_by_link_list, hard_mode=debug.Switches.IS_HARD_MODE)
 
 # -------------------------
 

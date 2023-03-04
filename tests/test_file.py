@@ -1,6 +1,7 @@
 import asyncio
 from pathlib import Path
 
+import aiofiles
 import pytest
 from PyQt6.QtCore import pyqtSignal
 from aiohttp import StreamReader, streams
@@ -19,15 +20,15 @@ message = pyqtSignal(str)
 file_info = pyqtSignal(int, int)
 
 link = "https://promodj.com/some_beautiful_track.flac"
-file = File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int])
 debug.Switches.IS_GUI = False
 
 
 @pytest.mark.asyncio
 async def test_file_init_bruteforce():
-    assert await tools.fuzzer(File.__init__)
+    assert await tools.fuzzer(File.__init__, hard_mode=debug.Switches.IS_HARD_MODE)
 
 def test_set_attribute():
+    file = File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int])
     debug.set_attribute_test(file)
 
 def test_set_wrong_attributes() -> None:
@@ -40,28 +41,33 @@ def test_set_wrong_attributes() -> None:
 
 
 def test_types() -> None:
+    file = File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int])
     assert isinstance(file, File)
     assert isinstance(file._link, str)
     assert isinstance(file._name, str)
     assert isinstance(file._path, Path)
 
 
-def test_check_path_and_name(tmp_path) -> None:
+def test_check_path_and_name_1(tmp_path) -> None:
+    # 1. file not exists
+    CurrentValues.download_dir = str(tmp_path)
     file = File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int])
 
-    # 1. file not exists
     pre_name = file._name
     pre_path = file._path
     file._check_path_and_name()
     assert pre_name == file._name
     assert pre_path == file._path
 
+
+@pytest.mark.asyncio
+async def test_check_path_and_name_2(tmp_path) -> None:
     # 2. file exists
     CurrentValues.download_dir = str(tmp_path)
     CurrentValues.is_rewrite_files = False
     CurrentValues.is_file_history = False
-    file = File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int])
-    with open(file._path, "wb") as _file: _file.write(b"")
+    file = File(link=link+"1", progress=progress[int], message=message[str], file_info=file_info[int, int])
+    async with aiofiles.open(file._path, "wb") as _file: await _file.write(b"")
 
     pre_name = file._name
     pre_path = file._path
@@ -75,12 +81,13 @@ def test_check_path_and_name(tmp_path) -> None:
 
 @pytest.mark.asyncio
 async def test_check_path_and_name_bruteforce():
-    assert await tools.fuzzer(file._check_path_and_name)
+    file = File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int])
+    assert await tools.fuzzer(file._check_path_and_name, hard_mode=debug.Switches.IS_HARD_MODE)
 
 @pytest.mark.asyncio
 async def test_write_file_from_stream(tmp_path) -> None:
     CurrentValues.download_dir = str(tmp_path)
-    file = File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int])
+    file = File(link=link+"2", progress=progress[int], message=message[str], file_info=file_info[int, int])
     debug.Switches.IS_PRINTING = False
     debug.Switches.IS_GUI = False
     assert await file._write_file(await _fake_stream())
@@ -95,4 +102,5 @@ async def _fake_stream() -> StreamReader:
 
 @pytest.mark.asyncio
 async def test_write_file_bruteforce():
-    assert await tools.fuzzer(file._write_file)
+    file = File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int])
+    assert await tools.fuzzer(file._write_file, hard_mode=debug.Switches.IS_HARD_MODE)
