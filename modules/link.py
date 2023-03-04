@@ -1,7 +1,7 @@
 import asyncio
 from asyncio import Semaphore
 from inspect import stack
-from typing import Optional, Sequence, Set
+from typing import Any, Optional, Sequence, Set
 from urllib.parse import unquote
 
 from PyQt6.QtCore import pyqtBoundSignal, pyqtSignal
@@ -126,7 +126,7 @@ class Link:
         else:
             return debug.log(repr(TypeError(MESSAGES.Errors.LinkIsNotAStrType)) + f" in {stack()[0][3]}")
 
-    async def _nano_task(self, content_length: int) -> None:
+    async def _nano_task(self, content_length: Optional[int]) -> None:
         if type(self) == Link or isinstance(content_length, int):
             CurrentValues.total_size += content_length if content_length else 0
             self._counter += 1
@@ -146,12 +146,14 @@ class Page:
 
 
     @debug.switch(debug.Switches.IS_PARSE)
-    async def parse(self) -> Optional[ResultSet]:
+    async def parse(self) -> Optional[ResultSet[Any]]:
         try:
             async with CurrentValues.session.get(self._link, timeout=None, headers={"Connection": "keep-alive"}) as response:
                 if response.status != 200:
-                    return debug.log(MESSAGES.Errors.SomethingWentWrong + f" in {stack()[0][3]}. {response.status=}")
+                    debug.log(MESSAGES.Errors.SomethingWentWrong + f" in {stack()[0][3]}. {response.status=}")
+                    return None
                 return BeautifulSoup(unquote(await response.read()), "lxml", parse_only=SoupStrainer("a")).findAll(href=True)
 
         except ClientError as error:
-            return debug.log(MESSAGES.Errors.UnableToConnect + f" in {stack()[0][3]}. {response.status=}", error)
+            debug.log(MESSAGES.Errors.UnableToConnect + f" in {stack()[0][3]}. {response.status=}", error)
+            return None

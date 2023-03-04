@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from inspect import stack
 from platform import system
 from typing import Optional, get_args
@@ -10,7 +9,6 @@ from modules import debug
 from util import tools
 
 
-@dataclass()
 class __CurrentValues:
 
     __slots__ = (
@@ -31,20 +29,20 @@ class __CurrentValues:
     )
 
     def __init__(self) -> None:
-        self.download_dir: str = CONST.DefaultValues.download_dir
-        self.genre: str = CONST.DefaultValues.genre
-        self.form: CONST.DefaultValues.FORMS = CONST.DefaultValues.form
-        self.quantity: int = CONST.DefaultValues.quantity
-        self.threads: int = CONST.DefaultValues.threads
-        self.is_lossless: bool = CONST.DefaultValues.is_lossless
-        self.is_period: bool = CONST.DefaultValues.is_period
-        self.is_rewrite_files: bool = CONST.DefaultValues.is_rewrite_files
-        self.is_file_history: bool = CONST.DefaultValues.is_file_history
-        self.session: Optional[ClientSession] = None
-        self.total_files: int = 0
-        self.total_downloaded_files: int = 0
-        self.total_downloaded: int = 0
-        self.total_size: int = 0
+        self.download_dir = CONST.DefaultValues.download_dir
+        self.genre = CONST.DefaultValues.genre
+        self.form = CONST.DefaultValues.form
+        self.quantity = CONST.DefaultValues.quantity
+        self.threads = CONST.DefaultValues.threads
+        self.is_lossless = CONST.DefaultValues.is_lossless
+        self.is_period = CONST.DefaultValues.is_period
+        self.is_rewrite_files = CONST.DefaultValues.is_rewrite_files
+        self.is_file_history = CONST.DefaultValues.is_file_history
+        self.session = None
+        self.total_files = 0
+        self.total_downloaded_files = 0
+        self.total_downloaded = 0
+        self.total_size = 0
 
 
     @property
@@ -164,7 +162,7 @@ class __CurrentValues:
 
     @session.setter
     def session(self, value: Optional[ClientSession]) -> None:
-        if not isinstance(value, Optional[ClientSession]):
+        if not isinstance(value, ClientSession | None):
             debug.log(f"TypeError in {stack()[0][3]}")
             raise TypeError
         self.__session = value

@@ -63,7 +63,7 @@ BRUTAL_TEST_PARAMETERS = (*TEST_PARAMETERS, *(random_string(1100) for _ in range
 async def fuzzer(obj: Callable, params_range: int = 5, hard_mode: bool = False) -> bool:
     # test_parameters = BRUTAL_TEST_PARAMETERS if hard_mode else TEST_PARAMETERS
 
-    async def recursive_func(*args, n: int = 0):
+    async def recursive_func(*args: Any, n: int = 0) -> None:
         for tp in BRUTAL_TEST_PARAMETERS if hard_mode else TEST_PARAMETERS:
             if n > 0:
                 n -= 1

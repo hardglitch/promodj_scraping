@@ -58,7 +58,7 @@ def print_message(*args: Any, **kwargs: Any) -> None:
 
 def switch(debug_param: DebugParam) -> Any:
     if not isinstance(debug_param, DebugParam): return None
-    def wrapper(func: Callable):
+    def wrapper(func: Callable) -> Any:
         if iscoroutinefunction(func):
             @wraps(func)
             async def wrapped(*args: Any, **kwargs: Any) -> Any:
