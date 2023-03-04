@@ -4,7 +4,8 @@ from typing import Set
 import pytest
 
 from data.data import CONST
-from modules import db
+from modules import db, debug
+from util import tools
 
 
 @pytest.mark.asyncio
@@ -31,3 +32,12 @@ async def test_db():
     assert filtered_links == found_links
 
     Path(CONST.DB_NAME).unlink()
+
+
+@pytest.mark.asyncio
+async def test_write_file_history_bruteforce():
+    assert await tools.fuzzer(db.write_file_history, hard_mode=debug.Switches.IS_HARD_MODE)
+
+@pytest.mark.asyncio
+async def test_filter_by_history_bruteforce():
+    assert await tools.fuzzer(db.filter_by_history, hard_mode=debug.Switches.IS_HARD_MODE)

@@ -2,11 +2,11 @@
   "include": [
     "data",
     "modules",
-    "tests",
     "util"
   ],
   
   "exclude": [
-    "**/__pycache__"
+    "**/__pycache__",
+    "tests"
   ]
 }

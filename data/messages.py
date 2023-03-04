@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 @dataclass(frozen=True)
-class Messages:
+class __Messages:
 
     @dataclass(frozen=True)
     class __Errors:
@@ -19,6 +19,8 @@ class Messages:
         UnableToDownloadAFile: str = "Unable to download a file"
         WrongPath: str = "Wrong Path"
         WrongFileName: str = "Wrong File Name"
+        LinkIsNotAStrType: str = "Link is not a 'str' type"
+        SecurityThreat: str = "Security Threat"
 
     Errors = __Errors()
 
@@ -45,4 +47,4 @@ class Messages:
     Searching: str = "searching"
     Analysis: str = "analysis"
 
-MESSAGES = Messages()
+MESSAGES = __Messages()

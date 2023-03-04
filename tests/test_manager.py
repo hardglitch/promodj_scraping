@@ -7,15 +7,15 @@ from aiohttp import ClientSession
 from data.data import Data
 from modules.manager import Manager
 from modules.shared import CurrentValues
-from tests.prerequisites import Start
+from tests.setup import Setup
 
 
 @pytest.fixture(scope="function")
-def start():
-    Start()
+def setup():
+    Setup()
 
 
-def test_default_values(start):
+def test_default_values(setup):
     mng = Manager(
         download_dir=Data.DefaultValues.download_dir,
         genre=Data.DefaultValues.genre,
@@ -52,7 +52,7 @@ def test_default_values(start):
     assert CurrentValues.total_size == 0
 
 
-def test_default_types(start):
+def test_default_types(setup):
     mng = Manager(
         download_dir=Data.DefaultValues.download_dir,
         genre=Data.DefaultValues.genre,
