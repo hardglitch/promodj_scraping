@@ -23,19 +23,18 @@ class File:
                  message: pyqtBoundSignal,
                  file_info: pyqtBoundSignal
         ):
+        if not isinstance(self, File) or\
+           not link or\
+           not isinstance(link, str) or\
+           not isinstance(progress, pyqtBoundSignal | pyqtSignal) or\
+           not isinstance(message, pyqtBoundSignal | pyqtSignal) or \
+           not isinstance(file_info, pyqtBoundSignal | pyqtSignal):
+                debug.log(MESSAGES.Errors.NoLinkToDownload + f" in {stack()[0][3]}")
+                return
+
         self.progress = progress
         self.message = message
         self.file_info = file_info
-
-        if not link\
-                or not isinstance(link, str) \
-                or not isinstance(self.progress, pyqtBoundSignal) and not isinstance(self.progress, pyqtSignal) \
-                or not isinstance(self.message, pyqtBoundSignal) and not isinstance(self.message, pyqtSignal) \
-                or not isinstance(self.file_info, pyqtBoundSignal) and not isinstance(self.file_info, pyqtSignal):
-            debug.log(MESSAGES.Errors.NoLinkToDownload + f" in {stack()[0][3]}")
-            if debug.Switches.IS_GUI: self.message.emit(MESSAGES.Errors.NoLinkToDownload)
-            return
-
         self._link: str = link
         self._name: str = str(tools.clear_path(self._link.rsplit("/", 1)[-1]))
         self._path: Path = Path(CurrentValues.download_dir).joinpath(self._name)

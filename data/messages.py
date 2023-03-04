@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 @dataclass(frozen=True)
-class Messages:
+class __Messages:
 
     @dataclass(frozen=True)
     class __Errors:
@@ -47,4 +47,4 @@ class Messages:
     Searching: str = "searching"
     Analysis: str = "analysis"
 
-MESSAGES = Messages()
+MESSAGES = __Messages()

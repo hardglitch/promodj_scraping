@@ -23,17 +23,17 @@ class Link:
                  success: pyqtBoundSignal,
                  search: pyqtBoundSignal,
         ):
+        if not isinstance(self, Link) or \
+           not isinstance(success, pyqtBoundSignal | pyqtSignal) or \
+           not isinstance(message, pyqtBoundSignal | pyqtSignal) or \
+           not isinstance(search, pyqtBoundSignal | pyqtSignal):
+                debug.log(MESSAGES.Errors.NoLinkToDownload + f" in {stack()[0][3]}")
+                return
+
         self.message = message
         self.success = success
         self.search = search
         self._counter: int = 0
-
-        if not isinstance(self.success, pyqtBoundSignal) and not isinstance(self.success, pyqtSignal) \
-            or not isinstance(self.message, pyqtBoundSignal) and not isinstance(self.message, pyqtSignal) \
-            or not isinstance(self.search, pyqtBoundSignal) and not isinstance(self.search, pyqtSignal):
-                debug.log(MESSAGES.Errors.NoLinkToDownload + f" in {stack()[0][3]}")
-                if debug.Switches.IS_GUI: self.message.emit(MESSAGES.Errors.NoLinkToDownload)
-                return
 
 
     async def get_all_links(self) -> Optional[Set[str]]:
@@ -127,7 +127,7 @@ class Link:
             return debug.log(repr(TypeError(MESSAGES.Errors.LinkIsNotAStrType)) + f" in {stack()[0][3]}")
 
     async def _nano_task(self, content_length: int) -> None:
-        if isinstance(content_length, int):
+        if type(self) == Link or isinstance(content_length, int):
             CurrentValues.total_size += content_length if content_length else 0
             self._counter += 1
 
@@ -137,7 +137,7 @@ class Page:
     __slots__ = "_link"
 
     def __init__(self, number: int):
-        if not isinstance(number, int) or number <= 0:
+        if not isinstance(self, Page) or not isinstance(number, int) or number <= 0:
             debug.log(MESSAGES.Errors.SomethingWentWrong + f" in {stack()[0][3]}")
             return
         bitrate: str = "lossless" if CurrentValues.is_lossless else "high"

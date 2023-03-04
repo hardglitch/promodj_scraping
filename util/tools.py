@@ -47,7 +47,7 @@ def byte_dumb(cycles: int = 1) -> bytes:
 
 
 async def fuzzer(obj: Callable, params_range: int = 5) -> bool:
-    BASE_TYPES = (1, -1, 0, 0.1, range(10000), "s", string.printable)
+    BASE_TYPES = (1, -1, 0, 0.1, range(10000), "", " ", b"s", string.printable)
     LIST = list(BASE_TYPES)
     DICTS = (({x: y} for x in (*BASE_TYPES, LIST) if not isinstance(x, Iterable)) for y in (*BASE_TYPES, LIST))
     SPECIAL_CHARS = string.punctuation
@@ -65,5 +65,6 @@ async def fuzzer(obj: Callable, params_range: int = 5) -> bool:
                 if str(error).find("positional argument") < 0: raise error
             except ValueError as error:
                 if str(error).find("not enough values to unpack") < 0: raise error
-        await recursive_func(n=params_range)
+
+    await recursive_func(n=params_range)
     return True

@@ -8,17 +8,17 @@ from typing import Any, Callable, Optional
 from data.messages import MESSAGES
 
 
+@dataclass(slots=True, frozen=True)
+class __Constants:
+    LOG_FILE: str = "logging.log"
+
+Constants = __Constants()
+
 @dataclass(slots=True)
 class DebugParam:
     name: str
     value: bool
     fake_func: Optional[Callable] = None
-
-@dataclass(slots=True, frozen=True)
-class __Constants:
-    LOG_FILE = "logging.log"
-
-Constants = __Constants()
 
 @dataclass(slots=True)
 class __Switches:
@@ -39,9 +39,10 @@ Switches = __Switches()
 
 
 def log(message: str, error: Optional[Exception] = None, is_exit: bool = False) -> None:
-    assert isinstance(message, str)
-    assert isinstance(error, Exception | None)
-    assert isinstance(is_exit, bool)
+    if not isinstance(message, str) or not message or \
+       not isinstance(error, Exception | None) or \
+       not isinstance(is_exit, bool):
+            return None
     message = message[:1000]
     if Switches.IS_LOGGING:
         tm = strftime("%Y-%m-%d %H:%M:%S", gmtime())
@@ -55,6 +56,7 @@ def print_message(*args: Any, **kwargs: Any) -> None:
 
 
 def switch(debug_param: DebugParam) -> Any:
+    if not isinstance(debug_param, DebugParam): return None
     def wrapper(func: Callable):
         if iscoroutinefunction(func):
             @wraps(func)
@@ -75,10 +77,8 @@ def switch(debug_param: DebugParam) -> Any:
         return wrapped
     return wrapper
 
+
 def set_attribute_test(instance: Any) -> bool:
     try: setattr(instance, "new", 1)
-    except:
-        assert AttributeError
-        return True
-    else: raise MESSAGES.Errors.SecurityThreat
-
+    except (AttributeError, TypeError): return True
+    else: raise Exception(MESSAGES.Errors.SecurityThreat)
