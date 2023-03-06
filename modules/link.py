@@ -36,6 +36,7 @@ class Link:
         self._counter: int = 0
 
 
+    @debug.switch(debug.Switches.IS_GET_ALL_FILES)
     async def get_all_links(self) -> Optional[Set[str]]:
         #1. Get a raw link set
         page_number: int = 1

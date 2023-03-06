@@ -89,16 +89,16 @@ class TestLink:
         async def test_get_filtered_links_lossless(self) -> None:
             CurrentValues.is_lossless = True
             assert link._get_filtered_links(await TestLink._setup_resultset()) == {
-                fr"https://promodj.com/source/some1.flac",
-                fr"https://promodj.com/source/some2.wav",
-                fr"https://promodj.com/source/some22.aiff",
+                r"https://promodj.com/source/some1.flac",
+                r"https://promodj.com/source/some2.wav",
+                r"https://promodj.com/source/some22.aiff",
             }
 
         @pytest.mark.asyncio
         async def test_get_filtered_links_lossy(self) -> None:
             CurrentValues.is_lossless = True
             assert link._get_filtered_links(await TestLink._setup_resultset()) == {
-                fr"https://promodj.com/source/some3.mp3"
+                r"https://promodj.com/source/some3.mp3"
             }
 
         @pytest.mark.asyncio
@@ -138,9 +138,9 @@ class TestLink:
         CurrentValues.is_lossless = True
 
         assert await link.get_all_links() == {
-            fr"https://promodj.com/source/some1.flac",
-            fr"https://promodj.com/source/some2.wav",
-            fr"https://promodj.com/source/some22.aiff",
+            r"https://promodj.com/source/some1.flac",
+            r"https://promodj.com/source/some2.wav",
+            r"https://promodj.com/source/some22.aiff",
         }
 
     def _fake_worker(self) -> None:

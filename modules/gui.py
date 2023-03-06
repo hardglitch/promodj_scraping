@@ -279,7 +279,7 @@ class MainWindow(QMainWindow):
     @asyncSlot()
     async def set_actual_genres(self) -> None:
         async with ClientSession() as session:
-            tags_link = fr"https://promodj.com/music"
+            tags_link = r"https://promodj.com/music"
             async with session.get(tags_link) as response:
                 if response.status != 200:
                     self.lblMessage.setText(MESSAGES.Errors.UnableToConnect)
