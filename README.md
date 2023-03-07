@@ -6,16 +6,16 @@
 
 This App will give you the opportunity to download tracks/mixes/lives from this site in a convenient way.
 
-PromoDJ Scraper is completely portable. 
-It distributed in 2 forms: packed and unpacked.
+PromoDJ Scraper is completely portable and is distributed in 2 forms: packaged and unpacked.
 
-Packed - pyinstaller assembles all used files in one executable file.
+In the first case, PyInstaller assembles the all used files into a single executable.
 It is more convenient to use the App, but Its launch speed may be slower.
 
 The unpacked version solves this problem.
 
 -------------------------------------------
 Stack:
+<pre>
 - asyncio
 - PyQt6 + qasync (GUI)
 - aiofiles (IO)
@@ -23,19 +23,18 @@ Stack:
 - aiohttp (Web)
 - beautifulsoup4 + lxml (Parsing)
 
-
 - mypy
 - pyright
 - bandit
 
-
-- pytest
+- pytest + pytest-asyncio + pytest-xdist
 - allure
 
-
 - pyinstaller
+</pre>
 
-
-In test mode
+So far in test mode:
+<pre>
 - ruff (fastest Linter)
 - Docker (to automatically build the Linux version of the App)
+</pre>
