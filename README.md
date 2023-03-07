@@ -38,4 +38,4 @@ Stack:
 
 In test mode
 - ruff (fastest Linter)
-- Docker (to build the Linux version of the App)
+- Docker (to automatically build the Linux version of the App)
