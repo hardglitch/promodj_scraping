@@ -11,3 +11,23 @@ GUI created with PyQt6.
 
 PromoDJ Scraper is completely portable
 
+-------------------------------------------
+Stack:
+- asyncio
+- PyQt6 + qasync (GUI)
+- aiofiles (IO)
+- aiosqlite (SQLite)
+- aiohttp (Web)
+- beautifulsoup4 + lxml (Parsing)
+
+
+- mypy
+- pyright
+- bandit
+
+
+- pytest
+- allure
+
+
+- pyinstaller
