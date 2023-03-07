@@ -72,7 +72,7 @@ class MainWindow(QMainWindow):
         self.chbPeriod = QCheckBox(CONST.Inscriptions.Period, self)
         self.chbPeriod.setChecked(CONST.DefaultValues.is_period)
         self.chbPeriod.move(300, 40)
-        self.chbPeriod.toggled.connect(self.event_chb_period)
+        self.chbPeriod.toggled.connect(self.period)
         self.chbPeriod.setToolTip(MESSAGES.ToolTips.Period)
         self.chbPeriod.setFont(self._font)
 
@@ -86,7 +86,7 @@ class MainWindow(QMainWindow):
         self.chbFileHistory.setChecked(CONST.DefaultValues.is_file_history)
         self.chbFileHistory.move(30, 40)
         self.chbFileHistory.resize(100, 30)
-        self.chbFileHistory.toggled.connect(self.event_chb_file_history)
+        self.chbFileHistory.toggled.connect(self.file_history)
         self.chbFileHistory.setToolTip(MESSAGES.ToolTips.FileHistory)
         self.chbFileHistory.setFont(self._font)
 
@@ -255,13 +255,13 @@ class MainWindow(QMainWindow):
     def file_info(self, total_downloaded: int = 0, total_files: int = 0) -> None:
         self.lblFiles.setText(f"{total_downloaded}/{total_files}")
 
-    def event_chb_period(self) -> None:
+    def period(self) -> None:
         if self.chbPeriod.isChecked():
             self.lblQuantity.setText(CONST.Inscriptions.LastDays)
         else:
             self.lblQuantity.setText(CONST.Inscriptions.Files)
 
-    def event_chb_file_history(self) -> None:
+    def file_history(self) -> None:
         self.chbRewriteFiles.setEnabled(not self.chbFileHistory.isChecked())
 
     def save_to(self) -> None:
