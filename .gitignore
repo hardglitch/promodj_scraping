@@ -7,7 +7,6 @@
 !/tests/*.py
 !/tests/pytest.ini
 !/tests/testpage.html
-!/tests/pytest.ini
 !/util
 !/util/*.py
 !/util/settings
@@ -19,10 +18,7 @@
 !requirements.txt
 !LICENSE.md
 !README.md
-!_bandit_run.bat
 !_build_app_win.bat
 !_build_app_win - UNPACKED.bat
-!_mypy_run.bat
-!_pyright_run.bat
 !pyrightconfig.json
 !.gitignore

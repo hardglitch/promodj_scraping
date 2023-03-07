@@ -5,10 +5,9 @@ import sys
 import time
 from functools import wraps
 from inspect import iscoroutinefunction
-from typing import Any, Callable, Dict, Iterable
+from typing import Any, Callable, Dict, Iterable, Tuple
 
-
-BASE_TYPES = (sys.maxsize, -1, 0, 0.1, range(10000), "", " ", b"s", string.printable)
+BASE_TYPES: Tuple = (sys.maxsize, -1, 0, 0.1, range(10000), "", " ", b"s", string.printable)
 LIST = list(BASE_TYPES)
 DICTS = (({x: y} for x in (*BASE_TYPES, LIST) if not isinstance(x, Iterable)) for y in (*BASE_TYPES, LIST))
 SPECIAL_CHARS = string.punctuation

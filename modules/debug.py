@@ -5,8 +5,6 @@ from inspect import iscoroutinefunction
 from time import gmtime, strftime
 from typing import Any, Callable, Optional
 
-from data.messages import MESSAGES
-
 
 @dataclass(slots=True, frozen=True)
 class __Constants:
@@ -35,6 +33,10 @@ class __Switches:
     # -- link.py --
     IS_PARSE = DebugParam("IS_PARSE", True)
     IS_WORKER = DebugParam("IS_WORKER", True)
+
+    # -- manager.py --
+    IS_GET_ALL_FILES = DebugParam("IS_GET_ALL_FILES", True)
+    IS_BALANCER = DebugParam("IS_BALANCER", True)
 
 Switches = __Switches()
 
@@ -82,4 +84,3 @@ def switch(debug_param: DebugParam) -> Any:
 def set_attribute_test(instance: Any) -> bool:
     try: setattr(instance, "new", 1)
     except (AttributeError, TypeError): return True
-    else: raise Exception(MESSAGES.Errors.SecurityThreat)

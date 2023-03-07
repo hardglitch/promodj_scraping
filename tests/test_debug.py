@@ -1,26 +1,36 @@
+import allure
 import pytest
 
 from modules import debug
 from util import tools
 
 
-def test_set_attribute_debug_param() -> None:
-    assert debug.set_attribute_test(debug.Switches.IS_DOWNLOAD)
+@allure.epic("Bruteforce all methods this module")
+class TestDebug:
 
-def test_set_attribute_constants() -> None:
-    assert debug.set_attribute_test(debug.Constants)
+    @allure.description("Bruteforce instance of DebugParam subclass")
+    def test_set_attribute_debug_param(self) -> None:
+        assert debug.set_attribute_test(debug.Switches.IS_DOWNLOAD)
 
-def test_set_attribute_switches() -> None:
-    assert debug.set_attribute_test(debug.Switches)
+    @allure.description("Bruteforce instance of Constants subclass")
+    def test_set_attribute_constants(self) -> None:
+        assert debug.set_attribute_test(debug.Constants)
 
-@pytest.mark.asyncio
-async def test_log_bruteforce():
-    assert await tools.fuzzer(debug.log, hard_mode=debug.Switches.IS_HARD_MODE)
+    @allure.description("Bruteforce instance of Switches class")
+    def test_set_attribute_switches(self) -> None:
+        assert debug.set_attribute_test(debug.Switches)
 
-@pytest.mark.asyncio
-async def test_switch_bruteforce():
-    assert await tools.fuzzer(debug.switch, hard_mode=debug.Switches.IS_HARD_MODE)
+    @allure.description("Bruteforce Debug method")
+    @pytest.mark.asyncio
+    async def test_log_bruteforce(self):
+        assert await tools.fuzzer(debug.log, hard_mode=debug.Switches.IS_HARD_MODE)
 
-@pytest.mark.asyncio
-async def test_set_attribute_test_bruteforce():
-    assert await tools.fuzzer(debug.set_attribute_test, hard_mode=debug.Switches.IS_HARD_MODE)
+    @allure.description("Bruteforce Debug method")
+    @pytest.mark.asyncio
+    async def test_switch_bruteforce(self):
+        assert await tools.fuzzer(debug.switch, hard_mode=debug.Switches.IS_HARD_MODE)
+
+    @allure.description("Bruteforce Debug method")
+    @pytest.mark.asyncio
+    async def test_set_attribute_test_bruteforce(self):
+        assert await tools.fuzzer(debug.set_attribute_test, hard_mode=debug.Switches.IS_HARD_MODE)

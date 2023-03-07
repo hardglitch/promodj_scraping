@@ -63,28 +63,27 @@ class Manager(QMainWindow):
     async def _get_files(self) -> None:
         if not CurrentValues.session:
             debug.log(MESSAGES.Errors.SomethingWentWrong + f" in {stack()[0][3]}")
-            return self._message.emit(MESSAGES.Errors.SomethingWentWrong)
+            return self._message.emit(MESSAGES.Errors.SomethingWentWrong) if debug.Switches.IS_GUI else None
 
         async with CurrentValues.session:
             if CurrentValues.is_file_history: await db.create_history_db()
 
             link: Link = Link(message=self.progress[int], success=self.success[int], search=self.search[int, int])
             all_links: Optional[Set[str]] = await link.get_all_links()
-            if not all_links: return self._success.emit(0)
-            # assert isinstance(all_links, Set)
-            # assert all(map(lambda x: True if type(x)==str else False, all_links))
+            if not all_links: return self._success.emit(0) if debug.Switches.IS_GUI else None
 
             sem = Semaphore(CurrentValues.threads)
-            tasks: List[Task] = [asyncio.ensure_future(self._worker(_link, sem)) for _link in all_links]
+            tasks: List[Task] = [asyncio.ensure_future(self._balancer(_link, sem)) for _link in all_links]
             CurrentValues.total_files = len(tasks)
-            self._search.emit(0, 0)
+            if debug.Switches.IS_GUI: self._search.emit(0, 0)
             await asyncio.gather(*tasks)
 
-            if tasks: self._success.emit(1)
-            else: self._success.emit(0)
+            if debug.Switches.IS_GUI:
+                self._success.emit(1) if tasks else self._success.emit(0)
 
 
-    async def _worker(self, link: str, sem: asyncio.Semaphore) -> None:
+    @debug.switch(debug.Switches.IS_BALANCER)
+    async def _balancer(self, link: str, sem: asyncio.Semaphore) -> None:
         async with sem:
             file: File = File(link=link, progress=self.progress[int], message=self.message[str], file_info=self.file_info[int, int])
             await file.get_file()
