@@ -1,6 +1,6 @@
 **PromoDJ Music Downloader / PromoDJ Scraper**
 
-![1](https://user-images.githubusercontent.com/49201692/223818140-a2c7b50f-590f-4b8d-bc01-32b6b0f96b87.png)
+![1](https://user-images.githubusercontent.com/49201692/223825480-5e86b22a-dcfb-4c3c-bfc1-91249cb16f4c.png)
 
 [PromoDJ.com](https://promodj.com) is The Great Site for (electronic) music lovers like me.
 
