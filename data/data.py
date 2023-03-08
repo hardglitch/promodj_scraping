@@ -15,7 +15,7 @@ class Data:
     @dataclass(frozen=True, slots=True)
     class __DefaultValues:
         FORMS = Literal["mixes", "tracks", "lives"]
-        LANGUAGES = Literal["en", "ru"]
+        LANGUAGES = Literal["en", "ru", "uk"]
 
         language: LANGUAGES = "en"
         download_dir: str = "Downloaded Music"

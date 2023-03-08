@@ -40,7 +40,7 @@ class __Dictionary:
                         self.UnableToConnect: str = "Unable to connect"
                         self.SomethingWentWrong: str = "Something went wrong"
                         self.NoDate: str = "No Date"
-                        self.NoLinkToWrite: str = "No Link to write"
+                        self.NoLinkToWrite: str = "No Link to write to file"
                         self.UnableToDownloadAFile: str = "Unable to download a file"
                         self.WrongPath: str = "Wrong Path"
                         self.WrongFileName: str = "Wrong File Name"
@@ -48,7 +48,7 @@ class __Dictionary:
                         self.SecurityThreat: str = "Security Threat"
 
                     case "ru":
-                        self.NoSuitableParameter: str = "Нет подходящих параметров"
+                        self.NoSuitableParameter: str = "Нет подходящего параметра"
                         self.NoLinksToFiltering: str = "Нет ссылок для фильтрации"
                         self.UnableToDownload: str = "Невозможно скачать"
                         self.NoLinkToExtractAName: str = "Нет ссылки для извлечения имени"
@@ -57,12 +57,29 @@ class __Dictionary:
                         self.UnableToConnect: str = "Невозможно подключиться"
                         self.SomethingWentWrong: str = "Что-то пошло не так"
                         self.NoDate: str = "Нет даты"
-                        self.NoLinkToWrite: str = "Нет ссылки для записи"
+                        self.NoLinkToWrite: str = "Нет ссылки для записи в файл"
                         self.UnableToDownloadAFile: str = "Невозможно скачать файл"
                         self.WrongPath: str = "Неправильный путь"
                         self.WrongFileName: str = "Неправильное имя файла"
                         self.LinkIsNotAStrType: str = "Ссылка не типа 'str'"
                         self.SecurityThreat: str = "Угроза безопасности"
+
+                    case "uk":
+                        self.NoSuitableParameter: str = "Немає відповідного параметра"
+                        self.NoLinksToFiltering: str = "Немає посилань на фільтрацію"
+                        self.UnableToDownload: str = "Неможливо завантажити"
+                        self.NoLinkToExtractAName: str = "Немає посилання для отримання імені"
+                        self.NoLinkToDownload: str = "Немає посилання для завантаження"
+                        self.NoLinksToDownload: str = "Немає посилань для завантаження"
+                        self.UnableToConnect: str = "Не може підключитися"
+                        self.SomethingWentWrong: str = "Щось пішло не так"
+                        self.NoDate: str = "Немає дати"
+                        self.NoLinkToWrite: str = "Немає посилання для запису у файл"
+                        self.UnableToDownloadAFile: str = "Неможливо завантажити файл"
+                        self.WrongPath: str = "Неправильний шлях"
+                        self.WrongFileName: str = "Неправильна назва файлу"
+                        self.LinkIsNotAStrType: str = "Посилання не має типу 'str'"
+                        self.SecurityThreat: str = "Загроза безпеці"
 
 
         @dataclass(slots=True)
@@ -93,7 +110,7 @@ class __Dictionary:
 
                     case "ru":
                         self.Genre = "Жанр"
-                        self.Quantity = "Количество файлов (Если Период выключен)\n" \
+                        self.Quantity = "Количество файлов (если Период выключен)\n" \
                                         "или дней (если Период включен)"
                         self.Threads = "Количество одновременно скачиваемых файлов"
                         self.Period = "Если включено, искать все файлы за указанное количество дней\n" \
@@ -101,9 +118,24 @@ class __Dictionary:
                         self.Lossless = "Если включено, искать файлы со следующими расширениями: wav, flac, aiff\n" \
                                         "Если выключено, искать только mp3"
                         self.FileHistory = "Включить/Выключить историю скачанных файлов"
-                        self.RewriteFiles = "Этот чекбокс работает только если История Файлов ВЫКЛЮЧЕНА!\n" \
-                                            "Если включено, переписывать существующие файлы при загрузке\n" \
+                        self.RewriteFiles = "Этот флажок работает только если История Файлов ВЫКЛЮЧЕНА!\n" \
+                                            "Если включено, переписывать существующие файлы при скачивании\n" \
                                             "Если выключено, всегда создавать новые файлы"
+
+                    case "uk":
+                        self.Genre = "Жанр"
+                        self.Quantity = "Кількість файлів (якщо Крапка вимкнено)\n" \
+                                        "чи днів (якщо Крапка увімкнено)"
+                        self.Threads = "Кількість файлів, що одночасно скачуються"
+                        self.Period = "Якщо увімкнено, шукати всі файли за вказану кількість днів\n" \
+                                      "Якщо выключено, шукати останні файли"
+                        self.Lossless = "Якщо увімкнено, шукати файли з такими розширеннями: wav, flac, aiff\n" \
+                                        "Якщо выключено, шукати тільки mp3"
+                        self.FileHistory = "Увімкнути/Вимкнути історію завантажених файлів"
+                        self.RewriteFiles = "Цей прапорець працює, лише якщо Iсторія файлів ВИМКНЕНО!\n" \
+                                            "Якщо увімкнено, переписувати існуючі файли під час скачування\n" \
+                                            "Якщо выключено, завжди створювати нові файли"
+
 
 
         Errors = __Errors()
@@ -154,7 +186,7 @@ class __Dictionary:
             match lang:
                 case "en":
                     self.PromoDJMusicDownloader = "PromoDJ Music Downloader"
-                    self.PromoDJMusicDownloaderExtended = self.PromoDJMusicDownloader + " --- Last download was _ days ago"
+                    self.PromoDJMusicDownloaderExtended = self.PromoDJMusicDownloader + " - Last download was _ days ago"
                     self.Files = "files"
                     self.Period = "Period"
                     self.Lossless = "Lossless"
@@ -169,7 +201,7 @@ class __Dictionary:
 
                 case "ru":
                     self.PromoDJMusicDownloader = "PromoDJ Загрузчик"
-                    self.PromoDJMusicDownloaderExtended = self.PromoDJMusicDownloader + " --- Последняя загрузка была _ дней назад"
+                    self.PromoDJMusicDownloaderExtended = self.PromoDJMusicDownloader + " - Последняя загрузка была _ дней назад"
                     self.Files = "файлов"
                     self.Period = "Период"
                     self.Lossless = "Без потерь"
@@ -181,6 +213,21 @@ class __Dictionary:
                     self.Exit = "Выход"
                     self.Cancel = "Отмена"
                     self.LastDays = "дней"
+
+                case "uk":
+                    self.PromoDJMusicDownloader = "PromoDJ Завантажувач"
+                    self.PromoDJMusicDownloaderExtended = self.PromoDJMusicDownloader + " - Останнє завантаження було _ днів тому"
+                    self.Files = "файлів"
+                    self.Period = "Крапка"
+                    self.Lossless = "Без втрат"
+                    self.FileHistory = "Iсторія"
+                    self.RewriteFiles = "Переписувати"
+                    self.Threads = "нитки"
+                    self.SaveTo = "Зберегти у"
+                    self.Download = "Завантажити"
+                    self.Exit = "Вихід"
+                    self.Cancel = "Відміна"
+                    self.LastDays = "днiв"
 
 
     MESSAGES = __Messages()
