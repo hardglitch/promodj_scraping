@@ -32,7 +32,8 @@ class MainWindow(QMainWindow):
         [self._genres.update({value: CONST.DefaultValues.genres[n + 1]})
                 for n, value in enumerate(CONST.DefaultValues.genres) if n % 2 == 0]
 
-        setup_theme(theme="auto", additional_qss="QToolTip {color: black;}")
+        self._theme = "dark"
+        setup_theme(theme=self._theme, additional_qss="QToolTip {color: black;}")
         self.setWindowIcon(QIcon("logo.ico"))
 
         self.setWindowTitle(Dictionary.INSCRIPTIONS.PromoDJMusicDownloader)
@@ -164,12 +165,20 @@ class MainWindow(QMainWindow):
 
         self.cmbLanguage = QComboBox(self)
         self.cmbLanguage.resize(50, 20)
-        self.cmbLanguage.move(470, 165)
+        self.cmbLanguage.move(474, 168)
         self.cmbLanguage.setDuplicatesEnabled(False)
         self.cmbLanguage.addItems(get_args(CONST.DefaultValues.LANGUAGES))
         self.cmbLanguage.setCurrentText(str(CONST.DefaultValues.language))
         self.cmbLanguage.currentTextChanged.connect(self.change_language)
         self.cmbLanguage.setFont(self._font)
+
+        self.btnTheme = QPushButton(self)
+        self.btnTheme.setText("☼")
+        self.btnTheme.setGeometry(442, 167, 28, 28)
+        self.btnTheme.setToolTip(Dictionary.INSCRIPTIONS.SaveTo)
+        self.btnTheme.clicked.connect(self.toggle_theme)
+        self.btnTheme.setCheckable(True)
+        self.btnTheme.setFont(QFont("Arial", 10))
 
     @asyncSlot()
     async def download_files(self) -> None:
@@ -303,6 +312,10 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(Dictionary.INSCRIPTIONS.PromoDJMusicDownloaderExtended.replace("_",
                             str(int(abs((int(time()) - self._last_launch) / (3600 * 24))))))
 
+    def toggle_theme(self) -> None:
+        self._theme = "light" if self._theme == "dark" else "dark"
+        setup_theme(theme=self._theme, additional_qss="QToolTip {color: black;}")
+        self.btnTheme.setChecked(False)
 
     def app_exit(self) -> None:
         QApplication.instance().quit()
