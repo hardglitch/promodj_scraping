@@ -84,3 +84,4 @@ def switch(debug_param: DebugParam) -> Any:
 def set_attribute_test(instance: Any) -> bool:
     try: setattr(instance, "new", 1)
     except (AttributeError, TypeError): return True
+    else: return False

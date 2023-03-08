@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import QMainWindow
 from aiohttp import ClientSession
 
 from data.data import CONST
-from data.messages import MESSAGES
+from data.dictionary import Dictionary
 from modules import db, debug
 from modules.file import File
 from modules.link import Link
@@ -62,8 +62,8 @@ class Manager(QMainWindow):
 
     async def _get_files(self) -> None:
         if not CurrentValues.session:
-            debug.log(MESSAGES.Errors.SomethingWentWrong + f" in {stack()[0][3]}")
-            return self._message.emit(MESSAGES.Errors.SomethingWentWrong) if debug.Switches.IS_GUI else None
+            debug.log(Dictionary.MESSAGES.Errors.SomethingWentWrong + f" in {stack()[0][3]}")
+            return self._message.emit(Dictionary.MESSAGES.Errors.SomethingWentWrong) if debug.Switches.IS_GUI else None
 
         async with CurrentValues.session:
             if CurrentValues.is_file_history: await db.create_history_db()
