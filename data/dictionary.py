@@ -167,7 +167,7 @@ class __Dictionary:
 
 
 
-        def set_new_language(self, lang: CONST.DefaultValues.LANGUAGES):
+        def set_new_language(self, lang: CONST.DefaultValues.LANGUAGES) -> None:
             self.ToolTips = self.__ToolTips(lang)
             self.Errors = self.__Errors(lang)
 
@@ -239,7 +239,7 @@ class __Dictionary:
     MESSAGES = __Messages()
     INSCRIPTIONS = __Inscriptions()
 
-    def set_new_language(self, lang: CONST.DefaultValues.LANGUAGES = CONST.DefaultValues.language):
+    def set_new_language(self, lang: CONST.DefaultValues.LANGUAGES = CONST.DefaultValues.language) -> None:
         self.MESSAGES = self.__Messages(lang)
         self.MESSAGES.set_new_language(lang)
         self.INSCRIPTIONS = self.__Inscriptions(lang)
