@@ -1,6 +1,6 @@
 **PromoDJ Music Downloader / PromoDJ Scraper**
 
-![1](https://user-images.githubusercontent.com/49201692/220620326-60fff0c1-a6cb-460e-a788-f86c69b52364.png)
+![1](https://user-images.githubusercontent.com/49201692/223818140-a2c7b50f-590f-4b8d-bc01-32b6b0f96b87.png)
 
 [PromoDJ.com](https://promodj.com) is The Great Site for (electronic) music lovers like me.
 
@@ -12,6 +12,8 @@ In the first case, PyInstaller assembles the all used files into a single execut
 It is more convenient to use the App, but Its launch speed may be slower.
 
 The unpacked version solves this problem.
+
+![2](https://user-images.githubusercontent.com/49201692/223827411-c16e1703-4eb0-46a8-bf1c-3ce0bd5ebb96.png)
 
 -------------------------------------------
 Stack:
