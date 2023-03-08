@@ -309,25 +309,8 @@ class Data:
         RewriteFiles: str = "RewriteFiles"
         FileHistory: str = "FileHistory"
         LastDownload: str = "LastDownload"
+        Language: str = "Language"
 
     Parameters = __Parameters()
-
-    @dataclass(frozen=True, slots=True)
-    class __Inscriptions:
-        PromoDJMusicDownloader: str = "PromoDJ Music Downloader"
-        PromoDJMusicDownloaderExtended: str = PromoDJMusicDownloader + " --- Last download was _ days ago"
-        Files: str = "files"
-        Period: str = "Period"
-        Lossless: str = "Lossless"
-        FileHistory: str = "File History"
-        RewriteFiles: str = "Overwrite Files"
-        Threads: str = "threads"
-        SaveTo: str = "Save to"
-        Download: str = "Download"
-        Exit: str = "Exit"
-        Cancel: str = "Cancel"
-        LastDays: str = "last days"
-
-    Inscriptions = __Inscriptions()
 
 CONST = Data()

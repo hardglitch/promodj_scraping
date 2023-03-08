@@ -1,8 +1,8 @@
-PyQt6==6.4.2;python_version=="3.11"
-aiohttp==3.8.4;python_version=="3.11"
-qasync==0.23.0;python_version=="3.11"
-aiofiles==23.1.0;python_version=="3.11"
-aiosqlite==0.18.0;python_version=="3.11"
-beautifulsoup4==4.11.2;python_version=="3.11"
-pyqtdarktheme==2.1.0;python_version=="3.11"
-lxml==4.9.2;python_version=="3.11"
+PyQt6==6.4.2
+aiohttp==3.8.4
+qasync==0.23.0
+aiofiles==23.1.0
+aiosqlite==0.18.0
+beautifulsoup4==4.11.2
+pyqtdarktheme==2.1.0
+lxml==4.9.2

@@ -7,7 +7,7 @@ from aiofiles import open
 from aiohttp import StreamReader
 
 from data.data import CONST
-from data.messages import MESSAGES
+from data.dictionary import Dictionary
 from modules import db, debug
 from modules.shared import CurrentValues
 from util import tools
@@ -29,7 +29,7 @@ class File:
            not isinstance(progress, pyqtBoundSignal | pyqtSignal) or\
            not isinstance(message, pyqtBoundSignal | pyqtSignal) or \
            not isinstance(file_info, pyqtBoundSignal | pyqtSignal):
-                debug.log(MESSAGES.Errors.NoLinkToDownload + f" in {stack()[0][3]}")
+                debug.log(Dictionary.MESSAGES.Errors.NoLinkToDownload + f" in {stack()[0][3]}")
                 return
 
         self.progress = progress
@@ -66,18 +66,18 @@ class File:
             async with CurrentValues.session.get(self._link, timeout=None,
                                                  headers={"Connection": "keep-alive"}) as response:
                 if response.status != 200:
-                    debug.log(MESSAGES.Errors.SomethingWentWrong + f" in {stack()[0][3]}. {response.status=}")
+                    debug.log(Dictionary.MESSAGES.Errors.SomethingWentWrong + f" in {stack()[0][3]}. {response.status=}")
                     return False
                 if await self._write_file(response.content):
                     debug.print_message(f"File save as {self._path}")
                     return True
                 else:
-                    debug.log(MESSAGES.Errors.UnableToDownloadAFile + f" in {stack()[0][3]}")
+                    debug.log(Dictionary.MESSAGES.Errors.UnableToDownloadAFile + f" in {stack()[0][3]}")
                     return False
 
         except Exception as error:
-            debug.log(MESSAGES.Errors.UnableToDownloadAFile + f" in {stack()[0][3]}", error)
-            if debug.Switches.IS_GUI: self.message.emit(MESSAGES.Errors.UnableToDownloadAFile)
+            debug.log(Dictionary.MESSAGES.Errors.UnableToDownloadAFile + f" in {stack()[0][3]}", error)
+            if debug.Switches.IS_GUI: self.message.emit(Dictionary.MESSAGES.Errors.UnableToDownloadAFile)
             return False
 
 

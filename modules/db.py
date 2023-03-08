@@ -4,7 +4,7 @@ from typing import Set
 import aiosqlite
 
 from data.data import CONST
-from data.messages import MESSAGES
+from data.dictionary import Dictionary
 from modules import debug
 
 
@@ -18,8 +18,8 @@ async def create_history_db() -> None:
 
 
 async def write_file_history(link: str, date: int) -> None:
-    if not link or not isinstance(link, str): return debug.log(MESSAGES.Errors.NoLinkToWrite)
-    if not date or not isinstance(date, int): return debug.log(MESSAGES.Errors.NoDate)
+    if not link or not isinstance(link, str): return debug.log(Dictionary.MESSAGES.Errors.NoLinkToWrite)
+    if not date or not isinstance(date, int): return debug.log(Dictionary.MESSAGES.Errors.NoDate)
 
     try:
         async with aiosqlite.connect(database=CONST.DB_NAME) as db_connection:
@@ -34,7 +34,7 @@ async def filter_by_history(found_links: Set[str]) -> Set[str]:
     if not found_links or\
        not isinstance(found_links, Set) or\
        not all(map(lambda x: True if type(x)==str else False, found_links)):
-            debug.log(MESSAGES.Errors.NoLinksToFiltering)
+            debug.log(Dictionary.MESSAGES.Errors.NoLinksToFiltering)
             return set()
     try:
         async with aiosqlite.connect(CONST.DB_NAME) as db_connection:

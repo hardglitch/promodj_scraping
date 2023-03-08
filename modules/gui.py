@@ -13,7 +13,7 @@ from qasync import asyncSlot
 from qdarktheme import setup_theme
 
 from data.data import CONST
-from data.messages import MESSAGES
+from data.dictionary import Dictionary
 from modules import debug
 from modules.manager import Manager
 from util.settings.settings import Parameter, Settings
@@ -35,11 +35,11 @@ class MainWindow(QMainWindow):
         setup_theme(theme="auto", additional_qss="QToolTip {color: black;}")
         self.setWindowIcon(QIcon("logo.ico"))
 
-        self.setWindowTitle(CONST.Inscriptions.PromoDJMusicDownloader)
+        self.setWindowTitle(Dictionary.INSCRIPTIONS.PromoDJMusicDownloader)
         self.setFixedSize(530, 200)
 
         self.cmbGenre = QComboBox(self)
-        self.cmbGenre.setToolTip(MESSAGES.ToolTips.Genre)
+        self.cmbGenre.setToolTip(Dictionary.MESSAGES.ToolTips.Genre)
         self.cmbGenre.resize(220, 24)
         self.cmbGenre.move(10, 10)
         self.cmbGenre.setDuplicatesEnabled(False)
@@ -62,40 +62,40 @@ class MainWindow(QMainWindow):
         self.cmbQuantity.addItems([str(i) for i in range(1,11)])
         self.cmbQuantity.addItems(["20", "30", "40", "50", "100"])
         self.cmbQuantity.setCurrentText(str(CONST.DefaultValues.quantity))
-        self.cmbQuantity.setToolTip(MESSAGES.ToolTips.Quantity)
+        self.cmbQuantity.setToolTip(Dictionary.MESSAGES.ToolTips.Quantity)
         self.cmbQuantity.setFont(self._font)
 
-        self.lblQuantity = QLabel(CONST.Inscriptions.Files, self)
+        self.lblQuantity = QLabel(Dictionary.INSCRIPTIONS.Files, self)
         self.lblQuantity.move(360, 10)
         self.lblQuantity.setFont(self._font)
 
-        self.chbPeriod = QCheckBox(CONST.Inscriptions.Period, self)
+        self.chbPeriod = QCheckBox(Dictionary.INSCRIPTIONS.Period, self)
         self.chbPeriod.setChecked(CONST.DefaultValues.is_period)
         self.chbPeriod.move(300, 40)
         self.chbPeriod.toggled.connect(self.period)
-        self.chbPeriod.setToolTip(MESSAGES.ToolTips.Period)
+        self.chbPeriod.setToolTip(Dictionary.MESSAGES.ToolTips.Period)
         self.chbPeriod.setFont(self._font)
 
-        self.chbFormat = QCheckBox(CONST.Inscriptions.Lossless, self)
+        self.chbFormat = QCheckBox(Dictionary.INSCRIPTIONS.Lossless, self)
         self.chbFormat.setChecked(True)
         self.chbFormat.move(410, 40)
-        self.chbFormat.setToolTip(MESSAGES.ToolTips.Lossless)
+        self.chbFormat.setToolTip(Dictionary.MESSAGES.ToolTips.Lossless)
         self.chbFormat.setFont(self._font)
 
-        self.chbFileHistory = QCheckBox(CONST.Inscriptions.FileHistory, self)
+        self.chbFileHistory = QCheckBox(Dictionary.INSCRIPTIONS.FileHistory, self)
         self.chbFileHistory.setChecked(CONST.DefaultValues.is_file_history)
         self.chbFileHistory.move(30, 40)
         self.chbFileHistory.resize(100, 30)
         self.chbFileHistory.toggled.connect(self.file_history)
-        self.chbFileHistory.setToolTip(MESSAGES.ToolTips.FileHistory)
+        self.chbFileHistory.setToolTip(Dictionary.MESSAGES.ToolTips.FileHistory)
         self.chbFileHistory.setFont(self._font)
 
-        self.chbRewriteFiles = QCheckBox(CONST.Inscriptions.RewriteFiles, self)
+        self.chbRewriteFiles = QCheckBox(Dictionary.INSCRIPTIONS.RewriteFiles, self)
         self.chbRewriteFiles.move(150, 40)
         self.chbRewriteFiles.resize(130, 30)
         self.chbRewriteFiles.setEnabled(not self.chbFileHistory.isChecked())
         self.chbRewriteFiles.setChecked(not CONST.DefaultValues.is_file_history)
-        self.chbRewriteFiles.setToolTip(MESSAGES.ToolTips.RewriteFiles)
+        self.chbRewriteFiles.setToolTip(Dictionary.MESSAGES.ToolTips.RewriteFiles)
         self.chbRewriteFiles.setFont(self._font)
 
         self.cmbThreads = QComboBox(self)
@@ -103,10 +103,10 @@ class MainWindow(QMainWindow):
         self.cmbThreads.move(433, 10)
         [self.cmbThreads.addItem(str(i), i) for i in range(1, CONST.MaxValues.threads + 1)]
         self.cmbThreads.setCurrentText(str(CONST.DefaultValues.threads))
-        self.cmbThreads.setToolTip(MESSAGES.ToolTips.Threads)
+        self.cmbThreads.setToolTip(Dictionary.MESSAGES.ToolTips.Threads)
         self.cmbThreads.setFont(self._font)
 
-        self.lblThreads = QLabel(CONST.Inscriptions.Threads, self)
+        self.lblThreads = QLabel(Dictionary.INSCRIPTIONS.Threads, self)
         self.lblThreads.move(475, 10)
         self.lblThreads.setFont(self._font)
 
@@ -116,7 +116,7 @@ class MainWindow(QMainWindow):
         self.btnSaveTo.setIcon(save_icon)
         self.btnSaveTo.setIconSize(QSize(24, 24))
         self.btnSaveTo.setGeometry(10, 85, 24, 24)
-        self.btnSaveTo.setToolTip(CONST.Inscriptions.SaveTo)
+        self.btnSaveTo.setToolTip(Dictionary.INSCRIPTIONS.SaveTo)
         self.btnSaveTo.setCheckable(True)
         self.btnSaveTo.clicked.connect(self.save_to)
 
@@ -126,12 +126,12 @@ class MainWindow(QMainWindow):
         self.lblSaveTo.move(40, 85)
         self.lblSaveTo.setFont(self._font)
 
-        self.btnDownload = QPushButton(CONST.Inscriptions.Download, self)
+        self.btnDownload = QPushButton(Dictionary.INSCRIPTIONS.Download, self)
         self.btnDownload.move(270, 160)
         self.btnDownload.clicked.connect(self.download_files)
         self.btnDownload.setFont(self._font)
 
-        self.btnExit = QPushButton(CONST.Inscriptions.Exit, self)
+        self.btnExit = QPushButton(Dictionary.INSCRIPTIONS.Exit, self)
         self.btnExit.move(160, 160)
         self.btnExit.clicked.connect(self.app_exit)
         self.btnExit.setFont(self._font)
@@ -162,6 +162,15 @@ class MainWindow(QMainWindow):
         self.lblAuthor.move(40, 175)
         self.lblAuthor.setToolTip("https://github.com/hardglitch/promodj_scraping")
 
+        self.cmbLanguage = QComboBox(self)
+        self.cmbLanguage.resize(50, 20)
+        self.cmbLanguage.move(470, 165)
+        self.cmbLanguage.setDuplicatesEnabled(False)
+        self.cmbLanguage.addItems(get_args(CONST.DefaultValues.LANGUAGES))
+        self.cmbLanguage.setCurrentText(str(CONST.DefaultValues.language))
+        self.cmbLanguage.currentTextChanged.connect(self.change_language)
+        self.cmbLanguage.setFont(self._font)
+
     @asyncSlot()
     async def download_files(self) -> None:
         try:
@@ -171,12 +180,12 @@ class MainWindow(QMainWindow):
 
             if self._music:
                 self._music.cancel_downloading()
-                self.btnDownload.setText(CONST.Inscriptions.Download)
+                self.btnDownload.setText(Dictionary.INSCRIPTIONS.Download)
                 self._music = None
                 return
 
             self.progBar.setValue(0)
-            self.btnDownload.setText(CONST.Inscriptions.Cancel)
+            self.btnDownload.setText(Dictionary.INSCRIPTIONS.Cancel)
 
             quantity: int = int(self.cmbQuantity.currentText()) \
                 if self.cmbQuantity.currentText().isnumeric() \
@@ -214,7 +223,8 @@ class MainWindow(QMainWindow):
                 Parameter(CONST.Parameters.RewriteFiles, str(int(self.chbRewriteFiles.isChecked()))),
                 Parameter(CONST.Parameters.FileHistory, str(int(self.chbFileHistory.isChecked()))),
                 Parameter(CONST.Parameters.Quantity, self.cmbQuantity.currentText()),
-                Parameter(CONST.Parameters.Threads, self.cmbThreads.currentText())
+                Parameter(CONST.Parameters.Threads, self.cmbThreads.currentText()),
+                Parameter(CONST.Parameters.Language, self.cmbLanguage.currentText())
             )
 
         except Exception as error:
@@ -225,11 +235,11 @@ class MainWindow(QMainWindow):
         self.progBar.setVisible(False)
         self.lblFiles.setText("")
 
-        if value == 1: self.lblMessage.setText(MESSAGES.AllFilesDownloaded)
-        else: self.lblMessage.setText(MESSAGES.MatchingFilesNotFound)
+        if value == 1: self.lblMessage.setText(Dictionary.MESSAGES.AllFilesDownloaded)
+        else: self.lblMessage.setText(Dictionary.MESSAGES.MatchingFilesNotFound)
 
         if self._music:
-            self.btnDownload.setText(CONST.Inscriptions.Download)
+            self.btnDownload.setText(Dictionary.INSCRIPTIONS.Download)
             self.btnDownload.setChecked(False)
             self._music.cancel_downloading()
             self._music = None
@@ -237,9 +247,9 @@ class MainWindow(QMainWindow):
     def search(self, value: int = 0, mode: int = 0) -> None:
         if self.progBar.isVisible(): self.progBar.setVisible(False)
         if mode == 1:
-            self.lblMessage.setText("." * value + MESSAGES.Searching + "." * value)
+            self.lblMessage.setText("." * value + Dictionary.MESSAGES.Searching + "." * value)
         elif mode == 2:
-            self.lblMessage.setText("." * value + MESSAGES.Analysis + "." * value)
+            self.lblMessage.setText("." * value + Dictionary.MESSAGES.Analysis + "." * value)
         else:
             self.lblMessage.setText("")
             self.progBar.setVisible(True)
@@ -257,9 +267,9 @@ class MainWindow(QMainWindow):
 
     def period(self) -> None:
         if self.chbPeriod.isChecked():
-            self.lblQuantity.setText(CONST.Inscriptions.LastDays)
+            self.lblQuantity.setText(Dictionary.INSCRIPTIONS.LastDays)
         else:
-            self.lblQuantity.setText(CONST.Inscriptions.Files)
+            self.lblQuantity.setText(Dictionary.INSCRIPTIONS.Files)
 
     def file_history(self) -> None:
         self.chbRewriteFiles.setEnabled(not self.chbFileHistory.isChecked())
@@ -270,6 +280,29 @@ class MainWindow(QMainWindow):
             self.lblSaveTo.setText(str(Path(save_to_dir)))
             self.lblSaveTo.setToolTip(self.lblSaveTo.text())
         self.btnSaveTo.setChecked(False)
+
+    def change_language(self) -> None:
+        Dictionary.set_new_language(self.cmbLanguage.currentText())
+        self.cmbGenre.setToolTip(Dictionary.MESSAGES.ToolTips.Genre)
+        self.cmbQuantity.setToolTip(Dictionary.MESSAGES.ToolTips.Quantity)
+        self.chbPeriod.setToolTip(Dictionary.MESSAGES.ToolTips.Period)
+        self.chbFormat.setToolTip(Dictionary.MESSAGES.ToolTips.Lossless)
+        self.chbFormat.setText(Dictionary.INSCRIPTIONS.Lossless)
+        self.chbFileHistory.setToolTip(Dictionary.MESSAGES.ToolTips.FileHistory)
+        self.chbRewriteFiles.setToolTip(Dictionary.MESSAGES.ToolTips.RewriteFiles)
+        self.cmbThreads.setToolTip(Dictionary.MESSAGES.ToolTips.Threads)
+        self.btnSaveTo.setToolTip(Dictionary.INSCRIPTIONS.SaveTo)
+        self.btnExit.setText(Dictionary.INSCRIPTIONS.Exit)
+        self.period()
+        if self._music: self.btnDownload.setText(Dictionary.INSCRIPTIONS.Cancel)
+        else: self.btnDownload.setText(Dictionary.INSCRIPTIONS.Download)
+        self.lblThreads.setText(Dictionary.INSCRIPTIONS.Threads)
+        self.chbPeriod.setText(Dictionary.INSCRIPTIONS.Period)
+        self.chbFileHistory.setText(Dictionary.INSCRIPTIONS.FileHistory)
+        self.chbRewriteFiles.setText(Dictionary.INSCRIPTIONS.RewriteFiles)
+        self.setWindowTitle(Dictionary.INSCRIPTIONS.PromoDJMusicDownloaderExtended.replace("_",
+                            str(int(abs((int(time()) - self._last_launch) / (3600 * 24))))))
+
 
     def app_exit(self) -> None:
         QApplication.instance().quit()
@@ -282,8 +315,8 @@ class MainWindow(QMainWindow):
             tags_link = r"https://promodj.com/music"
             async with session.get(tags_link) as response:
                 if response.status != 200:
-                    self.lblMessage.setText(MESSAGES.Errors.UnableToConnect)
-                    debug.log(MESSAGES.Errors.UnableToConnect + f" {response.status=}")
+                    self.lblMessage.setText(Dictionary.MESSAGES.Errors.UnableToConnect)
+                    debug.log(Dictionary.MESSAGES.Errors.UnableToConnect + f" {response.status=}")
                     return
                 links = BeautifulSoup(await response.read(), features="html.parser").findAll("a")
                 tmp_dict = {}
@@ -306,7 +339,7 @@ class MainWindow(QMainWindow):
 
                 if param.name == CONST.Parameters.LastDownload and param.value.isnumeric():
                     self._last_launch = abs(int(param.value))
-                    self.setWindowTitle(CONST.Inscriptions.PromoDJMusicDownloaderExtended.replace("_",
+                    self.setWindowTitle(Dictionary.INSCRIPTIONS.PromoDJMusicDownloaderExtended.replace("_",
                                         str(int(abs((int(time()) - self._last_launch) / (3600 * 24))))))
 
                 elif param.name == CONST.Parameters.Genre and param.value in self._genres.keys():
@@ -339,6 +372,9 @@ class MainWindow(QMainWindow):
 
                 elif param.name == CONST.Parameters.Threads:
                     self.cmbThreads.setCurrentText(param.value)   # controlled by Qt
+
+                elif param.name == CONST.Parameters.Language and param.value in get_args(CONST.DefaultValues.LANGUAGES):
+                    self.cmbLanguage.setCurrentText(param.value)
 
         await self.set_actual_genres()
 
