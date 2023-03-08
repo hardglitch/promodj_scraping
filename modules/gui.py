@@ -165,7 +165,7 @@ class MainWindow(QMainWindow):
 
         self.cmbLanguage = QComboBox(self)
         self.cmbLanguage.resize(50, 20)
-        self.cmbLanguage.move(470, 165)
+        self.cmbLanguage.move(474, 168)
         self.cmbLanguage.setDuplicatesEnabled(False)
         self.cmbLanguage.addItems(get_args(CONST.DefaultValues.LANGUAGES))
         self.cmbLanguage.setCurrentText(str(CONST.DefaultValues.language))
@@ -174,7 +174,7 @@ class MainWindow(QMainWindow):
 
         self.btnTheme = QPushButton(self)
         self.btnTheme.setText("☼")
-        self.btnTheme.setGeometry(435, 164, 28, 28)
+        self.btnTheme.setGeometry(442, 167, 28, 28)
         self.btnTheme.setToolTip(Dictionary.INSCRIPTIONS.SaveTo)
         self.btnTheme.clicked.connect(self.toggle_theme)
         self.btnTheme.setCheckable(True)
