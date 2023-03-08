@@ -159,6 +159,12 @@ class __Dictionary:
                     self.AllFilesDownloaded = "100% - OK"
                     self.Searching = "поиск"
                     self.Analysis = "анализ"
+                case "uk":
+                    self.MatchingFilesNotFound = "Відповідні файли не знайдено або вже завантажено"
+                    self.AllFilesDownloaded = "100% - OK"
+                    self.Searching = "пошук"
+                    self.Analysis = "аналіз"
+
 
 
         def set_new_language(self, lang: CONST.DefaultValues.LANGUAGES):
