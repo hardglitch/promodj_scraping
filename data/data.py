@@ -16,7 +16,9 @@ class Data:
     class __DefaultValues:
         FORMS = Literal["mixes", "tracks", "lives"]
         LANGUAGES = Literal["en", "ru", "uk"]
+        THEMES = Literal["dark", "light"]
 
+        theme: THEMES = "dark"
         language: LANGUAGES = "en"
         download_dir: str = "Downloaded Music"
         genre: str = "Trance"
@@ -310,6 +312,9 @@ class Data:
         FileHistory: str = "FileHistory"
         LastDownload: str = "LastDownload"
         Language: str = "Language"
+        Theme: str = "Theme"
+        Dark: str = "dark"
+        Light: str = "light"
 
     Parameters = __Parameters()
 

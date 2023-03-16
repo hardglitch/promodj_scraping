@@ -24,7 +24,7 @@ async def write_file_history(link: str, date: int) -> None:
     try:
         async with aiosqlite.connect(database=CONST.DB_NAME) as db_connection:
             sql_request = """INSERT INTO file_history VALUES(?, ?)"""
-            await db_connection.execute(sql_request, (link, abs(date)))
+            await db_connection.execute(sql_request, (link[:1000], abs(date)))
             await db_connection.commit()
     except aiosqlite.DatabaseError as error:
         debug.log(f"DB Error in {inspect.stack()[0][3]} -", error)

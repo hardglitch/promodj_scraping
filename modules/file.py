@@ -2,8 +2,8 @@ from inspect import stack
 from pathlib import Path
 from time import time
 
+import aiofiles
 from PyQt6.QtCore import pyqtBoundSignal, pyqtSignal
-from aiofiles import open
 from aiohttp import StreamReader
 
 from data.data import CONST
@@ -84,7 +84,7 @@ class File:
     @debug.switch(debug.Switches.IS_WRITE_FILE)
     async def _write_file(self, content: StreamReader) -> bool:
         if not isinstance(content, StreamReader): return False
-        async with open(self._path, "wb") as file:
+        async with aiofiles.open(self._path, "wb") as file:
             debug.print_message(f"Downloading - {self._link}")
             chunk_size: int = 16144
             async for chunk in content.iter_chunked(chunk_size):
