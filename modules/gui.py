@@ -16,7 +16,7 @@ from data.data import CONST
 from data.dictionary import Dictionary
 from modules import debug
 from modules.manager import Manager
-from util.settings.settings import Parameter, Settings
+from util.settings_module.settings_module import Parameter, Settings
 
 
 class MainWindow(QMainWindow):
@@ -32,7 +32,7 @@ class MainWindow(QMainWindow):
         [self._genres.update({value: CONST.DefaultValues.genres[n + 1]})
                 for n, value in enumerate(CONST.DefaultValues.genres) if n % 2 == 0]
 
-        self._theme = "dark"
+        self._theme = CONST.DefaultValues.theme
         setup_theme(theme=self._theme, additional_qss="QToolTip {color: black;}")
         self.setWindowIcon(QIcon("logo.ico"))
 
@@ -100,8 +100,8 @@ class MainWindow(QMainWindow):
         self.chbRewriteFiles.setFont(self._font)
 
         self.cmbThreads = QComboBox(self)
-        self.cmbThreads.resize(40, 24)
-        self.cmbThreads.move(433, 10)
+        self.cmbThreads.resize(50, 24)
+        self.cmbThreads.move(423, 10)
         [self.cmbThreads.addItem(str(i), i) for i in range(1, CONST.MaxValues.threads + 1)]
         self.cmbThreads.setCurrentText(str(CONST.DefaultValues.threads))
         self.cmbThreads.setToolTip(Dictionary.MESSAGES.ToolTips.Threads)
@@ -233,7 +233,8 @@ class MainWindow(QMainWindow):
                 Parameter(CONST.Parameters.FileHistory, str(int(self.chbFileHistory.isChecked()))),
                 Parameter(CONST.Parameters.Quantity, self.cmbQuantity.currentText()),
                 Parameter(CONST.Parameters.Threads, self.cmbThreads.currentText()),
-                Parameter(CONST.Parameters.Language, self.cmbLanguage.currentText())
+                Parameter(CONST.Parameters.Language, self.cmbLanguage.currentText()),
+                Parameter(CONST.Parameters.Theme, self._theme)
             )
 
         except Exception as error:
@@ -313,7 +314,7 @@ class MainWindow(QMainWindow):
                             str(int(abs((int(time()) - self._last_launch) / (3600 * 24))))))
 
     def toggle_theme(self) -> None:
-        self._theme = "light" if self._theme == "dark" else "dark"
+        self._theme = CONST.Parameters.Light if self._theme == CONST.Parameters.Dark else CONST.Parameters.Dark
         setup_theme(theme=self._theme, additional_qss="QToolTip {color: black;}")
         self.btnTheme.setChecked(False)
 
@@ -349,6 +350,10 @@ class MainWindow(QMainWindow):
 
         if settings_list:
             for param in settings_list:
+
+                if param.name == CONST.Parameters.Theme and param.value in get_args(CONST.DefaultValues.THEMES):
+                    self._theme = param.value
+                    setup_theme(theme=self._theme, additional_qss="QToolTip {color: black;}")
 
                 if param.name == CONST.Parameters.LastDownload and param.value.isnumeric():
                     self._last_launch = abs(int(param.value))

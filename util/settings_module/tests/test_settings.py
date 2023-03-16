@@ -4,7 +4,7 @@ from typing import List, Set, Tuple
 import aiofiles
 import pytest
 
-from util.settings.settings import Parameter, Settings
+from util.settings_module.settings_module import Parameter, Settings
 
 test_setting_filename = "test.ini"
 

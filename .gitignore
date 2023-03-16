@@ -9,10 +9,10 @@
 !/tests/testpage.html
 !/util
 !/util/*.py
-!/util/settings
-!/util/settings/*.py
-!/util/settings/tests
-!/util/settings/tests/*.py
+!/util/settings_module
+!/util/settings_module/*.py
+!/util/settings_module/tests
+!/util/settings_module/tests/*.py
 !main.py
 !logo.png
 !requirements.txt

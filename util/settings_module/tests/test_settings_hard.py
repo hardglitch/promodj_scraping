@@ -2,7 +2,7 @@ import string
 from typing import Callable, Generator, Iterable, Tuple
 
 from util import tools
-from util.settings.settings import Parameter, Settings
+from util.settings_module.settings_module import Parameter, Settings
 
 FULL_CHAOS: int = 0
 LEGAL_ARGUMENTS: int = 2
