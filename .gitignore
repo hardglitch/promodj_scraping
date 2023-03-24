@@ -14,8 +14,9 @@
 !/util/settings_module/tests
 !/util/settings_module/tests/*.py
 !main.py
-!logo.png
+!logo.ico
 !requirements.txt
+!requirements-dev.txt
 !LICENSE.md
 !README.md
 !_build_app_win.bat
