@@ -1,13 +1,13 @@
 *
-!/data
+!/data/
 !/data/*.py
-!/modules
+!/modules/
 !/modules/*.py
 !/tests/
 !/tests/*.py
 !/tests/pytest.ini
 !/tests/testpage.html
-!/util
+!/util/
 !/util/*.py
 !/util/settings_module
 !/util/settings_module/*.py

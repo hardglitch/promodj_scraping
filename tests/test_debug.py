@@ -1,6 +1,4 @@
 import allure
-import pytest
-
 from modules import debug
 from util import tools
 
@@ -21,16 +19,13 @@ class TestDebug:
         assert debug.set_attribute_test(debug.Switches)
 
     @allure.description("Bruteforce Debug method")
-    @pytest.mark.asyncio
     async def test_log_bruteforce(self):
         assert await tools.fuzzer(debug.log, hard_mode=debug.Switches.IS_HARD_MODE)
 
     @allure.description("Bruteforce Debug method")
-    @pytest.mark.asyncio
     async def test_switch_bruteforce(self):
         assert await tools.fuzzer(debug.switch, hard_mode=debug.Switches.IS_HARD_MODE)
 
     @allure.description("Bruteforce Debug method")
-    @pytest.mark.asyncio
     async def test_set_attribute_test_bruteforce(self):
         assert await tools.fuzzer(debug.set_attribute_test, hard_mode=debug.Switches.IS_HARD_MODE)

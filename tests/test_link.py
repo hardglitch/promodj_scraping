@@ -4,7 +4,6 @@ from typing import Set
 
 import aiofiles
 import allure
-import pytest
 from PyQt6.QtCore import pyqtSignal
 from bs4 import BeautifulSoup, ResultSet, SoupStrainer
 
@@ -44,7 +43,6 @@ class TestLink:
     @allure.epic("Bruteforce Instances")
     class BruteforceInstance:
         @allure.description("Bruteforce Link instance")
-        @pytest.mark.asyncio
         async def test_link_init_bruteforce(self) -> None:
             assert await tools.fuzzer(Link.__init__, hard_mode=debug.Switches.IS_HARD_MODE)
 
@@ -53,7 +51,6 @@ class TestLink:
             assert debug.set_attribute_test(link)
 
         @allure.description("Bruteforce Page instance")
-        @pytest.mark.asyncio
         async def test_page_init_bruteforce(self) -> None:
             assert await tools.fuzzer(Page.__init__, hard_mode=debug.Switches.IS_HARD_MODE)
 
@@ -64,7 +61,6 @@ class TestLink:
 
     @allure.epic("Full Test filtered_found_links")
     class TestFilteredFoundLinks:
-        @pytest.mark.asyncio
         async def test_filtered_found_links_positive(self) -> None:
             found_links = {"1.flac", "2.flac", "2.wav","1.wav"}
             assert isinstance(found_links, Set)
@@ -72,12 +68,10 @@ class TestLink:
             assert await link._filtered_found_links(found_links) in [
                 {"1.flac", "2.flac"}, {"1.wav", "2.wav"}, {"1.flac", "2.wav"}, {"1.wav", "2.flac"}]
 
-        @pytest.mark.asyncio
         async def test_filtered_found_links_legal(self) -> None:
             found_links = set()
             assert await link._filtered_found_links(found_links) == set()
 
-        @pytest.mark.asyncio
         async def test_filtered_found_links_bruteforce(self) -> None:
             assert await tools.fuzzer(link._filtered_found_links, hard_mode=debug.Switches.IS_HARD_MODE)
 
@@ -85,7 +79,6 @@ class TestLink:
     @allure.epic("Full Test get_filtered_links")
     class TestGetFilteredLinks:
 
-        @pytest.mark.asyncio
         async def test_get_filtered_links_lossless(self) -> None:
             CurrentValues.is_lossless = True
             assert link._get_filtered_links(await TestLink._setup_resultset()) == {
@@ -94,27 +87,23 @@ class TestLink:
                 r"https://promodj.com/source/some22.aiff",
             }
 
-        @pytest.mark.asyncio
-        async def test_get_filtered_links_lossy(self) -> None:
-            CurrentValues.is_lossless = True
+        async def test_get_filtered_links_lossy_value(self) -> None:
+            CurrentValues.is_lossless = False
             assert link._get_filtered_links(await TestLink._setup_resultset()) == {
                 r"https://promodj.com/source/some3.mp3"
             }
 
-        @pytest.mark.asyncio
-        async def test_get_filtered_links_lossy(self) -> None:
+        async def test_get_filtered_links_lossy_types(self) -> None:
             link_massive = ResultSet(SoupStrainer())
             assert isinstance(link_massive, ResultSet)
             assert link._get_filtered_links(link_massive) == set()
 
-        @pytest.mark.asyncio
         async def test_get_filtered_links_bruteforce(self) -> None:
             assert await tools.fuzzer(link._get_filtered_links, hard_mode=debug.Switches.IS_HARD_MODE)
 
 
     @allure.epic("Full Test get_total_filesize")
     class TestGetTotalFileSize:
-        @pytest.mark.asyncio
         async def test_get_total_filesize_by_link_list(self) -> None:
             found_links = {"1", "2", "3"}
             content_length = 100
@@ -125,12 +114,10 @@ class TestLink:
             await _link._get_total_filesize_by_link_list(found_links)
             assert CurrentValues.total_size == len(found_links) * content_length
 
-        @pytest.mark.asyncio
         async def test_get_total_filesize_by_link_list_bruteforce(self) -> None:
             assert await tools.fuzzer(link._get_total_filesize_by_link_list, hard_mode=debug.Switches.IS_HARD_MODE)
 
 
-    @pytest.mark.asyncio
     async def test_get_all_links(self) -> None:
         debug.Switches.IS_PARSE.fake_func = TestLink._setup_resultset
         debug.Switches.IS_WORKER.fake_func = self._fake_worker
