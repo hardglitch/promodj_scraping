@@ -1,6 +1,4 @@
 import allure
-import pytest
-
 from data.data import Data
 from modules import debug
 from modules.shared import CurrentValues
@@ -12,7 +10,6 @@ class BruteforceShared:
     def test_set_wrong_attribute(self):
         debug.set_attribute_test(CurrentValues)
 
-    @pytest.mark.asyncio
     async def test_set_wrong_attribute_in_init(self):
         assert await tools.fuzzer(CurrentValues.__init__, 15, hard_mode=debug.Switches.IS_HARD_MODE)
 

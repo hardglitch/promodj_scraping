@@ -26,7 +26,7 @@ class TestManager:
         self._test_loop: asyncio.AbstractEventLoop = QEventLoop(self._test_app)
         asyncio.set_event_loop(self._test_loop)
         MainWindow()
-        return Manager(
+        yield Manager(
             download_dir=Data.DefaultValues.download_dir,
             genre=Data.DefaultValues.genre,
             form=Data.DefaultValues.form,
@@ -37,6 +37,9 @@ class TestManager:
             is_rewrite_files=Data.DefaultValues.is_rewrite_files,
             is_file_history=Data.DefaultValues.is_file_history
         )
+        self._test_app.quit()
+        self._test_loop.close()
+
 
     def test_default_values(self, setup) -> None:
         mng = setup
@@ -110,12 +113,9 @@ class TestManagerAsyncio:
             is_file_history=Data.DefaultValues.is_file_history
         )
 
-    @pytest.mark.asyncio
     async def test_manager_init_bruteforce(self) -> None:
         assert await tools.fuzzer(Manager.__init__, hard_mode=debug.Switches.IS_HARD_MODE)
 
-
-    @pytest.mark.asyncio
     async def test_get_files_negative(self, setup) -> None:
         def fake_get_all_files_none():
             return None
@@ -129,8 +129,6 @@ class TestManagerAsyncio:
         debug.Switches.IS_GET_ALL_FILES.fake_func = fake_get_all_files_none
         assert not await mng._get_files()
 
-
-    @pytest.mark.asyncio
     async def test_get_files_positive(self, setup) -> None:
         def fake_get_all_files_result():
             return {"link1.flac", "link2.wav", "link3.aiff"}

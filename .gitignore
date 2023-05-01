@@ -1,13 +1,13 @@
 *
-!/data
+!/data/
 !/data/*.py
-!/modules
+!/modules/
 !/modules/*.py
 !/tests/
 !/tests/*.py
 !/tests/pytest.ini
 !/tests/testpage.html
-!/util
+!/util/
 !/util/*.py
 !/util/settings_module
 !/util/settings_module/*.py
@@ -16,7 +16,7 @@
 !main.py
 !logo.ico
 !requirements.txt
-!requirements-dev.txt
+!requirements-tests.txt
 !LICENSE.md
 !README.md
 !_build_app_win.bat

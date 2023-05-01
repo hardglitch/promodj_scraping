@@ -3,7 +3,6 @@ from pathlib import Path
 
 import aiofiles
 import allure
-import pytest
 from PyQt6.QtCore import pyqtSignal
 from aiohttp import StreamReader, streams
 from asyncmock import AsyncMock
@@ -28,7 +27,6 @@ debug.Switches.IS_GUI = False
 class TestFile:
 
     @allure.description("Bruteforce File method")
-    @pytest.mark.asyncio
     async def test_file_init_bruteforce(self):
         assert await tools.fuzzer(File.__init__, hard_mode=debug.Switches.IS_HARD_MODE)
 
@@ -67,7 +65,6 @@ class TestFile:
         assert pre_path == file._path
 
     @allure.description("Test File method")
-    @pytest.mark.asyncio
     async def test_check_path_and_name_2(self, tmp_path) -> None:
         # 2. file exists
         CurrentValues.download_dir = str(tmp_path)
@@ -87,13 +84,11 @@ class TestFile:
         pre_path.unlink()
 
     @allure.description("Bruteforce File method")
-    @pytest.mark.asyncio
     async def test_check_path_and_name_bruteforce(self):
         file = File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int])
         assert await tools.fuzzer(file._check_path_and_name, hard_mode=debug.Switches.IS_HARD_MODE)
 
     @allure.description("Test File method")
-    @pytest.mark.asyncio
     async def test_write_file_from_stream(self, tmp_path) -> None:
         CurrentValues.download_dir = str(tmp_path)
         file = File(link=link+"2", progress=progress[int], message=message[str], file_info=file_info[int, int])
@@ -110,7 +105,6 @@ class TestFile:
         return stream
 
     @allure.description("Bruteforce File method")
-    @pytest.mark.asyncio
     async def test_write_file_bruteforce(self):
         file = File(link=link, progress=progress[int], message=message[str], file_info=file_info[int, int])
         assert await tools.fuzzer(file._write_file, hard_mode=debug.Switches.IS_HARD_MODE)

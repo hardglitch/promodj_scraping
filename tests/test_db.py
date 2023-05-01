@@ -1,9 +1,6 @@
 from pathlib import Path
 from typing import Set
-
 import allure
-import pytest
-
 from data.data import CONST
 from modules import db, debug
 from util import tools
@@ -13,7 +10,6 @@ from util import tools
 class TestDB:
 
     @allure.description("Create DB. Check test link by DB")
-    @pytest.mark.asyncio
     async def test_db(self):
         try: Path(CONST.DB_NAME).unlink()
         except: pass
@@ -39,11 +35,9 @@ class TestDB:
         Path(CONST.DB_NAME).unlink()
 
     @allure.description("Bruteforce DB method")
-    @pytest.mark.asyncio
     async def test_write_file_history_bruteforce(self):
         assert await tools.fuzzer(db.write_file_history, hard_mode=debug.Switches.IS_HARD_MODE)
 
     @allure.description("Bruteforce DB method")
-    @pytest.mark.asyncio
     async def test_filter_by_history_bruteforce(self):
         assert await tools.fuzzer(db.filter_by_history, hard_mode=debug.Switches.IS_HARD_MODE)
