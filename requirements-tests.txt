@@ -3,8 +3,6 @@ allure-python-commons
 asyncmock
 bandit
 mypy
-pyinstaller
-pyinstaller-hooks-contrib
 PyQt5-stubs
 pyright
 pytest
