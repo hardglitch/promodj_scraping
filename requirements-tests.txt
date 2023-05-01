@@ -1,0 +1,16 @@
+allure-pytest
+allure-python-commons
+asyncmock
+bandit
+mypy
+pyinstaller
+pyinstaller-hooks-contrib
+PyQt5-stubs
+pyright
+pytest
+pytest-asyncio
+pytest-xdist
+ruff
+types-aiofiles
+types-beautifulsoup4
+types-html5lib

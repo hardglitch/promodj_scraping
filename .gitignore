@@ -16,7 +16,7 @@
 !main.py
 !logo.ico
 !requirements.txt
-!requirements-dev.txt
+!requirements-tests.txt
 !LICENSE.md
 !README.md
 !_build_app_win.bat
