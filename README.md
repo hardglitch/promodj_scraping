@@ -41,9 +41,3 @@ Stack:
 
 - pyinstaller
 </pre>
-
-So far in test mode:
-<pre>
-- ruff (fastest Linter)
-- Docker (to automatically build the Linux version of the App)
-</pre>
