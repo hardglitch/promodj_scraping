@@ -1,4 +1,4 @@
-PyQt6==6.5.0
+PyQt6==6.5.1
 aiohttp==3.8.4
 qasync==0.24.0
 aiofiles==23.1.0
