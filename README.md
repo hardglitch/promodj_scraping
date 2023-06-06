@@ -6,7 +6,7 @@
 <br/>
 <br/>
 ***
-[PromoDJ.com](https://promodj.com) is the Great site for (electronic) music lovers like me, that allows you to download high quality (electronic) music absolutely free (everything within the law). 
+PromoDJ.com is the Great site for (electronic) music lovers like me, that allows you to download high quality (electronic) music absolutely free (everything within the law). 
 This App will give you the opportunity to download tracks/mixes/lives from this site in a convenient way.
 <br/>
 <br/>
