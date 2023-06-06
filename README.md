@@ -10,11 +10,11 @@
 This App will give you the opportunity to download tracks/mixes/lives from this site in a convenient way.
 
 PromoDJ Scraper is completely portable and is distributed in 2 forms: packaged and unpacked.
-
 In the first case, PyInstaller assembles the all used files into a single executable.
 It is more convenient to use the App, but Its launch speed may be slower.
-
 The unpacked version solves this problem.
+
+The user interface has been translated into English, Russian and Ukrainian.
 ***
 <br/>
 
@@ -39,5 +39,5 @@ Stack:
 - pytest + pytest-asyncio + pytest-xdist
 - allure
 
-- pyinstaller
+- pyinstaller (Package Builder)
 </pre>
