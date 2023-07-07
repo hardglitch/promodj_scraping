@@ -99,7 +99,7 @@ class Link:
 
         found_links = await db.filter_by_history(found_links) if CurrentValues.is_file_history else found_links
 
-        # Convert {"1.wav", "1.flac", "2.flac", "2.wav"} to ['1.flac', '2.wav']
+        # Convert {"1.wav", "1.flac", "2.flac", "2.wav"} to {'1.flac', '2.wav'}
         return set(".".join(_) for _ in {k:v for k, v in [link.rsplit(".", 1) for link in found_links]}.items())
 
 
